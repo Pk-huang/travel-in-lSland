@@ -1,0 +1,392 @@
+# Iceland Insight 專案規格與計畫書
+
+> 文件角色：主規格與里程碑計畫（需求與範圍權威版本）
+> 
+> 維護規則：需求或時程變更時優先更新本檔，再同步進度紀錄檔
+
+版本：v1.0  
+日期：2026-06-17  
+狀態：Draft（可直接作為開發基線）
+
+---
+
+## 1. 專案目標與範圍
+
+### 1.1 產品目標
+打造一個結合 3D 地形視覺化、即時天氣/道路監控、AI 行程建議的 Web SaaS，協助使用者在冰島極端氣候下進行安全且可執行的旅遊決策。
+
+### 1.2 MVP 範圍（第一版）
+- 地圖範圍：冰島南岸優先（雷克雅維克 → 維克）
+- 核心功能：
+  1. 3D 地形與景點點位可視化
+  2. Weather + Road 即時資料聚合與風險標記
+  3. AI 一日行程建議 + 可點擊 3D 錨點跳轉
+  4. API 失效時自動 fallback（歷史/Mock）
+
+### 1.3 非目標（MVP 暫不做）
+- 多國家地圖支援
+- 使用者社群功能
+- 複雜帳單/訂閱系統
+
+---
+
+## 1.4 開發大方向（五步驟）
+
+1. **確認環境與套件**：確認 Node 版本、安裝 Next.js / Three.js / Zustand / Vercel AI SDK 等必要套件，確保本機與部署環境一致
+2. **API 可行性確認**：先呼叫 Vedur 與 Road API，確認回傳欄位、授權限制、rate limit 與資料穩定性，再決定資料契約
+3. **建立專案架構**：建立資料夾結構、TypeScript 型別、Zod schema 與 mock fixture，讓前後端有共同基礎
+4. **基礎邏輯優先，逐步擴展**：先跑通核心流程（取資料 → 3D 場景顯示 → AI 生成行程 → 飛到景點），再做效能優化與完整功能
+5. **完成與驗收**：通過 E2E 測試、效能測試與手機端驗證後部署
+
+---
+
+## 1.5 UI 模擬圖說明（Wireframe）
+
+> 以下為介面設計模擬圖，作為前端元件開發的視覺參考基線
+
+> 背景冰島地圖需求：需支援縮放、拖曳與點擊互動；點擊景點後可顯示資訊或觸發相機飛行
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  Navbar：登入 / 登出 / 調整時間 / ...                    │
+├───────────────┬─────────────────────────────────────────┤
+│               │                                         │
+│  左側面板     │         3D 冰島地圖（主畫面）           │
+│  ─────────    │                                         │
+│  天氣資訊     │   ← 可旋轉/縮放/飛行的 3D 地形          │
+│  交通資訊     │   ← 天氣/道路點位疊加（InstancedMesh）  │
+│  AI 建議 ...  │   ← AI 行程錨點（可點擊飛行）           │
+│               │                                         │
+├───────────────┴─────────────────────────────────────────┤
+│  底部：天氣資訊摘要 ｜ 時間軸（可拖拽）                  │
+└─────────────────────────────────────────────────────────┘
+```
+
+**各區塊對應 Phase**
+| 區塊 | 說明 | 對應 Phase |
+|------|------|------------|
+| Navbar | 登入狀態、時間選擇器 | Phase 0 |
+| 左側面板 | 天氣、道路、AI 行程卡片 | Phase 1 + Phase 3 |
+| 3D 地圖 | 地形、點位、錨點 | Phase 2 |
+| 底部時間軸 | 拖拽聯動 3D 場景光影 | Phase 2-3 |
+
+---
+
+## 1.6 預期網頁內容總結
+
+這個網站的核心內容會是一個結合 3D 地圖、即時資料面板、時間軸控制與 AI 規劃功能的互動式平台。畫面主體是一個可縮放、可拖曳、可點擊的 3D 背景地圖，使用者可以在地圖上查看不同位置的資訊點，並透過點擊操作切換視角或顯示細節內容。
+
+網站左側會提供資訊與控制面板，用來顯示即時狀態、風險提示、路況資訊與 AI 建議內容；底部則會有時間軸，讓使用者可以拖動時間來改變畫面中的顯示狀態。整體網站會以「即時資訊 + 互動地圖 + AI 輔助決策」為主軸，讓使用者能夠在同一個頁面中完成瀏覽、判斷與規劃。
+
+從內容結構來看，網站會包含以下幾個部分：
+- 3D 背景地圖與可互動點位
+- 即時天氣與路況資訊區塊
+- AI 行程建議與提示區塊
+- 可拖曳時間軸控制列
+- 點擊後顯示的景點或位置資訊卡
+- 狀態回饋與 fallback 提示機制
+
+整體風格會偏向資訊儀表板與互動式地圖的結合，而不是單純的靜態旅遊介紹頁。
+
+---
+
+## 2. 技術規格（Technical Spec）
+
+### 2.1 架構總覽
+- 前端：Next.js (App Router), React, Three.js, @react-three/fiber, Zustand
+- 後端：Next.js Route Handlers 作為 BFF
+- 快取：Upstash Redis
+- AI：Vercel AI SDK（串流）
+- 部署：Vercel
+
+### 2.1.1 地圖互動要求
+- 背景冰島地圖需支援縮放、拖曳與點擊
+- 點擊地圖上的景點或錨點時，需能顯示資訊卡或觸發相機飛到目標位置
+- 行動端需保留基本雙指縮放與單指點擊操作
+
+### 2.2 核心資料模型（TypeScript）
+
+```ts
+export type GeoPoint = {
+  id: string;
+  name: string;
+  lat: number;
+  lon: number;
+  elevationM?: number;
+  kind: 'poi' | 'weather-station' | 'road-segment';
+};
+
+export type WeatherConditions = {
+  source: 'vedur';
+  timestamp: string; // ISO8601
+  lat: number;
+  lon: number;
+  temperatureC: number;
+  windSpeedMs: number;
+  visibilityKm?: number;
+  precipitationMm?: number;
+  alertLevel: 'low' | 'medium' | 'high';
+};
+
+export type RoadSegment = {
+  source: 'road';
+  segmentId: string;
+  name: string;
+  status: 'open' | 'caution' | 'closed';
+  reason?: string;
+  updatedAt: string; // ISO8601
+  geometry: Array<[number, number]>; // [lon, lat]
+};
+
+export type ItineraryItem = {
+  id: string;
+  title: string;
+  startAt: string;
+  endAt: string;
+  waypoint: { lat: number; lon: number };
+  riskNote?: string;
+};
+```
+
+### 2.3 BFF API 規格
+
+#### Endpoint
+- `GET /api/data/iceland-status`
+
+#### Query
+- `region`: `south | west | north | east | all`
+- `at`: ISO datetime（可選，預設 now）
+
+#### Response (200)
+```json
+{
+  "meta": {
+    "region": "south",
+    "generatedAt": "2026-06-17T10:00:00.000Z",
+    "cache": "hit",
+    "fallback": false
+  },
+  "weather": [],
+  "roads": [],
+  "summary": {
+    "riskScore": 42,
+    "highRiskSegments": 3
+  }
+}
+```
+
+#### Error 格式
+```json
+{
+  "error": {
+    "code": "UPSTREAM_UNAVAILABLE",
+    "message": "Vedur API unavailable",
+    "fallback": true
+  }
+}
+```
+
+### 2.4 前端效能規格（SLO）
+- 首屏（LCP）：< 3.0s（4G 中階手機）
+- 3D 互動 FPS：>= 45（手機） / >= 60（桌機）
+- 資料刷新延遲：< 5s（含快取命中）
+- 地圖記憶體上限：< 450MB（桌機瀏覽器）
+
+### 2.5 可靠性與防禦規格
+- Upstash 快取 TTL：900 秒
+- Circuit Breaker：連續 5 次上游失敗即開啟，60 秒後半開測試
+- Fallback 順序：Redis stale cache → 靜態 snapshot → Mock data
+- 觀測性：Sentry + 結構化日誌（requestId, source, latency, cacheState）
+
+### 2.6 資安與金鑰管理
+- 外部 API key 只存於 server env，不暴露前端
+- BFF 加上 IP rate limit（例如每 IP 每分鐘 60 次）
+- 啟用基本輸入驗證（region/at 參數）避免濫用
+
+---
+
+## 3. 分階段計畫（每項含解決方案）
+
+## Phase 0：專案啟動（2~3 天）
+
+### 計畫項目 0-1：建立 monorepo / app 結構
+- 目標：初始化 Next.js + TypeScript + lint + format
+- 解決方案：
+  1. 建立 `app/`, `src/`, `workers/`, `lib/`, `types/`, `docs/`
+  2. 設定 ESLint + Prettier + strict tsconfig
+  3. 建立 `.env.example`、`README`、部署腳本
+- 交付物：可啟動專案與基礎 CI
+
+### 計畫項目 0-2：資料契約落地
+- 目標：讓前後端先對齊資料形狀
+- 解決方案：
+  1. 實作 `types/domain.ts`
+  2. 建立 Zod schema 驗證 BFF 回傳
+  3. 製作 mock fixture（normal / degraded / failure）
+- 交付物：`types` + `schemas` + `fixtures`
+
+---
+
+## Phase 1：BFF 與資料層（4~6 天）
+
+### 計畫項目 1-1：Vedur + Road API 聚合
+- 目標：統一資料來源並標準化輸出
+- 解決方案：
+  1. 建立 `lib/adapters/vedur.ts`、`road.ts`
+  2. 轉換為統一 domain model
+  3. 增加重試與 timeout（例如 3s timeout, retry 2）
+- 交付物：`GET /api/data/iceland-status` 可穩定返回統一 JSON
+
+### 計畫項目 1-2：快取與斷路器
+- 目標：抗 API 波動與降成本
+- 解決方案：
+  1. 導入 Upstash Redis
+  2. 對 region 分桶快取鍵（`status:{region}:{timeslot}`）
+  3. 實作 circuit breaker state machine
+- 交付物：cache hit、stale、fallback 皆可觀測
+
+### 計畫項目 1-3：觀測與告警
+- 目標：快速定位故障
+- 解決方案：
+  1. 接入 Sentry
+  2. 每次請求寫入 requestId 與 latency
+  3. 設定 API 失敗率告警（如 5 分鐘 > 10%）
+- 交付物：可追蹤異常與錯誤分布
+
+---
+
+## Phase 2：3D 地圖與互動 UI（7~10 天）
+
+### 計畫項目 2-1：3D 場景與地形 LOD
+- 目標：建立可順暢瀏覽的冰島 3D 場景
+- 解決方案：
+  1. 先上低精度 DEM + 簡化網格
+  2. 視距切換 LOD（近景高精、遠景低精）
+  3. 漸進載入避免首屏阻塞
+- 交付物：可旋轉/縮放/移動且不卡頓
+
+### 計畫項目 2-2：InstancedMesh 即時點位渲染
+- 目標：數千點位下保持高 FPS
+- 解決方案：
+  1. 天氣與道路點位改用 InstancedMesh
+  2. 顏色/狀態映射由 shader 控制
+  3. 定時更新 buffer，避免 React re-render 洪水
+- 交付物：高密度資料渲染穩定
+
+### 計畫項目 2-3：2D/3D 聯動時間軸
+- 目標：拖動時間軸即更新場景與鏡頭
+- 解決方案：
+  1. Zustand 單一狀態源 `selectedTime`
+  2. timeline 變更觸發 scene 狀態更新
+  3. fly-to 動畫做 debounce，避免抖動
+- 交付物：可視化時間推進與景點鏡頭跳轉
+
+### 計畫項目 2-4：行動端手勢隔離
+- 目標：避免 2D 面板與 3D 手勢衝突
+- 解決方案：
+  1. UI 面板層設置 pointer-events 策略
+  2. 事件邊界 `stopPropagation` + passive listener 調整
+  3. 在 iOS Safari 實機驗證
+- 交付物：手機可穩定操作
+
+---
+
+## Phase 3：AI 智慧規劃（4~6 天）
+
+### 計畫項目 3-1：AI 行程生成
+- 目標：輸入偏好後得到可執行行程
+- 解決方案：
+  1. Vercel AI SDK 串流輸出
+  2. System Prompt 限制「安全優先」與地理範圍
+  3. 回傳結構化 JSON（地點、時間、風險備註）
+- 交付物：可渲染於 UI 的 itinerary
+
+### 計畫項目 3-2：AI 結果轉 3D 錨點
+- 目標：文字建議可直接操控地圖
+- 解決方案：
+  1. NER/規則比對景點名稱
+  2. 查表映射到 `GeoPoint.id`
+  3. 生成「飛到景點」互動按鈕
+- 交付物：AI 回答可直接驅動相機
+
+### 計畫項目 3-3：Web Worker 路徑校準
+- 目標：重計算不阻塞主執行緒
+- 解決方案：
+  1. 將地理路徑校正與風險評分搬進 worker
+  2. 主線程以 message channel 接收結果
+  3. 超時 fallback 至簡化路徑
+- 交付物：UI 操作保持流暢
+
+---
+
+## Phase 4：測試、上線與營運（3~5 天）
+
+### 計畫項目 4-1：測試策略
+- 目標：確保穩定性與可回歸
+- 解決方案：
+  1. 單元測試：資料轉換、風險分數、時間軸 reducer
+  2. 整合測試：BFF 聚合 + fallback 路徑
+  3. E2E 測試：核心旅程（選時段→看風險→生成行程→飛景點）
+- 交付物：CI 綠燈可發版
+
+### 計畫項目 4-2：效能與壓力測試
+- 目標：先驗證效能上限再開放用戶
+- 解決方案：
+  1. Lighthouse + Web Vitals
+  2. 模擬高頻資料更新（例如每 10 秒）
+  3. 針對低階手機做 FPS/記憶體量測
+- 交付物：效能報告與優化清單
+
+### 計畫項目 4-3：CI/CD 上線策略
+- 目標：避免壞版直上正式環境
+- 解決方案：
+  1. Vercel preview + PR check gate
+  2. `main` 需通過 build/test/lint 才部署
+  3. 建立 rollback 指南（上一版一鍵回退）
+- 交付物：可控部署流程
+
+---
+
+## 4. 里程碑與時程（建議）
+
+- Week 1：Phase 0 + Phase 1（完成可用 BFF）
+- Week 2~3：Phase 2（3D 與 UI 聯動完成）
+- Week 4：Phase 3（AI 規劃與 3D 錨點）
+- Week 5：Phase 4（測試、優化、上線）
+
+> 總工期約 4~5 週（單人全端）；若多人並行可壓縮至 2~3 週。
+
+---
+
+## 5. 風險清單與對策
+
+1. 上游 API 不穩定  
+   - 對策：快取 + 斷路器 + snapshot fallback
+
+2. 3D 載入過重導致手機卡頓  
+   - 對策：LOD、instancing、延後載入、效能預算警戒
+
+3. AI 建議與真實道路/天氣衝突  
+   - 對策：行程輸出前做風險規則校驗（rule guard）
+
+4. 資料授權與商用限制  
+   - 對策：在 Phase 0 完成資料授權盤點與法務備忘錄
+
+---
+
+## 6. 立即執行清單（Next 5 Actions）
+
+1. 建立 `types/domain.ts` + `schemas/domain.ts`
+2. 定義 `GET /api/data/iceland-status` OpenAPI 文件
+3. 實作 Vedur/Road adapter（含 timeout + retry）
+4. 接上 Upstash 快取（TTL 900s）
+5. 建立前端最小 3D MVP（單區域 + 單時間軸）
+
+---
+
+## 7. 驗收定義（DoD）
+
+- 使用者可在 3D 地圖上查看天氣與道路風險
+- 可輸入偏好並生成至少一條可執行一日行程
+- API 故障時系統可自動 fallback，不白屏
+- 核心流程 E2E 通過，且行動端互動可用
