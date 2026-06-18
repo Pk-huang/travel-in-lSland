@@ -53,7 +53,7 @@
    - 記錄穩定性與更新頻率風險
 
 6. **決策與文件化**
-   - 將來源標記為 `adopted`、`reference-only` 或 `pending`
+   - 將來源標記為 `已採用`（adopted）、`僅參考`（reference-only）或 `待確認`（pending）
    - 在對應 API 文件中附上測試 URL 與備註
 
 ## AI 使用邊界
@@ -66,9 +66,9 @@
 
 | 來源 | URL | 型態 | 驗證結果 | 狀態 | 備註 |
 |---|---|---|---|---|---|
-| NOAA SWPC Aurora | https://services.swpc.noaa.gov/json/ovation_aurora_latest.json | 直接 JSON endpoint | 可回傳 JSON | adopted | 目前主要極光機器可讀來源 |
-| Vedur Weather OpenAPI | https://api.vedur.is/weather/openapi.json | 官方 OpenAPI | 可回傳 OpenAPI JSON | adopted | stations/observations 的主要依據 |
-| Vedur Aurora Page | https://vedur.is/vedur/spar/nordurljos/ | 網頁參考 | 網頁可開啟 | reference-only | 可作情境參考，尚未確認公開 JSON API |
+| NOAA SWPC Aurora | https://services.swpc.noaa.gov/json/ovation_aurora_latest.json | 直接 JSON endpoint | 可回傳 JSON | 已採用（adopted） | 目前主要極光機器可讀來源 |
+| Vedur Weather OpenAPI | https://api.vedur.is/weather/openapi.json | 官方 OpenAPI | 可回傳 OpenAPI JSON | 已採用（adopted） | stations/observations 的主要依據 |
+| Vedur Aurora Page | https://vedur.is/vedur/spar/nordurljos/ | 網頁參考 | 網頁可開啟 | 僅參考（reference-only） | 可作情境參考，尚未確認公開 JSON API |
 
 ## Postman 最小檢查清單
 

@@ -26,4 +26,4 @@
 2. 任務啟動：在 [IMPLEMENTATION_PROGRESS_LOG.md](IMPLEMENTATION_PROGRESS_LOG.md) 將狀態改為 `doing`
 3. 開發過程：若有新按鈕/元件，先用 [FEATURE_SPEC_TEMPLATE.md](FEATURE_SPEC_TEMPLATE.md) 建一份規格
 4. 完成驗收：回填 [IMPLEMENTATION_PROGRESS_LOG.md](IMPLEMENTATION_PROGRESS_LOG.md) 的驗收結果與決策原因
-# travel-in-lSland
+# 專案倉庫：travel-in-lSland

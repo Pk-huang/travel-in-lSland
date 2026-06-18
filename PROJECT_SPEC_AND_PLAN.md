@@ -6,7 +6,7 @@
 
 版本：v1.0  
 日期：2026-06-17  
-狀態：Draft（可直接作為開發基線）
+狀態：草稿（可直接作為開發基線）
 
 ---
 
@@ -90,7 +90,7 @@
 
 ---
 
-## 2. 技術規格（Technical Spec）
+## 2. 技術規格
 
 ### 2.1 架構總覽
 - 前端：Next.js (App Router), React, Three.js, @react-three/fiber, Zustand
@@ -150,14 +150,14 @@ export type ItineraryItem = {
 
 ### 2.3 BFF API 規格
 
-#### Endpoint
+#### API 端點
 - `GET /api/data/iceland-status`
 
-#### Query
+#### 查詢參數
 - `region`: `south | west | north | east | all`
 - `at`: ISO datetime（可選，預設 now）
 
-#### Response (200)
+#### 回應（200）
 ```json
 {
   "meta": {

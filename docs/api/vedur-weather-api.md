@@ -1,64 +1,64 @@
-# Vedur Weather API
+# Vedur 天氣 API
 
-**Base URL:** https://api.vedur.is/weather  
-**OpenAPI:** https://api.vedur.is/weather/openapi.json  
-**API version header:** `X-Vi-Api-Version: 2026-02-17`
-
----
-
-## 1. What this API is for
-
-Vedur is the main official weather source for Iceland. It is the best source for:
-
-- station metadata
-- latest weather observations
-- weather aggregation by time period
-- weather warnings and forecast-related context
-- road-risk proxy signals such as wind, rain, snow, and visibility
+**Base URL：** https://api.vedur.is/weather  
+**OpenAPI：** https://api.vedur.is/weather/openapi.json  
+**API 版本 header：** `X-Vi-Api-Version: 2026-02-17`
 
 ---
 
-## 2. Important limitations
+## 1. 這個 API 的用途
 
-- This is a weather API, not a traffic incident API.
-- It does not replace official road-closure data.
-- Some endpoints require choosing between `station_id`, `region_id`, or `polygon`.
-- `parameters=basic` is usually enough for MVP work.
-- `parameters=all` returns more fields, but it is heavier.
+Vedur 是冰島主要官方氣象來源，特別適合以下用途：
+
+- 測站中繼資料
+- 最新氣象觀測
+- 依時間區間彙整的天氣資料
+- 天氣預警與預報相關背景
+- 與道路風險高度相關的訊號（風、雨、雪、能見度）
 
 ---
 
-## 3. Postman-ready endpoints
+## 2. 重要限制
 
-### 3.1 OpenAPI document
+- 這是氣象 API，不是交通事件 API。
+- 不能取代官方道路封閉資料。
+- 部分端點需在 `station_id`、`region_id`、`polygon` 間擇一。
+- `parameters=basic` 對 MVP 通常已足夠。
+- `parameters=all` 會回傳更多欄位，但 payload 較大。
+
+---
+
+## 3. 可直接用於 Postman 的端點
+
+### 3.1 OpenAPI 文件
 
 - **GET** https://api.vedur.is/weather/openapi.json
 
-Use this first if you want the full schema.
+若需要完整 schema，建議先呼叫此端點。
 
 ### 3.2 Capabilities
 
 - **GET** https://api.vedur.is/weather/capabilities
 
-Shows available endpoints.
+顯示可用端點能力清單。
 
 ### 3.3 Stations
 
 - **GET** https://api.vedur.is/weather/stations?region_id=12
 
-Returns stations for the whole country.
+回傳全國範圍測站資料。
 
-### 3.4 Latest AWS observations
+### 3.4 最新 AWS 觀測
 
 - **GET** https://api.vedur.is/weather/observations/aws/hour/latest?region_id=12&parameters=basic
 
-### 3.5 Latest SYNOP observations
+### 3.5 最新 SYNOP 觀測
 
 - **GET** https://api.vedur.is/weather/observations/synop/latest?region_id=12&parameters=basic
 
 ---
 
-## 4. Suggested headers
+## 4. 建議 headers
 
 ```http
 Accept: application/json
@@ -67,9 +67,9 @@ X-Vi-Api-Version: 2026-02-17
 
 ---
 
-## 5. Example JSON shapes
+## 5. JSON 結構範例
 
-### 5.1 Station response
+### 5.1 測站回應
 
 ```json
 {
@@ -87,7 +87,7 @@ X-Vi-Api-Version: 2026-02-17
 }
 ```
 
-### 5.2 AWS latest observation
+### 5.2 AWS 最新觀測
 
 ```json
 [
@@ -107,7 +107,7 @@ X-Vi-Api-Version: 2026-02-17
 ]
 ```
 
-### 5.3 SYNOP latest observation
+### 5.3 SYNOP 最新觀測
 
 ```json
 [
@@ -129,33 +129,33 @@ X-Vi-Api-Version: 2026-02-17
 
 ---
 
-## 6. Field reference
+## 6. 欄位對照
 
-### Core road-risk fields
+### 核心道路風險欄位
 
-| Field | Meaning | Why it matters |
+| 欄位 | 意義 | 重要原因 |
 |---|---|---|
-| `t` | Air temperature | Freeze / ice risk |
-| `f` | Wind speed | Driving stability |
-| `fg` | Wind gust | Sudden hazard |
-| `d_txt` / `d_txt_is` | Wind direction text | Exposure on open roads |
-| `rh` | Relative humidity | Frost / fog context |
-| `r` | Precipitation | Wet / snow risk |
-| `snd` | Snow depth | Winter road conditions |
-| `ps` / `p` | Pressure | Storm context |
-| `sun` | Sun-related value | Daylight / visibility context |
+| `t` | 氣溫 | 結冰／霜凍風險 |
+| `f` | 風速 | 行駛穩定性 |
+| `fg` | 陣風 | 突發危險 |
+| `d_txt` / `d_txt_is` | 風向文字 | 開闊路段受風風險 |
+| `rh` | 相對濕度 | 霧／結霜背景 |
+| `r` | 降水量 | 濕滑／降雪風險 |
+| `snd` | 積雪深度 | 冬季道路條件 |
+| `ps` / `p` | 氣壓 | 風暴背景判斷 |
+| `sun` | 日照相關值 | 白天時段／能見度背景 |
 
-### Useful station / region inputs
+### 常用測站／區域參數
 
-- `station_id`: specific station list
-- `region_id`: Iceland forecast region
-- `polygon`: WKT polygon for geographic filtering
+- `station_id`：指定測站
+- `region_id`：冰島預報區域
+- `polygon`：以 WKT 多邊形做地理篩選
 
 ---
 
-## 7. Region IDs
+## 7. Region ID 對照
 
-| Region | Value |
+| 區域 | 數值 |
 |---|---:|
 | Höfuðborgarsvæðið | 1 |
 | Suðurland | 2 |
@@ -172,21 +172,21 @@ X-Vi-Api-Version: 2026-02-17
 
 ---
 
-## 8. Recommended MVP use
+## 8. 建議 MVP 使用方式
 
-If the project goal is road-risk or travel safety, this API can support:
+若專案目標是道路風險或旅遊安全，這個 API 可支援：
 
-- ice risk warnings
-- storm risk warnings
-- snow and rain impact signals
-- region-level summary cards
-- station-level detail screens
+- 結冰風險提醒
+- 風暴風險提醒
+- 雨雪影響訊號
+- 區域層級摘要卡片
+- 測站層級細節頁面
 
 ---
 
-## 9. Practical notes
+## 9. 實務建議
 
-- Use `basic` first.
-- Start with `region_id=12` for the whole country.
-- Switch to specific stations later if you need detailed local views.
-- Keep the response shape small in Postman until you confirm the endpoint works.
+- 先用 `parameters=basic`。
+- 先從 `region_id=12`（全國）開始驗證。
+- 需要在地精度時，再切換到特定測站。
+- 在確認端點穩定前，建議先保持精簡回應欄位。
