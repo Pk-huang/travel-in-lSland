@@ -95,9 +95,14 @@
 ### 2.1 架構總覽
 - 前端：Next.js (App Router), React, Three.js, @react-three/fiber, Zustand
 - 後端：Next.js Route Handlers 作為 BFF
-- 快取：Upstash Redis
-- AI：Vercel AI SDK（串流）
+- 快取：Upstash Redis（Phase 1 加入）
+- AI：Vercel AI SDK（串流）（Phase 3 加入，MVP 暫不做）
 - 部署：Vercel
+- Package Manager：pnpm
+- 地形底圖：Three.js mesh + NASA 衛星圖 texture（B 方案，公開免費）
+- 極光資料：NOAA SWPC JSON（納入 MVP，無需 API key）
+- 路況來源：由 Vedur 天氣欄位推算（無獨立路況 API），推算邏輯見 docs/api/iceland-traffic-api.md
+- 未來擴充：Supabase（Auth + PostgreSQL），用於 CRUD 使用者行程，Phase 3 後加入
 
 ### 2.1.1 地圖互動要求
 - 背景冰島地圖需支援縮放、拖曳與點擊
@@ -146,6 +151,13 @@ export type ItineraryItem = {
   waypoint: { lat: number; lon: number };
   riskNote?: string;
 };
+
+export type AuroraConditions = {
+  source: 'noaa';
+  observationTime: string; // ISO8601
+  forecastTime: string;    // ISO8601
+  coordinates: Array<[number, number, number]>; // [lon, lat, intensity 0-100]
+};
 ```
 
 ### 2.3 BFF API 規格
@@ -168,6 +180,7 @@ export type ItineraryItem = {
   },
   "weather": [],
   "roads": [],
+  "aurora": [],
   "summary": {
     "riskScore": 42,
     "highRiskSegments": 3

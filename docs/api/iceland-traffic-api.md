@@ -120,6 +120,48 @@ X-Vi-Api-Version: 2026-02-17
 
 ---
 
+## 9. Road Risk 推算公式（MVP 採用）
+
+**決策日期：** 2026-06-21  
+**決策原因：** 無穩定公開的即時路況 API，改由 Vedur 天氣欄位推算 `RoadSegment.status`
+
+### 推算規則（BFF 層執行，`lib/adapters/road.ts`）
+
+```ts
+function deriveRoadStatus(obs: VedurObservation): 'open' | 'caution' | 'closed' {
+  const { fg, snd, t, r } = obs;
+
+  // closed：陣風過強、積雪過深、極端低溫
+  if ((fg ?? 0) > 25 || (snd ?? 0) > 30 || (t ?? 0) < -15) {
+    return 'closed';
+  }
+
+  // caution：風速偏高、積雪、降水、低溫
+  if ((fg ?? 0) > 15 || (snd ?? 0) > 10 || (r ?? 0) > 5 || (t ?? 0) < -5) {
+    return 'caution';
+  }
+
+  return 'open';
+}
+```
+
+### 欄位對照
+
+| Vedur 欄位 | 說明 | closed 閾值 | caution 閾值 |
+|---|---|---|---|
+| `fg` | 陣風 (m/s) | > 25 | > 15 |
+| `snd` | 積雪深度 (cm) | > 30 | > 10 |
+| `t` | 氣溫 (°C) | < -15 | < -5 |
+| `r` | 降水 (mm/hr) | — | > 5 |
+
+### 後續可添加的目標
+
+- 串接 Umferdin 網頁（`https://umferdin.is/`）解析即時封路事件，覆蓋 `closed` 判斷
+- 加入能見度欄位 `vv`（若 Vedur 有回傳）強化 caution 條件
+- 依路段地理位置（海拔、山口）加權調整閾值
+
+---
+
 ## 9. 下一步建議
 
 若專案規模擴大，建議再細分子資料夾，例如：
