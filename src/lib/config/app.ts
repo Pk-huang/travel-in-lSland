@@ -1,8 +1,10 @@
 import type { Region } from "@/src/types";
 
+/**
+ * App 級別、跨來源共用的設定。
+ * 各外部 API 的專屬設定請放在該來源檔案內（例如 api/vedur.ts）。
+ */
 export const DEFAULT_REGION: Region = "south";
-export const DEFAULT_TIMEOUT_MS = 3_000;
-export const DEFAULT_RETRY_COUNT = 2;
 
 export const REGION_LABELS: Record<Region, string> = {
   south: "South Iceland",

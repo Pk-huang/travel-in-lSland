@@ -163,7 +163,7 @@ export type AuroraConditions = {
 ### 2.3 BFF API 規格
 
 #### API 端點
-- `GET /api/data/iceland-status`
+- `GET /data/iceland-status`
 
 #### 查詢參數
 - `region`: `south | west | north | east | all`
@@ -248,7 +248,7 @@ export type AuroraConditions = {
   1. 建立 `lib/adapters/vedur.ts`、`road.ts`
   2. 轉換為統一 domain model
   3. 增加重試與 timeout（例如 3s timeout, retry 2）
-- 交付物：`GET /api/data/iceland-status` 可穩定返回統一 JSON
+- 交付物：`GET /data/iceland-status` 可穩定返回統一 JSON
 
 ### 計畫項目 1-2：快取與斷路器
 - 目標：抗 API 波動與降成本
@@ -390,7 +390,7 @@ export type AuroraConditions = {
 ## 6. 立即執行清單（Next 5 Actions）
 
 1. 建立 `types/domain.ts` + `schemas/domain.ts`
-2. 定義 `GET /api/data/iceland-status` OpenAPI 文件
+2. 定義 `GET /data/iceland-status` OpenAPI 文件
 3. 實作 Vedur/Road adapter（含 timeout + retry）
 4. 接上 Upstash 快取（TTL 900s）
 5. 建立前端最小 3D MVP（單區域 + 單時間軸）

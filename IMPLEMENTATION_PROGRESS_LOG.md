@@ -52,9 +52,20 @@
 ## Phase 1：BFF 與資料層（4~6 天）
 
 ### 1-1 Vedur + Road API 聚合
-- 狀態：待辦
+- 狀態：進行中
 - 產出：
+	- 通用請求工具（timeout 3s / retry 2）：[src/lib/api/client.ts](src/lib/api/client.ts)
+	- Vedur 抓取進入點（依參數抓 raw）：[src/lib/api/vedur-source.ts](src/lib/api/vedur-source.ts)
+	- 天氣純解析 `parseWeather`：[src/lib/adapters/weather.ts](src/lib/adapters/weather.ts)
+	- 路況純推算 `deriveRoads`（公式見 docs §9）：[src/lib/adapters/road.ts](src/lib/adapters/road.ts)
+	- BFF route（接收/驗證/協調/回傳）：[src/app/data/iceland-status/route.ts](src/app/data/iceland-status/route.ts)
+	- 架構：fetcher 抓一次 raw → weather/road 各自純函式解析 → route 合併並出口驗證
+	- 資料夾整理：對外抓取集中於唯一 `src/lib/api`；端點路徑改為 `/data/iceland-status`
 - 驗收結果：
+	- `corepack pnpm lint` / `corepack pnpm build` 成功，route 註冊為 `ƒ /data/iceland-status`
+	- `region=mars` → 400 `INVALID_REGION`；上游不可達 → 503 統一 error 格式
+	- 以 mock raw 跑解析鏈：`open,closed` / `low,high` 並通過 schema parse
+	- 待辦：快取 / 斷路器 / fallback（Phase 1-2），以及 weather 站點經緯度補齊
 
 ### 1-2 快取與斷路器
 - 狀態：待辦
