@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "UPSTREAM_UNAVAILABLE",
+    "message": "Vedur API unavailable",
+    "fallback": true
+  }
+}

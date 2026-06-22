@@ -1,6 +1,6 @@
 # Iceland Insight 實作進度紀錄
 
-更新日期：2026-06-18  
+更新日期：2026-06-22  
 用途：依照既有 Phase 規劃，集中記錄實作進度、決策、阻塞與下一步
 
 ---
@@ -22,14 +22,30 @@
 ## Phase 0：專案啟動（2~3 天）
 
 ### 0-1 建立 monorepo / app 結構
-- 狀態：待辦
+- 狀態：進行中
 - 產出：
+	- 已建立 `package.json`（package manager: pnpm 11.8.0）
+	- 已產生 `pnpm-lock.yaml` 與 `node_modules`
+	- 已完成第一批核心依賴與開發依賴安裝（見 2026-06-22 紀錄）
+	- 已建立 Next.js 最小骨架：`app/layout.tsx`、`app/page.tsx`、`app/globals.css`
+	- 已建立設定檔：`next.config.ts`、`tsconfig.json`、`eslint.config.mjs`、`next-env.d.ts`
+	- 已更新 scripts：`dev`、`build`、`start`、`lint`
 - 驗收結果：
+	- `corepack pnpm list --depth 0` 可列出完整 top-level 套件
+	- `corepack pnpm build` 成功，首頁 route 可產生
 
 ### 0-2 資料契約落地
-- 狀態：待辦
+- 狀態：完成
 - 產出：
+	- 已建立共用型別：[src/types/domain.ts](src/types/domain.ts)
+	- 已建立型別匯出入口：[src/types/index.ts](src/types/index.ts)
+	- 已建立 Zod schema：[src/schemas/domain.ts](src/schemas/domain.ts)
+	- 已建立 schema 匯出入口：[src/schemas/index.ts](src/schemas/index.ts)
+	- 已建立 mock fixtures：`normal` / `degraded` / `failure`
 - 驗收結果：
+	- `corepack pnpm lint` 成功
+	- `corepack pnpm build` 成功
+	- `normal` / `degraded` / `failure` fixtures 均可通過對應 schema parse
 
 ---
 
@@ -189,3 +205,28 @@
 - 今日完成：確認 pnpm 為 package manager，Node 20 LTS
 - 今日阻塞：尚未初始化實作專案骨架（等待執行指令）
 - 下一步：執行 Phase 0-1（`pnpm create next-app` 初始化專案）
+
+### 2026-06-22
+- 今日完成：在現有 workspace 初始化 pnpm 專案（`corepack pnpm init`）
+- 今日完成：安裝核心依賴（Next/React/Three/R3F/Zustand/Zod/Upstash/Sentry）
+- 今日完成：安裝開發依賴（TypeScript/@types/ESLint/Prettier）
+- 安裝指令：
+	- `corepack pnpm add next react react-dom three @react-three/fiber @react-three/drei zustand zod @upstash/redis @sentry/nextjs`
+	- `corepack pnpm add -D typescript @types/node @types/react @types/react-dom eslint eslint-config-next prettier --ignore-scripts`
+- 目前已安裝（top-level）：
+	- dependencies：`@react-three/drei@10.7.7`、`@react-three/fiber@9.6.1`、`@sentry/nextjs@10.59.0`、`@upstash/redis@1.38.0`、`next@16.2.9`、`react@19.2.7`、`react-dom@19.2.7`、`three@0.184.0`、`zod@4.4.3`、`zustand@5.0.14`
+	- devDependencies：`@types/node@26.0.0`、`@types/react@19.2.17`、`@types/react-dom@19.2.3`、`eslint@10.5.0`、`eslint-config-next@16.2.9`、`prettier@3.8.4`、`typescript@6.0.3`
+- 注意事項：
+	- pnpm 安全策略目前忽略 build scripts（`@sentry/cli`、`sharp`）；如需允許請執行 `corepack pnpm approve-builds`
+- 今日阻塞：尚未建立 Next.js app 檔案骨架（目前僅完成套件層）
+- 下一步：執行 Next.js 骨架初始化或手動建立 `app/`、`next.config`、`tsconfig`、`eslint` 設定
+
+### 2026-06-22（續）
+- 今日完成：建立 Next.js App Router + TypeScript + ESLint 最小可跑骨架
+- 今日完成：建立首頁與全域樣式，補齊基礎設定檔與 scripts
+- 今日完成：驗證 `corepack pnpm lint`（無錯誤）與 `corepack pnpm build`（成功）
+- 今日完成：建立 Phase 0-2 共用 domain types、Zod schemas、mock fixtures
+- 今日完成：新增 `IcelandStatusResponse` / `ApiErrorResponse` 等資料契約
+- 今日完成：驗證所有 fixtures 可通過 schema parse（`schema-fixtures: ok`）
+- 注意事項：Next.js 偵測到工作區外層有其他 lockfile，顯示 workspace root 推斷警告；不影響目前 build
+- 下一步：開始 Phase 1-1（Vedur / Road adapters）

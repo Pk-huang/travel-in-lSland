@@ -1,0 +1,49 @@
+{
+  "meta": {
+    "region": "south",
+    "generatedAt": "2026-06-22T09:00:00.000Z",
+    "cache": "hit",
+    "fallback": false
+  },
+  "weather": [
+    {
+      "source": "vedur",
+      "timestamp": "2026-06-22T09:00:00.000Z",
+      "lat": 63.5303,
+      "lon": -19.5114,
+      "temperatureC": 9.8,
+      "windSpeedMs": 6.2,
+      "visibilityKm": 14.5,
+      "precipitationMm": 0,
+      "alertLevel": "low"
+    }
+  ],
+  "roads": [
+    {
+      "source": "road",
+      "segmentId": "south-1",
+      "name": "Route 1 - Hvolsvöllur to Vík",
+      "status": "open",
+      "updatedAt": "2026-06-22T09:00:00.000Z",
+      "geometry": [
+        [-20.2341, 63.7531],
+        [-19.0060, 63.4194]
+      ]
+    }
+  ],
+  "aurora": [
+    {
+      "source": "noaa",
+      "observationTime": "2026-06-22T08:45:00.000Z",
+      "forecastTime": "2026-06-22T10:00:00.000Z",
+      "coordinates": [
+        [-19.0, 64.8, 22],
+        [-17.5, 64.5, 18]
+      ]
+    }
+  ],
+  "summary": {
+    "riskScore": 18,
+    "highRiskSegments": 0
+  }
+}

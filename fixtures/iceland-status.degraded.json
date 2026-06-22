@@ -1,0 +1,40 @@
+{
+  "meta": {
+    "region": "south",
+    "generatedAt": "2026-06-22T09:05:00.000Z",
+    "cache": "stale",
+    "fallback": true
+  },
+  "weather": [
+    {
+      "source": "vedur",
+      "timestamp": "2026-06-22T08:30:00.000Z",
+      "lat": 63.5303,
+      "lon": -19.5114,
+      "temperatureC": 4.1,
+      "windSpeedMs": 18.7,
+      "visibilityKm": 3.2,
+      "precipitationMm": 2.8,
+      "alertLevel": "high"
+    }
+  ],
+  "roads": [
+    {
+      "source": "road",
+      "segmentId": "south-1",
+      "name": "Route 1 - Hvolsvöllur to Vík",
+      "status": "caution",
+      "reason": "High wind and reduced visibility",
+      "updatedAt": "2026-06-22T08:30:00.000Z",
+      "geometry": [
+        [-20.2341, 63.7531],
+        [-19.0060, 63.4194]
+      ]
+    }
+  ],
+  "aurora": [],
+  "summary": {
+    "riskScore": 72,
+    "highRiskSegments": 1
+  }
+}
