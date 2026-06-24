@@ -4,6 +4,7 @@ import { DEFAULT_REGION } from "@/src/lib/config/app";
 import { fetchVedurObservations } from "@/src/lib/api/vedur";
 import { deriveRoads } from "@/src/lib/adapters/road";
 import { parseWeather } from "@/src/lib/adapters/weather";
+import { getStationCoords } from "@/src/lib/stations/catalog";
 import { CACHE_TTL_MS, buildStatusKey, cache, isFresh } from "@/src/lib/cache";
 import { vedurBreaker } from "@/src/lib/http/circuit-breaker";
 import { statusSingleFlight } from "@/src/lib/http/single-flight";
@@ -49,8 +50,12 @@ function buildSummary(roads: RoadSegment[]): IcelandStatusResponse["summary"] {
 
 /** 從上游抓取並組裝統一回應（cache: miss、fallback: false）。 */
 async function fetchFresh(region: Region): Promise<IcelandStatusResponse> {
-  const raw = await fetchVedurObservations({ region });
-  const weather = parseWeather(raw);
+  // 觀測與測站主檔可並行抓取；主檔有 24h 快取，多數情況近乎零成本。
+  const [raw, coords] = await Promise.all([
+    fetchVedurObservations({ region }),
+    getStationCoords(region),
+  ]);
+  const weather = parseWeather(raw, coords);
   const roads = deriveRoads(raw);
 
   return icelandStatusResponseSchema.parse({

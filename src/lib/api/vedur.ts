@@ -68,3 +68,28 @@ export async function fetchVedurObservations(
 
   return fetchJson<RawVedurObservation[]>(url, { headers: VEDUR_HEADERS });
 }
+
+/**
+ * Vedur 測站主檔欄位（見 docs/api/vedur-weather-api.md §5.1）。
+ * AWS 觀測不帶 lat/lon，需以 station id 對照此主檔回填座標。
+ */
+export type RawVedurStation = {
+  station: number;
+  name: string;
+  lat: number;
+  lon: number;
+  ele?: number | null;
+};
+
+/**
+ * 抓取某 region 的測站主檔（含 lat/lon/ele）。
+ * 主檔極少變動，呼叫端應搭配長 TTL 快取（見 stations/catalog）。
+ */
+export async function fetchVedurStations(
+  region: Region,
+): Promise<RawVedurStation[]> {
+  const regionId = VEDUR_REGION_ID[region];
+  const url = `${VEDUR_BASE_URL}/stations?region_id=${regionId}`;
+
+  return fetchJson<RawVedurStation[]>(url, { headers: VEDUR_HEADERS });
+}

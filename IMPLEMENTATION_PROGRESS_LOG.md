@@ -120,6 +120,22 @@
 
 ## Phase 2：3D 地圖與互動 UI（7~10 天）
 
+### 2-0 前置：天氣測站座標回填（lat/lon backfill）
+- 狀態：完成
+- 背景：AWS 觀測（`observations/aws/hour/latest`）不帶 lat/lon，3D 點位渲染需要座標
+- 解法：以 station id 對照測站主檔（`stations?region_id=`）回填座標
+- 產出：
+	- I/O 來源：`fetchVedurStations` + `RawVedurStation`：[src/lib/api/vedur.ts](src/lib/api/vedur.ts)
+	- 純轉換：`buildStationCoords`（station id → 座標，過濾無座標站）：[src/lib/adapters/stations.ts](src/lib/adapters/stations.ts)
+	- 快取型存取（24h TTL，失敗優雅降級回 stale/空表）：[src/lib/stations/catalog.ts](src/lib/stations/catalog.ts)
+	- `parseWeather(raw, coords)` 回填，優先序「主檔 → 觀測自帶 → 0」：[src/lib/adapters/weather.ts](src/lib/adapters/weather.ts)
+	- route `fetchFresh` 並行抓觀測 + 主檔：[src/app/data/iceland-status/route.ts](src/app/data/iceland-status/route.ts)
+- 驗收結果：
+	- 上游驗證：south 區 43 觀測站對 121 測站主檔，座標涵蓋率 100%
+	- `corepack pnpm lint` / `corepack pnpm build` 成功
+	- 實測 `region=east`：weatherN=20、withCoords=20，座標為真實東部冰島經緯（約 65.28°N, -14°W）
+- 設計取捨：主檔失敗不阻斷 iceland-status（座標回填為加值，非關鍵路徑）
+
 ### 2-1 3D 場景與地形 LOD
 - 狀態：待辦
 - 產出：
