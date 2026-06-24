@@ -95,14 +95,25 @@
 	- route 流程改為：新鮮快取→hit；過期快取→秒回 stale + 背景 `revalidate`（不 await）；無快取→await single-flight 抓上游，失敗回 snapshot
 	- 驗收：`lint` / `build` 通過；實測 miss→fetch（43 站）、重打 `cache=hit`、`region=mars`/`at=notadate` 皆回 400
 - [待辦] ③ HTTP 快取標頭（`Cache-Control: s-maxage / stale-while-revalidate`）：讓 Vercel CDN 擋掉重複請求（雲端部署前處理）
-- [待辦] ④ 區分錯誤類型：上游失敗走 fallback、程式錯誤回 500 並記錄（與 1-3 觀測一起做）
+- [完成] ④ 區分錯誤類型：`UpstreamError`→fallback、程式/資料錯誤→500 並上報（隨 1-3 一起完成）
 - [待辦] ⑤ Rate Limit（規格 §2.6：每 IP 每分鐘 60 次）
-- [待辦] ⑥ 觀測日誌（Phase 1-3：requestId / latency / cacheState + Sentry）
+- [完成] ⑥ 觀測日誌（即 1-3：requestId / latency / cacheState + Sentry hook）
 
 ### 1-3 觀測與告警
-- 狀態：待辦
+- 狀態：完成（告警規則待接上 Sentry DSN）
 - 產出：
+	- 結構化日誌模組（單行 JSON，依嚴重度分流 stdout/stderr）：[src/lib/observability/logger.ts](src/lib/observability/logger.ts)
+	- 例外上報入口（`captureException`，DSN 未設時零成本、設定後動態載入 @sentry/nextjs）：[src/lib/observability/index.ts](src/lib/observability/index.ts)
+	- transport 錯誤統一收斂為 `UpstreamError`（逾時 / 非 2xx / 網路）：[src/lib/http/client.ts](src/lib/http/client.ts)
+	- route 錯誤分流 + 每請求觀測欄位（requestId / region / source / latencyMs / cacheState / fallback / status），並回 `x-request-id` 標頭：[src/app/data/iceland-status/route.ts](src/app/data/iceland-status/route.ts)
+- 錯誤分流策略：
+	- `UpstreamError`（上游問題）→ 計入斷路器、走 fallback（stale → snapshot）
+	- 非上游錯誤（程式 / 資料 bug）→ **不**拖累斷路器、上報 Sentry、無快取時回 500（不被 fallback 掩蓋）
 - 驗收結果：
+	- `corepack pnpm lint` / `corepack pnpm build` 成功
+	- 實測：成功與 400 回應皆帶 `x-request-id`；`region=south` 取得真實 43 站、重打 `cache=hit`；`region=mars` 回 400
+	- 每請求伺服器端輸出結構化 JSON 日誌（cacheState / latencyMs / fallback / status）
+- 待辦：提供 `SENTRY_DSN` 後補 Sentry 初始化（instrumentation / source map）與失敗率告警規則（§1-3：5 分鐘 > 10%）
 
 ---
 

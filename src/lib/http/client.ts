@@ -66,8 +66,17 @@ export async function fetchJson<T>(
     }
   }
 
-  if (lastError instanceof Error) {
+  // 所有 transport 層失敗（逾時 abort、網路錯誤、非 2xx）統一收斂為 UpstreamError，
+  // 讓上層能用 `instanceof UpstreamError` 明確區分「上游問題」與「程式錯誤」。
+  if (lastError instanceof UpstreamError) {
     throw lastError;
+  }
+  if (lastError instanceof Error) {
+    const reason =
+      lastError.name === "AbortError"
+        ? `Upstream timed out after ${timeoutMs}ms`
+        : lastError.message;
+    throw new UpstreamError(reason);
   }
   throw new UpstreamError("Unknown upstream error");
 }
