@@ -4,6 +4,8 @@ import { DEFAULT_REGION } from "@/src/lib/config/app";
 import { fetchVedurObservations } from "@/src/lib/api/vedur";
 import { deriveRoads } from "@/src/lib/adapters/road";
 import { parseWeather } from "@/src/lib/adapters/weather";
+import { CACHE_TTL_MS, buildStatusKey, cache, isFresh } from "@/src/lib/cache";
+import { vedurBreaker } from "@/src/lib/http/circuit-breaker";
 import {
   apiErrorResponseSchema,
   icelandStatusResponseSchema,
@@ -12,8 +14,10 @@ import {
 import type {
   ApiErrorResponse,
   IcelandStatusResponse,
+  Region,
   RoadSegment,
 } from "@/src/types";
+import snapshot from "@/fixtures/iceland-status.normal.json";
 
 function errorBody(
   code: string,
@@ -40,11 +44,44 @@ function buildSummary(roads: RoadSegment[]): IcelandStatusResponse["summary"] {
   return { riskScore, highRiskSegments };
 }
 
+/** 從上游抓取並組裝統一回應（cache: miss、fallback: false）。 */
+async function fetchFresh(region: Region): Promise<IcelandStatusResponse> {
+  const raw = await fetchVedurObservations({ region });
+  const weather = parseWeather(raw);
+  const roads = deriveRoads(raw);
+
+  return icelandStatusResponseSchema.parse({
+    meta: {
+      region,
+      generatedAt: new Date().toISOString(),
+      cache: "miss",
+      fallback: false,
+    },
+    weather,
+    roads,
+    aurora: [],
+    summary: buildSummary(roads),
+  });
+}
+
+/** 靜態 snapshot（fixture）作為最後一層 fallback。 */
+function buildSnapshot(region: Region): IcelandStatusResponse {
+  return icelandStatusResponseSchema.parse({
+    ...snapshot,
+    meta: {
+      region,
+      generatedAt: new Date().toISOString(),
+      cache: "miss",
+      fallback: true,
+    },
+  });
+}
+
 /**
  * GET /data/iceland-status
  *
- * 接收需求 → 抓一次 Vedur raw → weather/road 各自解析 → 合併驗證後回傳。
- * 這層只負責 HTTP 進出與協調，不含資料轉換邏輯。
+ * 流程：快取命中 → 直接回；否則經斷路器抓上游 →
+ * 失敗時依序 fallback：stale cache → 靜態 snapshot → error。
  */
 export async function GET(request: Request): Promise<NextResponse> {
   const { searchParams } = new URL(request.url);
@@ -54,10 +91,9 @@ export async function GET(request: Request): Promise<NextResponse> {
     searchParams.get("region") ?? DEFAULT_REGION,
   );
   if (!regionResult.success) {
-    return NextResponse.json(
-      errorBody("INVALID_REGION", "region 參數無效"),
-      { status: 400 },
-    );
+    return NextResponse.json(errorBody("INVALID_REGION", "region 參數無效"), {
+      status: 400,
+    });
   }
   const region = regionResult.data;
 
@@ -69,32 +105,36 @@ export async function GET(request: Request): Promise<NextResponse> {
     );
   }
 
-  // 2. 抓取 + 解析 + 組裝
-  try {
-    const raw = await fetchVedurObservations({ region });
-    const weather = parseWeather(raw);
-    const roads = deriveRoads(raw);
+  const key = buildStatusKey(region, atParam ?? undefined);
 
-    const body: IcelandStatusResponse = {
-      meta: {
-        region,
-        generatedAt: new Date().toISOString(),
-        cache: "miss",
-        fallback: false,
-      },
-      weather,
-      roads,
-      aurora: [],
-      summary: buildSummary(roads),
-    };
-
-    // 3. 出口前驗證，確保契約一致
-    const validated = icelandStatusResponseSchema.parse(body);
-    return NextResponse.json(validated);
-  } catch {
-    return NextResponse.json(
-      errorBody("UPSTREAM_UNAVAILABLE", "Vedur API unavailable", true),
-      { status: 503 },
-    );
+  // 2. 快取命中（新鮮）→ 直接回
+  const cached = await cache.get<IcelandStatusResponse>(key);
+  if (cached && isFresh(cached)) {
+    return NextResponse.json({
+      ...cached.value,
+      meta: { ...cached.value.meta, cache: "hit" },
+    });
   }
+
+  // 3. 經斷路器嘗試抓上游
+  if (vedurBreaker.canRequest()) {
+    try {
+      const fresh = await fetchFresh(region);
+      vedurBreaker.recordSuccess();
+      await cache.set(key, fresh, CACHE_TTL_MS);
+      return NextResponse.json(fresh);
+    } catch {
+      vedurBreaker.recordFailure();
+    }
+  }
+
+  // 4. Fallback：stale cache → snapshot
+  if (cached) {
+    return NextResponse.json({
+      ...cached.value,
+      meta: { ...cached.value.meta, cache: "stale", fallback: true },
+    });
+  }
+
+  return NextResponse.json(buildSnapshot(region));
 }

@@ -52,25 +52,39 @@
 ## Phase 1：BFF 與資料層（4~6 天）
 
 ### 1-1 Vedur + Road API 聚合
-- 狀態：進行中
+- 狀態：完成（核心鏈打通，可取得真實資料）
 - 產出：
-	- 通用請求工具（timeout 3s / retry 2）：[src/lib/api/client.ts](src/lib/api/client.ts)
-	- Vedur 抓取進入點（依參數抓 raw）：[src/lib/api/vedur-source.ts](src/lib/api/vedur-source.ts)
+	- 通用傳輸層（timeout 3s / retry 2）：[src/lib/http/client.ts](src/lib/http/client.ts)
+	- Vedur 唯一抓取點 + 專屬設定（就近）：[src/lib/api/vedur.ts](src/lib/api/vedur.ts)
 	- 天氣純解析 `parseWeather`：[src/lib/adapters/weather.ts](src/lib/adapters/weather.ts)
 	- 路況純推算 `deriveRoads`（公式見 docs §9）：[src/lib/adapters/road.ts](src/lib/adapters/road.ts)
+	- App 級設定：[src/lib/config/app.ts](src/lib/config/app.ts)
 	- BFF route（接收/驗證/協調/回傳）：[src/app/data/iceland-status/route.ts](src/app/data/iceland-status/route.ts)
 	- 架構：fetcher 抓一次 raw → weather/road 各自純函式解析 → route 合併並出口驗證
-	- 資料夾整理：對外抓取集中於唯一 `src/lib/api`；端點路徑改為 `/data/iceland-status`
+	- 資料夾分層：`api/`(對外來源) + `http/`(傳輸) + `config/`(設定) + `adapters/`(純解析)
+	- 端點路徑：`/data/iceland-status`（全專案僅一個對外 api 概念）
 - 驗收結果：
 	- `corepack pnpm lint` / `corepack pnpm build` 成功，route 註冊為 `ƒ /data/iceland-status`
 	- `region=mars` → 400 `INVALID_REGION`；上游不可達 → 503 統一 error 格式
-	- 以 mock raw 跑解析鏈：`open,closed` / `low,high` 並通過 schema parse
-	- 待辦：快取 / 斷路器 / fallback（Phase 1-2），以及 weather 站點經緯度補齊
+	- 實打 Vedur 成功：`GET /data/iceland-status?region=south` → 200，回傳真實即時觀測
+	- 解析容錯修正：Vedur `time` 補 UTC（`normalizeVedurTime`）、數值欄位允許 `null`、`r: null → undefined`
+- 已知缺口（不影響取得資料）：
+	- weather/road 的 `lat/lon` 目前為 0（AWS 觀測未帶座標，需接 `stations` 端點對照站點經緯度）
+- 後續：快取 / 斷路器 / fallback 移至 Phase 1-2
 
 ### 1-2 快取與斷路器
-- 狀態：待辦
+- 狀態：完成（記憶體版，之後可無痛換 Redis）
 - 產出：
+	- 快取抽象介面 + 記憶體實作：[src/lib/cache/store.ts](src/lib/cache/store.ts)
+	- 快取單例 + 鍵產生 + TTL：[src/lib/cache/index.ts](src/lib/cache/index.ts)
+	- 斷路器（5 次失敗開啟 / 60s 半開）：[src/lib/http/circuit-breaker.ts](src/lib/http/circuit-breaker.ts)
+	- route 串入流程：快取命中 → 斷路器抓上游 → fallback（stale cache → snapshot fixture）：[src/app/data/iceland-status/route.ts](src/app/data/iceland-status/route.ts)
+	- 快取鍵：`status:{region}:{timeslot}`，TTL 900s
 - 驗收結果：
+	- `corepack pnpm lint` / `corepack pnpm build` 成功
+	- 快取：暖身 miss → 後續 `cache=hit`（真實 43 站資料）
+	- fallback：壞上游 + 無快取 → 回 snapshot（`cache=miss, fallback=true`，region 正確覆寫）
+- 待辦：之後換 Upstash Redis（只需替換 cache 單例）；Sentry 結構化日誌移至 1-3
 
 ### 1-3 觀測與告警
 - 狀態：待辦
@@ -241,3 +255,23 @@
 - 今日完成：驗證所有 fixtures 可通過 schema parse（`schema-fixtures: ok`）
 - 注意事項：Next.js 偵測到工作區外層有其他 lockfile，顯示 workspace root 推斷警告；不影響目前 build
 - 下一步：開始 Phase 1-1（Vedur / Road adapters）
+
+### 2026-06-22（Phase 1-1）
+- 今日完成：建立 Vedur BFF 資料鏈（http/client、api/vedur、adapters/weather+road、/data route）
+- 今日完成：依「只接收/傳輸」原則重整資料夾 → `api/` + `http/` + `config/` + `adapters/`
+- 今日完成：端點改為 `/data/iceland-status`，同步更新規格書引用
+- 今日完成：實打 Vedur API 成功，`region=south` 回傳真實即時觀測（HTTP 200）
+- 今日修正：503 主因非連線失敗，而是出口驗證過嚴
+	- `time` 無時區 → `normalizeVedurTime` 補 UTC
+	- 數值欄位允許 `null`；降水 `r: null → undefined`
+- 已 push：`a2014f5..9671b76`（feat(api): Vedur BFF chain）
+- 已知缺口：weather/road 的 `lat/lon` 仍為 0（待接 Vedur `stations` 對照站點座標）
+- 下一步（擇一）：補站點經緯度，或進 Phase 1-2（快取 + 斷路器 + fallback）
+
+### 2026-06-24（Phase 1-2）
+- 今日完成：快取抽象層（介面 + 記憶體實作），之後換 Redis 只改單例
+- 今日完成：斷路器（連續 5 次失敗開啟、60s 半開試探）
+- 今日完成：route 串入「快取命中 → 斷路器抓上游 → fallback（stale → snapshot）」
+- 驗收：快取 miss→hit（真實 43 站）；壞上游無快取 → snapshot fallback（`fallback=true`）
+- 決策：MVP 先用記憶體快取（不需 Upstash 金鑰），介面已抽象、可無痛換 Redis
+- 下一步（擇一）：補站點經緯度、Phase 1-3（Sentry 觀測/告警），或接 Upstash Redis
