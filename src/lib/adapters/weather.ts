@@ -20,8 +20,11 @@ export function deriveAlertLevel(obs: RawVedurObservation): AlertLevel {
 /**
  * 把 Vedur 原始觀測轉成統一的 WeatherConditions[]。
  *
- * AWS 觀測本身不帶 lat/lon，須以 station id 對照測站主檔（coords）回填座標：
- * 優先序為「主檔座標 → 觀測自帶座標 → 0」。
+ * 背景：Vedur 的「觀測」端點（aws/hour/latest）不帶 lat/lon，座標放在另一個
+ * 「測站主檔」端點（stations）。此函式以 `station` id 為鍵做「左連接 JOIN」：
+ *   - 觀測為主表：有幾筆觀測就輸出幾筆（決定「有哪些點」）
+ *   - coords 為查找表：只用來補座標，不會新增資料列
+ * 座標優先序為「主檔座標 → 觀測自帶座標 → 0」。
  * 缺座標的測站（回填後仍為 0）對 3D 渲染無意義，但 MVP 暫予容忍。
  */
 export function parseWeather(

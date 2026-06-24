@@ -122,19 +122,24 @@
 
 ### 2-0 前置：天氣測站座標回填（lat/lon backfill）
 - 狀態：完成
-- 背景：AWS 觀測（`observations/aws/hour/latest`）不帶 lat/lon，3D 點位渲染需要座標
-- 解法：以 station id 對照測站主檔（`stations?region_id=`）回填座標
+- 名詞澄清：此處「AWS」＝ Automatic Weather Station（冰島氣象局自動氣象站），**與 Amazon Web Services 無關**。
+- 為什麼需要回填（背景）：
+	- Vedur 把同一件事拆成兩個端點：**觀測數據**（溫度/風速…，每小時變動，含 station id 但**無座標**）與**測站主檔**（座標/高程，幾乎不變，含 station id）。
+	- 這是 API 常見設計：位置幾乎不變，不必每筆觀測都重複塞經緯度，改讓呼叫端用 `station` id 去主檔查一次即可。
+	- 但 3D 地圖要把每個測站畫在正確位置，**沒有經緯度就無法定位**，故需把兩端點接起來。
+- 解法（概念）：以共同的 `station` id 做「**左連接 JOIN**」——**觀測為主表**（有幾筆觀測就輸出幾筆），**主檔為查找表**（只用來補座標）。只在主檔、當下無觀測的測站不會出現在結果。
 - 產出：
-	- I/O 來源：`fetchVedurStations` + `RawVedurStation`：[src/lib/api/vedur.ts](src/lib/api/vedur.ts)
-	- 純轉換：`buildStationCoords`（station id → 座標，過濾無座標站）：[src/lib/adapters/stations.ts](src/lib/adapters/stations.ts)
+	- I/O 來源（兩個獨立抓取函式，對應兩個來源）：`fetchVedurObservations`、`fetchVedurStations` + `RawVedurStation`：[src/lib/api/vedur.ts](src/lib/api/vedur.ts)
+	- 純轉換：`buildStationCoords`（把主檔變成 `station id → 座標` 查找表，過濾無座標站）：[src/lib/adapters/stations.ts](src/lib/adapters/stations.ts)
 	- 快取型存取（24h TTL，失敗優雅降級回 stale/空表）：[src/lib/stations/catalog.ts](src/lib/stations/catalog.ts)
-	- `parseWeather(raw, coords)` 回填，優先序「主檔 → 觀測自帶 → 0」：[src/lib/adapters/weather.ts](src/lib/adapters/weather.ts)
+	- JOIN 發生處：`parseWeather(raw, coords)`，優先序「主檔 → 觀測自帶 → 0」：[src/lib/adapters/weather.ts](src/lib/adapters/weather.ts)
 	- route `fetchFresh` 並行抓觀測 + 主檔：[src/app/data/iceland-status/route.ts](src/app/data/iceland-status/route.ts)
+- 為什麼拆這麼多檔：兩來源「變動頻率」不同（觀測 900s、座標 24h），拆開才能各自套合適快取，不必為了拿座標每次重抓近乎不變的主檔。
 - 驗收結果：
 	- 上游驗證：south 區 43 觀測站對 121 測站主檔，座標涵蓋率 100%
 	- `corepack pnpm lint` / `corepack pnpm build` 成功
 	- 實測 `region=east`：weatherN=20、withCoords=20，座標為真實東部冰島經緯（約 65.28°N, -14°W）
-- 設計取捨：主檔失敗不阻斷 iceland-status（座標回填為加值，非關鍵路徑）
+- 設計取捨：主檔失敗不阻斷 iceland-status（座標回填為加值，非關鍵路徑）；主檔的 `ele`（高程）一併保留，供 Phase 2-2 點位貼地形表面用。
 
 ### 2-1 3D 場景與地形 LOD
 - 狀態：待辦

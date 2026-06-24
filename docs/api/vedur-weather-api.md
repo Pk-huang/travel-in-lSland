@@ -58,6 +58,26 @@ Vedur 是冰島主要官方氣象來源，特別適合以下用途：
 
 ---
 
+## 3.6 重要：觀測與座標被切分（需回填 lat/lon）
+
+> 「AWS」＝ Automatic Weather Station（自動氣象站），**與 Amazon Web Services 無關**。
+
+Vedur 把同一件事拆成兩個端點，本專案需把它們接起來：
+
+| 端點 | 回傳 | 含 `station` id | 含 lat/lon |
+|------|------|:---:|:---:|
+| `observations/aws/hour/latest` | 即時觀測（溫度/風速/降水…，每小時變動） | ✅ | ❌ |
+| `stations` | 測站主檔（座標/高程，幾乎不變） | ✅ | ✅ |
+
+- **為什麼切分**：測站位置幾乎不變，API 不在每筆觀測重複塞經緯度，改讓呼叫端用 `station` id 查一次主檔即可。
+- **為什麼要回填**：3D 地圖需把每個測站畫在正確位置，缺座標就無法定位。
+- **接法（左連接 JOIN）**：以 `station` id 為鍵，**觀測為主表**、**主檔為查找表**；只在主檔、當下無觀測的測站不會出現。
+- **快取策略**：觀測 900s、主檔 24h（主檔極少變動）。
+- **實作對應**：`fetchVedurStations`（[src/lib/api/vedur.ts](src/lib/api/vedur.ts)）→ `buildStationCoords`（[src/lib/adapters/stations.ts](src/lib/adapters/stations.ts)）→ `getStationCoords` 24h 快取（[src/lib/stations/catalog.ts](src/lib/stations/catalog.ts)）→ `parseWeather(raw, coords)` 做 JOIN（[src/lib/adapters/weather.ts](src/lib/adapters/weather.ts)）。
+- **實測涵蓋率**：south 區 43 觀測站對 121 測站主檔，座標對應率 100%。
+
+---
+
 ## 4. 建議 headers
 
 ```http
