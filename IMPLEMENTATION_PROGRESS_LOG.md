@@ -86,6 +86,19 @@
 	- fallback：壞上游 + 無快取 → 回 snapshot（`cache=miss, fallback=true`，region 正確覆寫）
 - 待辦：之後換 Upstash Redis（只需替換 cache 單例）；Sentry 結構化日誌移至 1-3
 
+#### BFF 流程優化清單（2026-06-24 盤點）
+> 目的：讓資料流更順、更省、更穩。以下依優先序，逐項實作。
+
+- [完成] ① Stale-While-Revalidate：快取過期時先回 stale（秒回），背景再 single-flight 更新
+- [完成] ② Single-flight 請求合併：同一 key 同時只放一個請求打上游，其餘共用結果
+	- 產出：[src/lib/http/single-flight.ts](src/lib/http/single-flight.ts)（`SingleFlight` 類別 + `statusSingleFlight` 單例）
+	- route 流程改為：新鮮快取→hit；過期快取→秒回 stale + 背景 `revalidate`（不 await）；無快取→await single-flight 抓上游，失敗回 snapshot
+	- 驗收：`lint` / `build` 通過；實測 miss→fetch（43 站）、重打 `cache=hit`、`region=mars`/`at=notadate` 皆回 400
+- [待辦] ③ HTTP 快取標頭（`Cache-Control: s-maxage / stale-while-revalidate`）：讓 Vercel CDN 擋掉重複請求（雲端部署前處理）
+- [待辦] ④ 區分錯誤類型：上游失敗走 fallback、程式錯誤回 500 並記錄（與 1-3 觀測一起做）
+- [待辦] ⑤ Rate Limit（規格 §2.6：每 IP 每分鐘 60 次）
+- [待辦] ⑥ 觀測日誌（Phase 1-3：requestId / latency / cacheState + Sentry）
+
 ### 1-3 觀測與告警
 - 狀態：待辦
 - 產出：

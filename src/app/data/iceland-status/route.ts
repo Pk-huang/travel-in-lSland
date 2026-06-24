@@ -6,6 +6,7 @@ import { deriveRoads } from "@/src/lib/adapters/road";
 import { parseWeather } from "@/src/lib/adapters/weather";
 import { CACHE_TTL_MS, buildStatusKey, cache, isFresh } from "@/src/lib/cache";
 import { vedurBreaker } from "@/src/lib/http/circuit-breaker";
+import { statusSingleFlight } from "@/src/lib/http/single-flight";
 import {
   apiErrorResponseSchema,
   icelandStatusResponseSchema,
@@ -78,10 +79,35 @@ function buildSnapshot(region: Region): IcelandStatusResponse {
 }
 
 /**
+ * 經斷路器 + single-flight 抓上游並寫入快取。
+ * - 斷路器未放行 → 回 null（讓上層走 fallback）
+ * - 同一 key 併發只會真正打一次上游，其餘共用結果（防驚群）
+ * - 成功更新斷路器與快取；失敗記錄並回 null
+ */
+async function revalidate(
+  region: Region,
+  key: string,
+): Promise<IcelandStatusResponse | null> {
+  if (!vedurBreaker.canRequest()) return null;
+
+  try {
+    const fresh = await statusSingleFlight.run(key, () => fetchFresh(region));
+    vedurBreaker.recordSuccess();
+    await cache.set(key, fresh, CACHE_TTL_MS);
+    return fresh;
+  } catch {
+    vedurBreaker.recordFailure();
+    return null;
+  }
+}
+
+/**
  * GET /data/iceland-status
  *
- * 流程：快取命中 → 直接回；否則經斷路器抓上游 →
- * 失敗時依序 fallback：stale cache → 靜態 snapshot → error。
+ * 流程：
+ * 1. 新鮮快取 → 直接回（hit）
+ * 2. 過期快取 → 立刻回 stale，並在背景 single-flight 更新（SWR）
+ * 3. 無快取 → single-flight 抓上游；失敗則回 snapshot
  */
 export async function GET(request: Request): Promise<NextResponse> {
   const { searchParams } = new URL(request.url);
@@ -107,8 +133,10 @@ export async function GET(request: Request): Promise<NextResponse> {
 
   const key = buildStatusKey(region, atParam ?? undefined);
 
-  // 2. 快取命中（新鮮）→ 直接回
+  // 2. 查快取
   const cached = await cache.get<IcelandStatusResponse>(key);
+
+  // 2a. 新鮮 → 直接回 hit
   if (cached && isFresh(cached)) {
     return NextResponse.json({
       ...cached.value,
@@ -116,24 +144,19 @@ export async function GET(request: Request): Promise<NextResponse> {
     });
   }
 
-  // 3. 經斷路器嘗試抓上游
-  if (vedurBreaker.canRequest()) {
-    try {
-      const fresh = await fetchFresh(region);
-      vedurBreaker.recordSuccess();
-      await cache.set(key, fresh, CACHE_TTL_MS);
-      return NextResponse.json(fresh);
-    } catch {
-      vedurBreaker.recordFailure();
-    }
-  }
-
-  // 4. Fallback：stale cache → snapshot
+  // 2b. 過期 → 立刻回 stale，背景 single-flight 更新（不 await）
   if (cached) {
+    void revalidate(region, key);
     return NextResponse.json({
       ...cached.value,
       meta: { ...cached.value.meta, cache: "stale", fallback: true },
     });
+  }
+
+  // 3. 無快取 → 同步取上游（single-flight）；失敗回 snapshot
+  const fresh = await revalidate(region, key);
+  if (fresh) {
+    return NextResponse.json(fresh);
   }
 
   return NextResponse.json(buildSnapshot(region));
