@@ -100,7 +100,7 @@
 - [完成] ⑥ 觀測日誌（即 1-3：requestId / latency / cacheState + Sentry hook）
 
 ### 1-3 觀測與告警
-- 狀態：完成（告警規則待接上 Sentry DSN）
+- 狀態：結構化日誌 + 錯誤分流完成；Sentry 接入與失敗率告警依決定延後（hook 已備妥）
 - 產出：
 	- 結構化日誌模組（單行 JSON，依嚴重度分流 stdout/stderr）：[src/lib/observability/logger.ts](src/lib/observability/logger.ts)
 	- 例外上報入口（`captureException`，DSN 未設時零成本、設定後動態載入 @sentry/nextjs）：[src/lib/observability/index.ts](src/lib/observability/index.ts)
@@ -109,11 +109,12 @@
 - 錯誤分流策略：
 	- `UpstreamError`（上游問題）→ 計入斷路器、走 fallback（stale → snapshot）
 	- 非上游錯誤（程式 / 資料 bug）→ **不**拖累斷路器、上報 Sentry、無快取時回 500（不被 fallback 掩蓋）
-- 驗收結果：
-	- `corepack pnpm lint` / `corepack pnpm build` 成功
-	- 實測：成功與 400 回應皆帶 `x-request-id`；`region=south` 取得真實 43 站、重打 `cache=hit`；`region=mars` 回 400
-	- 每請求伺服器端輸出結構化 JSON 日誌（cacheState / latencyMs / fallback / status）
-- 待辦：提供 `SENTRY_DSN` 後補 Sentry 初始化（instrumentation / source map）與失敗率告警規則（§1-3：5 分鐘 > 10%）
+- 觀測出口說明：requestId / latencyMs 寫入**伺服器端 stdout**（跨 `pnpm dev` 終端機 / Vercel logs），非 HTTP 回應 body；requestId 另以 `x-request-id` 標頭回傳
+- 已完成（對應 §1-3 三項）：
+	- ② 每請求 requestId + latency——已寫入結構化日誌
+- 依決定延後（需 Sentry DSN）：
+	- ① 接入 Sentry：程式端 hook 已備（`captureException`），但尚未提供 DSN / instrumentation，未真正上報
+	- ③ 失敗率告警（5 分鐘 > 10%）：屬 Sentry 後台規則，依賴 ①
 
 ---
 
