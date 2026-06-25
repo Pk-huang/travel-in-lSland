@@ -1,4 +1,7 @@
-# 不允許任何相依套件執行 build script（sharp / @sentry/cli 等）。
-# 使用官方支援欄位 onlyBuiltDependencies（空陣列＝全部封鎖），
-# 跨 pnpm 9/10/11 行為一致，避免版本差異造成 install 失敗。
-onlyBuiltDependencies: []
+# build script 政策（此 pnpm 版本認得的鍵為 allowBuilds；package.json 的 pnpm 欄位已不再讀取）。
+# 每個帶 build script 的相依都必須「明確表態」（true 允許 / false 封鎖），
+# 否則 pnpm 會以 ERR_PNPM_IGNORED_BUILDS 在 CI（Vercel）中斷安裝。
+allowBuilds:
+  unrs-resolver: true
+  sharp: false
+  '@sentry/cli': false
