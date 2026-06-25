@@ -268,6 +268,30 @@ export type AuroraConditions = {
 
 ---
 
+## Phase 1.5：最小可用網站（前後端串接 + 部署）（1~2 天）
+
+> 調整理由（2026-06-25）：後端與資料層已完成且扎實，但前端為 0、且尚未部署過。
+> 先以「簡易面板驗證前後端串接 → 立即部署」取得**最基礎可上線版本**，再進入較重的 3D（Phase 2）。
+> 目的：把已累積的後端價值轉成可見、可上線成果，並提早暴露部署環境問題。
+
+### 計畫項目 1.5-1：前端最小資料面板
+- 目標：用最簡單的 React 呈現 `GET /data/iceland-status`，驗證資料契約真的好用
+- 解決方案：
+  1. 首頁串接 BFF，顯示天氣 / 路況摘要卡片（對應 wireframe 左側面板）
+  2. 提供 region 切換（south/west/north/east/all）做最基本互動
+  3. 呈現 loading / error / fallback 狀態（對應 meta.cache、fallback）
+- 交付物：開啟網站即可看到真實冰島天氣 / 路況資料
+
+### 計畫項目 1.5-2：走骨架部署（Vercel）
+- 目標：先讓最小版本真正上線，提早暴露環境差異
+- 解決方案：
+  1. 連結 GitHub repo 至 Vercel，設定必要環境變數
+  2. 確認 build script（sharp / sentry-cli）與 pnpm 版本在雲端可過
+  3. 驗證線上 `GET /data/iceland-status` 與首頁可正常運作
+- 交付物：可公開存取的最小網站 URL（含真實資料）
+
+---
+
 ## Phase 2：3D 地圖與互動 UI（7~10 天）
 
 ### 計畫項目 2-1：3D 場景與地形 LOD
@@ -362,12 +386,13 @@ export type AuroraConditions = {
 
 ## 4. 里程碑與時程（建議）
 
-- Week 1：Phase 0 + Phase 1（完成可用 BFF）
+- Week 1：Phase 0 + Phase 1（完成可用 BFF）+ **Phase 1.5（最小可用網站上線）**
 - Week 2~3：Phase 2（3D 與 UI 聯動完成）
 - Week 4：Phase 3（AI 規劃與 3D 錨點）
 - Week 5：Phase 4（測試、優化、上線）
 
 > 總工期約 4~5 週（單人全端）；若多人並行可壓縮至 2~3 週。
+> 註：Phase 1.5 為 2026-06-25 新增的里程碑，先取得最基礎可上線版本再進 3D。
 
 ---
 
