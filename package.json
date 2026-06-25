@@ -20,6 +20,7 @@
     }
   },
   "type": "module",
+  "packageManager": "pnpm@11.8.0",
   "dependencies": {
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
