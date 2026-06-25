@@ -124,9 +124,34 @@
 > 先以簡易面板串接前後端、隨即部署，取得最基礎可上線版本，再進 3D（Phase 2）。
 
 ### 1.5-1 前端最小資料面板
-- 狀態：待辦
+- 狀態：完成
 - 產出：
+	- 資料 hook（CSR，封裝 fetch + loading/error，AbortController 防 race，可被 Phase 2 3D 重用）：[src/lib/client/use-iceland-status.ts](src/lib/client/use-iceland-status.ts)
+	- region 切換按鈕列（純呈現 + 回呼）：[src/components/RegionSelector.tsx](src/components/RegionSelector.tsx)
+	- 天氣/路況摘要面板（loading / error / fallback 三態，含 cache 狀態徽章）：[src/components/StatusPanel.tsx](src/components/StatusPanel.tsx)
+	- 首頁組裝（持有 region state）：[src/app/page.tsx](src/app/page.tsx)
+	- 暗色底樣式：[src/app/globals.css](src/app/globals.css)
 - 驗收結果：
+	- `corepack pnpm lint` / `corepack pnpm build` 成功
+	- 首頁 HTTP 200、標題正確渲染；切 region 即時更新面板（CSR）
+	- 對應 BFF `meta.cache` / `fallback` 顯示資料狀態徽章
+- 過程修正：hook 內同步 setState 觸發 `react-hooks/set-state-in-effect`，改以 effect 內 async `load()` 包裝後通過
+
+> 技術債（2026-06-25 記錄，Phase 2 前補齊）：
+> - **島嶼架構未落實**：為求快速 demo，1.5-1 採「整個 `page.tsx` 標 `"use client"`」的簡化做法。
+>   理想做法應為 Server Component 當預設，僅把互動元件下放為 client island：
+>   `page.tsx`(Server, 放 Header/外框) → `Dashboard.tsx`("use client", 持有 region state) → `RegionSelector` / `StatusPanel`。
+> - **補齊時機**：Phase 2 加入 Navbar 等更多靜態區塊、或導入 Zustand 時一併重構邊界。
+> - **觀念備註**：Zustand 解決的是「state 共享 / 免 props 鑽透」，**不**改變 server/client 邊界——讀 store 的元件仍須是 client。故 Zustand 無法取代 `"use client"` 的劃分，兩者是不同維度。
+>
+> 📒 面試用觀念筆記（SSR/CSR 邊界 × 狀態管理）：
+> 1. **`"use client"` ≠ 狀態管理**：前者決定「元件在 server 還 client 執行、要不要送 JS 到瀏覽器」（執行邊界）；後者決定「state 放哪、如何共享」（資料維度）。兩者正交。
+> 2. **SSR vs CSR 的真正差異不是『資料完不完整』**：切 region 時兩者都會拿到「完整一筆新資料」；差別在「拿到後重畫多少」——SSR 重新產生整頁（含沒變的 Header/按鈕，可能閃白），CSR 只更新有 diff 的區塊（局部、無閃爍）。
+> 3. **選擇準則**：高互動 / 即時變動 / 不需 SEO → CSR；首屏速度 / SEO / 低互動 → SSR。本面板是「反覆切 region」的高互動場景 → CSR。
+> 4. **useState 版 vs Zustand 版的邊界差異**：
+>    - useState：state 必須住「共同父層」→ 父層被迫變 client（client 島較大）。
+>    - Zustand：state 住獨立 store，葉子元件各自 `useStore()` → **父層可維持 Server**，client 邊界縮到真正互動的葉子（島更小更精準）。
+> 5. **結論**：Zustand 的副作用好處是「讓父層不必為了持有 state 而下放成 client」，但它**不是**用來「省掉 CSR」，而是「把 CSR 邊界移到更精準的位置」。元件少、樹淺時（如本面板）用 useState 即可；元件多、樹深（Phase 2：3D + 時間軸 + 多面板）才導入 Zustand 才划算。
 
 ### 1.5-2 走骨架部署（Vercel）
 - 狀態：待辦
