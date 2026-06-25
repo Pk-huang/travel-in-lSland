@@ -154,9 +154,25 @@
 > 5. **結論**：Zustand 的副作用好處是「讓父層不必為了持有 state 而下放成 client」，但它**不是**用來「省掉 CSR」，而是「把 CSR 邊界移到更精準的位置」。元件少、樹淺時（如本面板）用 useState 即可；元件多、樹深（Phase 2：3D + 時間軸 + 多面板）才導入 Zustand 才划算。
 
 ### 1.5-2 走骨架部署（Vercel）
-- 狀態：待辦
+- 狀態：完成（2026-06-25）
+- 線上 URL：https://travel-in-island.vercel.app/
 - 產出：
+	- `package.json` 加 `"packageManager": "pnpm@11.8.0"`（Vercel 據此選對的 pnpm）
+	- `.gitignore` 忽略 `.env` / `.env.*`（保留 `.env.example`）、`.vercel`
+	- `pnpm-workspace.yaml` 的 `allowBuilds` 政策（明確表態 build script）：[pnpm-workspace.yaml](pnpm-workspace.yaml)
 - 驗收結果：
+	- 線上首頁 HTTP 200
+	- 線上 `GET /data/iceland-status?region=south` → cache=miss（新 instance 首打）、fallback=False、weatherN=43、roadsN=43，真實資料
+	- 本地以 Vercel 同款流程預演通過：`rm -rf node_modules && CI=1 corepack pnpm install --frozen-lockfile` exit 0、`corepack pnpm build` exit 0
+- 部署除錯歷程（踩雷紀錄，皆為 pnpm 版本差異所致）：
+	1. **lockfile 解析失敗**：`devEngines.onFail: download` 會在 lockfile 寫入 `packageManagerDependencies`/`@pnpm/exe`（pnpm-11-only 欄位），Vercel 端解析 `pnpm-lock.yaml` 直接報錯。→ 移除 `devEngines`、重生 lockfile。
+	2. **`ERR_PNPM_IGNORED_BUILDS`**（CI exit 1）：`@sentry/cli`、`sharp`、`unrs-resolver` 有 build script 但未表態。曾試 `onlyBuiltDependencies` / `ignoredBuiltDependencies`（workspace.yaml 與 package.json `pnpm` 欄位）**皆無效**——因 pnpm v11 已**移除**這些鍵、且 package.json 的 `pnpm` 欄位**不再被讀取**。正解是 pnpm-workspace.yaml 的 `allowBuilds`（v10.26+）。
+	3. **YAML 解析錯誤（重複鍵）**：每次 install 失敗，pnpm 會**自動在 workspace.yaml 頂端插入一個 placeholder `allowBuilds:` 區塊**，與我手寫的那塊並存 → 出現兩個 `allowBuilds` 鍵 → YAML 重複鍵解析失敗。→ 合併成單一區塊後通過。
+- 📒 面試用觀念筆記（pnpm 11 / 部署）：
+	1. **build script 安全模型**：pnpm 預設 `strictDepBuilds: true`，凡帶 postinstall 的相依若未在 `allowBuilds` 明確 `true`/`false`，CI 直接 exit 1（防供應鏈攻擊）。每個都要表態。
+	2. **本機 ≠ CI**：本機非 CI 時 `ERR_PNPM_IGNORED_BUILDS` 只印警告不中斷；要重現 Vercel 失敗必須 `CI=1 ... --frozen-lockfile`。教訓：部署前先在本地用 CI 同款指令預演。
+	3. **設定鍵會跨版本搬家**：v11 移除 `onlyBuiltDependencies`/`neverBuiltDependencies`/`ignoredBuiltDependencies`，統一為 `allowBuilds`；package.json 的 `pnpm` 欄位也不再讀。除錯時務必對齊「當前版本」的文件，別套舊經驗。
+- 待辦延伸（已記錄，非阻斷）：Vercel 環境變數（目前 `VEDUR_BASE_URL` 有程式預設值，無必填）、Sentry DSN、③ HTTP 快取標頭。
 
 ---
 
