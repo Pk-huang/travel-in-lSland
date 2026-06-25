@@ -1,3 +1,4 @@
-allowBuilds:
-  '@sentry/cli': false
-  sharp: false
+# 不允許任何相依套件執行 build script（sharp / @sentry/cli 等）。
+# 使用官方支援欄位 onlyBuiltDependencies（空陣列＝全部封鎖），
+# 跨 pnpm 9/10/11 行為一致，避免版本差異造成 install 失敗。
+onlyBuiltDependencies: []
