@@ -1,24 +1,12 @@
-"use client";
-
-import { useState } from "react";
-
-import { RegionSelector } from "@/src/components/RegionSelector";
-import { StatusPanel } from "@/src/components/StatusPanel";
-import { useIcelandStatus } from "@/src/lib/client/use-iceland-status";
-import { DEFAULT_REGION } from "@/src/lib/config/app";
-import type { Region } from "@/src/types";
+import { Dashboard } from "@/src/components/Dashboard";
 
 /**
- * 首頁：最小資料面板（Phase 1.5-1）。
+ * 首頁：Server Component（靜態外框/標題）。
  *
- * 註：目前整頁標 "use client" 為快速 demo 的簡化做法。
- * 正確的島嶼架構（page=Server、僅互動元件下放為 client）為已記錄技術債，
- * 將於 Phase 2 一併補齊。詳見 IMPLEMENTATION_PROGRESS_LOG.md。
+ * 互動部分收斂在 <Dashboard />（client 島）。標題與版面外框留在 Server，
+ * 不送多餘 JS 到瀏覽器。詳見 IMPLEMENTATION_PROGRESS_LOG.md 島嶼架構說明。
  */
 export default function HomePage() {
-  const [region, setRegion] = useState<Region>(DEFAULT_REGION);
-  const { data, loading, error, refetch } = useIcelandStatus(region);
-
   return (
     <main style={styles.main}>
       <header style={styles.header}>
@@ -26,13 +14,7 @@ export default function HomePage() {
         <p style={styles.subtitle}>即時冰島天氣與路況（最小版）</p>
       </header>
 
-      <RegionSelector value={region} onChange={setRegion} disabled={loading} />
-      <StatusPanel
-        data={data}
-        loading={loading}
-        error={error}
-        onRetry={refetch}
-      />
+      <Dashboard />
     </main>
   );
 }
