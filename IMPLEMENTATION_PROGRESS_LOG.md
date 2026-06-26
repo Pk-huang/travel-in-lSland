@@ -174,6 +174,44 @@
 	3. **設定鍵會跨版本搬家**：v11 移除 `onlyBuiltDependencies`/`neverBuiltDependencies`/`ignoredBuiltDependencies`，統一為 `allowBuilds`；package.json 的 `pnpm` 欄位也不再讀。除錯時務必對齊「當前版本」的文件，別套舊經驗。
 - 待辦延伸（已記錄，非阻斷）：Vercel 環境變數（目前 `VEDUR_BASE_URL` 有程式預設值，無必填）、Sentry DSN、③ HTTP 快取標頭。
 
+### 1.5-3 元件架構重整 + 狀態分層（Phase 2 前的地基）
+- 狀態：規劃完成、實作中（2026-06-26）
+- 背景：1.5-1 為快速 demo，`Dashboard` 同時當「狀態擁有者」+「操作面板」，職責混合。
+  地圖（也是會操作、會渲染的母組件）若硬塞進 `Dashboard` 會形成父子關係，與「面板/地圖為平行兄弟」的真實心智模型不符，且 3D 長大後難切乾淨。趁樹還淺先重整。
+- 目標架構（面板與地圖為對等兄弟，靠共享狀態連動，非父子）：
+	- `page.tsx`(Server, grid 版面外框) → 並排 `ControlPanel`(client 島) + `MapCanvas`(client 島)
+	- 共享意圖狀態放 Zustand store；後端資料由 Context Provider 包 `useIcelandStatus` 供應（一處抓、兩島讀）
+- 📒 面試用觀念筆記（狀態分層：client state vs server state）：
+	1. **兩類狀態本質不同，要分開放**：
+	   - **A 意圖狀態（client state）**：使用者「想看什麼」——`region` / `time` / `selectedStationId`。能「直接賦值」、同步、無 loading/error。→ 放 **Zustand**。
+	   - **B 衍生資料（server state）**：後端回來的 `IcelandStatusResponse`。要發 API、有 loading/error、是「region 的函數」。→ 由 **hook 即時算出，不另存**。
+	2. **data 不是獨立狀態，是 region 的『果』**：唯一真相源只有 region；data 永遠跟著 region 跑。資料**單向流動**：user 改 region → hook 看到 → 抓 BFF → 得 data → 畫面更新；region 不回頭依賴 data。
+	3. **為何不讓 store 直接連 BFF**（即「region 變就在 setRegion 裡 fetch」）：會把 race condition（需 AbortController）、取消、loading/error、元件生命週期 cleanup 全部塞進「同步的狀態容器」，職責糊掉、重造輪子。這些是 React hook（useEffect 依賴 + cleanup）的專長。
+	4. **宣告式 vs 命令式**：不要「region 變了我去 call BFF」（命令式 push）；而是「data 宣告為 region 的函數，region 變 React 自動重跑」（宣告式 pull）。關係只描述一次，之後自動成立。
+	5. **Zustand ≒ 放在元件外面的 useState**：行為（記值、改值觸發重繪）與 useState 相同，差別只在「狀態住所」——useState 綁在元件身上（分享要 props 鑽透），Zustand 住模組單例（任何元件 import 即讀，免父層轉傳）。本專案 region 要給兩個平行兄弟共讀寫，故用 Zustand 讓父層不必為持有狀態而存在。
+	6. **Context vs Zustand vs 主題**：Context 適合「一處抓、多處讀」的共享傳遞（這裡傳 data）；Zustand 管「被頻繁讀寫的意圖」；主題（dark mode）這種低頻全域設定用 Context（ThemeProvider）即可，不需 Zustand。三者各司其職。
+- 一句記憶點：**Zustand 存「想要什麼」，hook 負責「去拿到並處理拿的過程」。旋鈕（region）和冷氣（fetch）分開，系統才好維護。**
+- 實作範圍（本步）：見下方「待辦清單」；UI 同步導入 Tailwind v4 + shadcn/ui，`MapCanvas` 先做有版面結構的 placeholder 空殼。
+- 實作產出（2026-06-26 完成）：
+	- 工具鏈：Tailwind v4（CSS-first，[postcss.config.mjs](postcss.config.mjs)、[src/app/globals.css](src/app/globals.css) 暗色設計權杖）+ shadcn/ui（[components.json](components.json)、[src/lib/utils.ts](src/lib/utils.ts) 的 `cn()`、`button`/`card`/`badge` 於 [src/components/ui/](src/components/ui)）
+	- 狀態層：Zustand store [src/lib/store/workspace.ts](src/lib/store/workspace.ts)；Context 供應 server state [src/components/providers/WorkspaceProvider.tsx](src/components/providers/WorkspaceProvider.tsx)
+	- 元件（依領域分資料夾）：
+		- 地圖領域 `map/`：[MapCanvas.tsx](src/components/map/MapCanvas.tsx)（全螢幕背景層 placeholder）
+		- 面板領域 `panel/`：[FloatingPanel.tsx](src/components/panel/FloatingPanel.tsx)（可收合外殼）→ [ControlPanel.tsx](src/components/panel/ControlPanel.tsx)（容器）→ [RegionSelector.tsx](src/components/panel/RegionSelector.tsx) + [StatusPanel.tsx](src/components/panel/StatusPanel.tsx)
+	- 版面：Google Maps 風格——地圖鋪滿視口背景、操作面板浮左可開合（[src/app/page.tsx](src/app/page.tsx) 用 `h-dvh` + `pointer-events` 分層）
+- 踩雷紀錄：shadcn CLI 會直接 `spawn pnpm`（不透過 corepack），因 pnpm 未全域安裝而 `ENOENT`。解法：建本地 shim（`/tmp/pnpm-shim/pnpm` → `exec corepack pnpm "$@"`）並加進 PATH 再跑 `shadcn add`。
+- 📒 工程取捨筆記（資料夾組織）：
+	1. **三種常見策略**：扁平（少量檔案全平放，7~10 個以上才分）／按領域 feature-based（中大型主流）／按 UI 父子層級（不建議）。
+	2. **資料夾表達「分類/領域」，不表達「父子」**：父子關係由 import 鏈表達，非資料夾深度。若按層級分，元件一旦被多處複用就無處可歸。
+	3. **本專案選擇**：按**領域**分 `map/` + `panel/`（非按父子層級）。理由：Phase 2 可預期大幅長大（Terrain/Stations/Controls/Timeline/AI 面板…），先依領域分好，新元件知道該放哪，符合團隊 workflow；屬「偏謹慎但合理」的提前分類。
+
+### 1.5-3 元件架構重整 — 收尾
+- 狀態：完成（2026-06-26）
+- 驗收結果：
+	- `corepack pnpm lint` / `corepack pnpm build` 成功；首頁 HTTP 200
+	- 面板可收合/展開；切 region 時 ControlPanel 與 MapCanvas 佔位的測站數同步變動（兄弟連動經 store + context 成立）
+	- 天氣/路況改上下單欄排列、面板加寬至 460px
+
 ---
 
 ## Phase 2：3D 地圖與互動 UI（7~10 天）

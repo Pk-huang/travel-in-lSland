@@ -1,31 +1,29 @@
-import { Dashboard } from "@/src/components/Dashboard";
+import { MapCanvas } from "@/src/components/map/MapCanvas";
+import { FloatingPanel } from "@/src/components/panel/FloatingPanel";
+import { WorkspaceProvider } from "@/src/components/providers/WorkspaceProvider";
 
 /**
- * 首頁：Server Component（靜態外框/標題）。
+ * 首頁：Server Component（全螢幕版面外框，Google Maps 風格）。
  *
- * 互動部分收斂在 <Dashboard />（client 島）。標題與版面外框留在 Server，
- * 不送多餘 JS 到瀏覽器。詳見 IMPLEMENTATION_PROGRESS_LOG.md 島嶼架構說明。
+ * 結構分層：
+ *   - MapCanvas：鋪滿視口的地圖背景（底層）
+ *   - FloatingPanel：浮在地圖之上、可收合的操作面板（內含 ControlPanel）
+ *
+ * 兩者為對等 client 島，透過 Zustand store（意圖狀態）與 WorkspaceProvider
+ * （後端資料）連動，彼此為兄弟而非父子。詳見 IMPLEMENTATION_PROGRESS_LOG.md 1.5-3。
  */
 export default function HomePage() {
   return (
-    <main style={styles.main}>
-      <header style={styles.header}>
-        <h1 style={styles.title}>Iceland Insight</h1>
-        <p style={styles.subtitle}>即時冰島天氣與路況（最小版）</p>
-      </header>
-
-      <Dashboard />
+    <main className="relative h-dvh w-full overflow-hidden">
+      {/* WorkspaceProvider 在頂層抓一次資料，供兩島共用 */}
+      <WorkspaceProvider>
+        {/* 底層：全螢幕地圖背景 */}
+        <MapCanvas />
+        {/* 上層：浮動操作面板（pointer-events 由子層各自開啟） */}
+        <div className="pointer-events-none absolute inset-0">
+          <FloatingPanel />
+        </div>
+      </WorkspaceProvider>
     </main>
   );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-  main: {
-    maxWidth: 960,
-    margin: "0 auto",
-    padding: "32px 20px 64px",
-  },
-  header: { marginBottom: 24 },
-  title: { fontSize: 28, margin: 0, color: "#fff" },
-  subtitle: { margin: "4px 0 0", color: "#8a9bb3", fontSize: 14 },
-};

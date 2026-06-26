@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/src/components/ui/button";
 import { REGION_LABELS } from "@/src/lib/config/app";
 import type { Region } from "@/src/types";
 
@@ -20,54 +21,23 @@ export function RegionSelector({
   disabled = false,
 }: RegionSelectorProps) {
   return (
-    <nav aria-label="選擇地區" style={styles.row}>
+    <nav aria-label="選擇地區" className="flex flex-wrap gap-2">
       {REGIONS.map((region) => {
         const active = region === value;
         return (
-          <button
+          <Button
             key={region}
             type="button"
+            size="sm"
+            variant={active ? "default" : "secondary"}
             onClick={() => onChange(region)}
             disabled={disabled}
             aria-pressed={active}
-            style={{
-              ...styles.button,
-              ...(active ? styles.active : {}),
-              ...(disabled ? styles.disabled : {}),
-            }}
           >
             {REGION_LABELS[region]}
-          </button>
+          </Button>
         );
       })}
     </nav>
   );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-  row: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: 8,
-    marginBottom: 20,
-  },
-  button: {
-    padding: "8px 16px",
-    borderRadius: 8,
-    border: "1px solid #2a3b52",
-    background: "#101a2b",
-    color: "#cfe0f5",
-    cursor: "pointer",
-    fontSize: 14,
-  },
-  active: {
-    background: "#2d6cdf",
-    borderColor: "#2d6cdf",
-    color: "#fff",
-    fontWeight: 600,
-  },
-  disabled: {
-    opacity: 0.5,
-    cursor: "not-allowed",
-  },
-};
