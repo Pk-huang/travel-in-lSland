@@ -27,8 +27,8 @@ export function MapCanvas() {
         <ambientLight intensity={0.6} />
         <directionalLight position={[5, 8, 5]} intensity={1.2} />
         <Terrain />
-        {/* 暫時：誇張版三軸（紅=X 東西、綠=Y 高度、藍=Z 南北）。確認方位後移除。 */}
-        <DebugAxes />
+        {/* 暫時：誇張版三軸（紅=X 東西、綠=Y 高度、藍=Z 南北），長度超出地形邊緣便於對位。確認方位後移除。 */}
+        <DebugAxes len={26} />
         <OrbitControls enableDamping />
       </Canvas>
 
