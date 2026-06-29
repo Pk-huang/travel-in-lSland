@@ -1,34 +1,17 @@
 "use client";
 
-import { useRef } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import type { Mesh } from "three";
 
+import { Terrain } from "@/src/components/map/Terrain";
 import { useWorkspaceData } from "@/src/components/providers/WorkspaceProvider";
 import { REGION_LABELS } from "@/src/lib/config/app";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
 
-/** 步驟 1 驗證物件：一顆持續旋轉的方塊，確認 R3F 渲染迴圈正常運作。 */
-function SpinningBox() {
-  const ref = useRef<Mesh>(null);
-  useFrame((_, delta) => {
-    if (!ref.current) return;
-    ref.current.rotation.x += delta * 0.5;
-    ref.current.rotation.y += delta * 0.8;
-  });
-  return (
-    <mesh ref={ref}>
-      <boxGeometry args={[2, 2, 2]} />
-      <meshStandardMaterial color="#4aa3ff" />
-    </mesh>
-  );
-}
-
 /**
  * MapCanvas：3D 地圖島（client island）— 全螢幕背景層。
  *
- * Phase 2-1a 步驟 1：先以 R3F <Canvas> + 旋轉方塊驗證工具鏈。
+ * Phase 2-1a 步驟 2a：以一塊躺平的平面（Terrain）取代驗證方塊。
  * 後續步驟將替換為 low-poly 地形（Terrain）+ 2-1b 真實 DEM；
  * 再來 2-2 以 data.weather 的 lat/lon 用 InstancedMesh 畫測站點位。
  */
@@ -42,7 +25,7 @@ export function MapCanvas() {
       <Canvas camera={{ position: [4, 3, 5], fov: 50 }} dpr={[1, 2]}>
         <ambientLight intensity={0.6} />
         <directionalLight position={[5, 8, 5]} intensity={1.2} />
-        <SpinningBox />
+        <Terrain />
         <OrbitControls enableDamping />
       </Canvas>
 
@@ -52,7 +35,7 @@ export function MapCanvas() {
           {REGION_LABELS[region]} ·{" "}
           {loading ? "載入測站中…" : `${stationCount} 個測站待渲染`}
         </p>
-        <p className="text-muted-foreground text-xs">3D 場景（步驟 1：方塊驗證）</p>
+        <p className="text-muted-foreground text-xs">3D 場景（步驟 2a：平坦地面）</p>
       </div>
     </div>
   );
