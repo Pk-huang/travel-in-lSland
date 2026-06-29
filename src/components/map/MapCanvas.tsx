@@ -4,6 +4,7 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 
 import { Terrain } from "@/src/components/map/Terrain";
+import { DebugAxes } from "@/src/components/map/DebugAxes";
 import { useWorkspaceData } from "@/src/components/providers/WorkspaceProvider";
 import { REGION_LABELS } from "@/src/lib/config/app";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
@@ -22,10 +23,12 @@ export function MapCanvas() {
 
   return (
     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_oklch(0.22_0.03_250)_0%,_oklch(0.13_0.02_250)_100%)]">
-      <Canvas camera={{ position: [4, 3, 5], fov: 50 }} dpr={[1, 2]}>
+      <Canvas camera={{ position: [12, 12, 12], fov: 50 }} dpr={[1, 2]}>
         <ambientLight intensity={0.6} />
         <directionalLight position={[5, 8, 5]} intensity={1.2} />
         <Terrain />
+        {/* 暫時：誇張版三軸（紅=X 東西、綠=Y 高度、藍=Z 南北）。確認方位後移除。 */}
+        <DebugAxes />
         <OrbitControls enableDamping />
       </Canvas>
 
