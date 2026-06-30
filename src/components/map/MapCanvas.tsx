@@ -1,9 +1,9 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
 
 import { Terrain } from "@/src/components/map/Terrain";
+import { CameraRig } from "@/src/components/map/CameraRig";
 import { DebugAxes } from "@/src/components/map/DebugAxes";
 import { useWorkspaceData } from "@/src/components/providers/WorkspaceProvider";
 import { REGION_LABELS } from "@/src/lib/config/app";
@@ -29,7 +29,7 @@ export function MapCanvas() {
         <Terrain />
         {/* 暫時：誇張版三軸（紅=X 東西、綠=Y 高度、藍=Z 南北），長度超出地形邊緣便於對位。確認方位後移除。 */}
         <DebugAxes len={26} />
-        <OrbitControls enableDamping />
+        <CameraRig />
       </Canvas>
 
       {/* 角落資訊：驗證資料連動仍在 */}
