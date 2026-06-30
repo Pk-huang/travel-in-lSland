@@ -3,6 +3,7 @@
 import { Canvas } from "@react-three/fiber";
 
 import { Terrain } from "@/src/components/map/Terrain";
+import { SeaLevel } from "@/src/components/map/SeaLevel";
 import { CameraRig } from "@/src/components/map/CameraRig";
 import { DebugAxes } from "@/src/components/map/DebugAxes";
 import { useWorkspaceData } from "@/src/components/providers/WorkspaceProvider";
@@ -27,6 +28,7 @@ export function MapCanvas() {
         <ambientLight intensity={0.6} />
         <directionalLight position={[5, 8, 5]} intensity={1.2} />
         <Terrain />
+        <SeaLevel />
         {/* 暫時：誇張版三軸（紅=X 東西、綠=Y 高度、藍=Z 南北），長度超出地形邊緣便於對位。確認方位後移除。 */}
         <DebugAxes len={26} />
         <CameraRig />
