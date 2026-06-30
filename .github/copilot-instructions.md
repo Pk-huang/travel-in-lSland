@@ -18,10 +18,32 @@
    - `get_errors`（型別/編譯）
    - `corepack pnpm lint`
    - `curl -s -o /dev/null -w "home:%{http_code}\n" http://localhost:3000/`（確認 200；dev server 多半已在背景跑）
+   - **額外 build**：若這一步牽涉「設定檔 / 相依套件 / 型別契約（types、schemas、API 形狀）」，必須再跑 `corepack pnpm build`。理由：dev/lint 過 ≠ 能部署（已踩過 Vercel build 才爆的雷）。
 4. **給使用者看**：說明改了什麼、驗證結果，請他在瀏覽器確認視覺。
 5. **commit 前必先問**：絕不自行 commit。使用者說 commit 才執行 `git add -A && git commit && git push`。
 
 > 一句話：**先講 → 改 → 驗證 → 給看 → 問 → commit**。寧可切太細，不要一次做太多。
+
+## 工程防護網（資深工程師準則）
+
+### 誠實準則（硬性）
+
+- **不假裝完成**：不確定就說不確定，禁止用「應該可以 / 大概 / 理論上」帶過。
+- **未驗證要明講**：沒實際跑過的驗證，明白標註「未驗證」，不得暗示已驗證或捏造結果。
+- **失敗先講根因**：遇錯先說明根本原因，再提解法；不默默繞過、不吞錯。
+
+### 變更範圍紀律（blast radius）
+
+- 一次只碰**一個關注點**；不順手重構、改格式或動無關程式。
+- 改動**公用模組**（`src/types/`、`src/schemas/`、`src/lib/http/`、`src/lib/store/` 等被多處引用者）前，**必先 `list_code_usages`** 列出所有使用點、評估影響面，再動手。
+- 不刪看似無用的程式，除非已確認無任何引用。
+
+### 相依與安全
+
+- 加套件前先評估：**體積、維護狀態、是否真的必要**（能用內建或既有就不加）。
+- 版本走 lockfile，不隨手 `latest`。
+- 祕密金鑰不寫進前端程式或 commit。
+
 
 ## Commit 規範
 
@@ -51,6 +73,13 @@
 - 比例約定：**1 unit = 1 km**，平面中心 = 冰島大致中心。
 - DebugAxes 顏色：**紅=X、綠=Y、藍=Z**。
 - 測站（Phase 2-2）用 **InstancedMesh** 畫，效能優先。
+
+## 3D 效能即設計
+
+- 量大、重複的物件預設用 **InstancedMesh**（一次 draw call），不要 N 個 component。
+- geometry / 計算結果用 **`useMemo` 快取**，**絕不**在 render loop（`useFrame`）每幀重建。
+- 重資源（three.js 等）一律 **`next/dynamic` + `ssr:false`** 動態載入，附 loading fallback，避免打進首包。
+- 留意 draw call 與頂點數；高密度 geometry 先評估再加。
 
 ## 教學模式
 

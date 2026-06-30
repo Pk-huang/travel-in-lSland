@@ -246,7 +246,21 @@
 	- 取得方式：opentopodata 公開 API（免金鑰，限 1 req/s、1000/日、100 點/次）→ 一次性對冰島範圍打格點生成靜態 heightmap 存進專案，無執行期成本。自架/下載 tile 太重，MVP 不採。
 - 路線決策：先做 low-poly（noise 假高度）跑通管線（Canvas/相機/位移/上色/座標系），再把高度來源換成 ASTER heightmap；殼共用，替換為局部，不白做。
 - 產出：
+	- **2-1a low-poly 程序地形完成（2026-06-30）**，依最小步逐 commit：
+		- 工具鏈：安裝 @react-three/fiber 9.6.1 + @react-three/drei 10.7.7（three 0.184.0）、@types/three；以旋轉方塊驗證 R3F 在 Next 16 可渲染（commit f7f2a3c）。
+		- 地塊 [src/components/map/Terrain.tsx](src/components/map/Terrain.tsx)：PlaneGeometry 128×128 段、繞 X −90° 躺平；逐頂點以 sin/cos 疊加寫高度（local Z → 世界 Y）；`computeVertexNormals` + flatShading 低多邊形（commit b543b3b、5f12118）。
+		- 上色：依高度逐頂點 vertex colors（深海→淺海→沙岸→草原→岩地→雪線），material 開 `vertexColors`（commit 0e61a7d）。
+		- 相機 [src/components/map/CameraRig.tsx](src/components/map/CameraRig.tsx)：切分 OrbitControls 成獨立角色層（限制留待後續）（commit 2f60ef9）。
+		- 海面 [src/components/map/SeaLevel.tsx](src/components/map/SeaLevel.tsx)：y=0 半透明藍平面（44×44），蓋住水下地形形成「海」（commit 31cd632）。
+		- 效能 [src/components/map/MapCanvasLoader.tsx](src/components/map/MapCanvasLoader.tsx)：`next/dynamic` + `ssr:false` 動態載入 MapCanvas，three.js 不進首包，附 loading fallback（commit 1bbecf3）。
+		- 除錯輔助 [src/components/map/DebugAxes.tsx](src/components/map/DebugAxes.tsx)：誇張三軸（紅X/綠Y/藍Z），**刻意保留**以利對位（commit d11d334）。
+	- 座標約定確立：X=東西、Y=高度、Z=南北；1 unit = 1 km；中心 = 冰島大致中心（供 2-1b DEM、2-2 測站共用）。
+	- 觀念筆記 [docs/notes/r3f-concepts.md](docs/notes/r3f-concepts.md)：WebGL/座標系/頂點上色/R3F 標籤對應/dynamic import 等 7 則問答。
+	- 開發規範 [.github/copilot-instructions.md](.github/copilot-instructions.md)：固化「最小步 → 驗證三連 → commit 前必問」workflow。
 - 驗收結果：
+	- 每步 `get_errors` 無誤、`corepack pnpm lint` 通過、home 200；`corepack pnpm build` 成功（`/` 維持 static，three.js 拆出獨立 chunk）。
+	- 線上自動部署：https://travel-in-island.vercel.app/
+- 下一步：**2-1b 真實 DEM**——以 opentopodata（ASTER30m/Mapzen）對冰島範圍打格點生成靜態 heightmap，替換 Terrain 的 sin 假高度。
 
 ### 2-2 InstancedMesh 即時點位渲染
 - 狀態：待辦
