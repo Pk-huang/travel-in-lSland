@@ -18,7 +18,7 @@ export function SeaLevel() {
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
       <planeGeometry args={[44, 44]} />
       <meshStandardMaterial
-        color="#3d85c6"
+        color="#2a5f86"
         transparent
         opacity={0.6}
       />

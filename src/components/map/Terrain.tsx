@@ -61,14 +61,14 @@ const VERTICAL_EXAGGERATION = 25;
  */
 const SEA_FLOOR_UNIT = -0.3;
 
-/** 依真實海拔（公尺）回傳顏色；海陸分界對齊真實 0m。 */
+/** 依真實海拔（公尺）回傳顏色；海陸分界對齊真實 0m。冰島風低彩度色帶。 */
 function elevationToColor(meters: number, targetColor: Color) {
-  if (meters < -200) return targetColor.set("#1f4e79"); // 深海
-  if (meters < 0) return targetColor.set("#3d85c6"); // 淺海
-  if (meters < 30) return targetColor.set("#e0c772"); // 海岸沙地
-  if (meters < 400) return targetColor.set("#5a8f3c"); // 低地草原
-  if (meters < 900) return targetColor.set("#7a6a55"); // 岩石高地
-  return targetColor.set("#f5f5f5"); // 雪線
+  if (meters < -200) return targetColor.set("#17324f"); // 深海
+  if (meters < 0) return targetColor.set("#2a5f86"); // 淺海
+  if (meters < 30) return targetColor.set("#55603f"); // 海岸低地（黑沙苔綠）
+  if (meters < 400) return targetColor.set("#6f8450"); // 低地苔原
+  if (meters < 900) return targetColor.set("#7d7259"); // 玄武岩高地
+  return targetColor.set("#eef2f5"); // 雪線
 }
 
 export function Terrain() {

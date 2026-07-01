@@ -57,7 +57,7 @@
 - **變數命名要有意義**：`height` 不寫 `h`、`positions` 不寫 `pos`、`segments` 不寫 `seg`。
 - **元件按角色切分**：地圖內每種角色獨立一檔（Terrain 地塊 / SeaLevel 海面 / CameraRig 相機 / StationLayer 測站 / Lighting 光）。切分目的是**故障定位**——某層壞掉能立刻知道是哪支。
 - **開發期用強烈除錯色**確認幾何/分層正確，正式配色另開一個步驟處理。
-- 除錯用的 `console.log` / wireframe / DebugAxes 等輔助，**不混進正式 commit**（除非使用者明確說保留，例如目前 DebugAxes 保留中）。
+- 除錯用的 `console.log` / wireframe / DebugAxes 等輔助，**不混進正式 commit**（除非使用者明確說保留）。DebugAxes 已於 Phase 2-1b 收尾（A-1）移出場景，元件檔保留備用。
 
 ## 技術約束
 

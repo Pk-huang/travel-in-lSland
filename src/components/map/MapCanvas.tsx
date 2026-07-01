@@ -5,7 +5,6 @@ import { Canvas } from "@react-three/fiber";
 import { Terrain } from "@/src/components/map/Terrain";
 import { SeaLevel } from "@/src/components/map/SeaLevel";
 import { CameraRig } from "@/src/components/map/CameraRig";
-import { DebugAxes } from "@/src/components/map/DebugAxes";
 import { useWorkspaceData } from "@/src/components/providers/WorkspaceProvider";
 import { REGION_LABELS } from "@/src/lib/config/app";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
@@ -25,12 +24,12 @@ export function MapCanvas() {
   return (
     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_oklch(0.22_0.03_250)_0%,_oklch(0.13_0.02_250)_100%)]">
       <Canvas camera={{ position: [12, 12, 12], fov: 50 }} dpr={[1, 2]}>
-        <ambientLight intensity={0.6} />
-        <directionalLight position={[5, 8, 5]} intensity={1.2} />
+        {/* 半球光：天空冷藍、地面暗色，模擬冰島冷冽天光的環境光。 */}
+        <hemisphereLight color="#bcd3e6" groundColor="#2e3226" intensity={0.75} />
+        {/* 方向光當太陽：壓低角度讓 flatShading 地形面產生明暗立體感。 */}
+        <directionalLight position={[8, 6, 4]} intensity={1.4} color="#fdf6ec" />
         <Terrain />
         <SeaLevel />
-        {/* 暫時：誇張版三軸（紅=X 東西、綠=Y 高度、藍=Z 南北），長度超出地形邊緣便於對位。確認方位後移除。 */}
-        <DebugAxes len={26} />
         <CameraRig />
       </Canvas>
 
@@ -40,7 +39,7 @@ export function MapCanvas() {
           {REGION_LABELS[region]} ·{" "}
           {loading ? "載入測站中…" : `${stationCount} 個測站待渲染`}
         </p>
-        <p className="text-muted-foreground text-xs">3D 場景（步驟 2a：平坦地面）</p>
+        <p className="text-muted-foreground text-xs">3D 場景（Phase 2-1b：真實 DEM 地形）</p>
       </div>
     </div>
   );
