@@ -278,6 +278,14 @@
 		4. `"/dem/..."` 路徑與地形尺度/誇張常數為硬編；未來多地形來源時抽 config。
 		5. heightmap 讀取邏輯目前僅 Terrain 使用，暫不抽 hook；若日後 MiniMap／測站貼地形共用再抽 `useHeightmap`（YAGNI）。
 	- 下一步：Phase 2-1b 地形完成，進 **Phase 2-2 測站點位**（InstancedMesh 畫 43 測站、以 `ele` 貼地形表面）。
+	- **互動待辦（之後再補）**：目前縮放靠 OrbitControls 內建滾輪；尚未做「點測站/區域相機平滑聚焦飛入」與「UI +/- 縮放按鈕」，留待互動階段處理。
+	- **地形清晰度待辦（之後再規劃執行）**：需求＝「放大時被放大的範圍能更清晰顯示更多細節」。根因＝目前 128×128 固定網格、頂點間距 ~4.1km，放大只是放大同一張粗網格、呈塊狀，非相機問題而是解析度問題。**本專案為面試作品，LOD 為首選方向**（展示設計思維＋可講取捨）。完整方案光譜、工時估算、面試講稿骨架已整理成筆記 → [docs/notes/lod-terrain-design.md](docs/notes/lod-terrain-design.md)。摘要：
+		- 方案 D Production 完整版（五子系統或 3D Tiles/Cesium）：~2~4 週，對固定小範圍冰島屬過度工程。
+		- **方案 B Chunked LOD MVP（推薦）**：真 tiling（quadtree-lite 3 層）＋依相機距離全域單層級選層＋TileCache 懶載；砍掉 frustum culling／接縫縫合／LRU（全域單層級天然無縫）。~2.5~3 天。可選加 L3（等效 512）跨 2 天拓資料。
+		- 方案 C 偽 LOD（3 張整島 heightmap 128/256/512 依距離切換）：~1 天，但難稱作 LOD。
+		- 方案 A 單一網格提高解析度（256/512）：~0.5~1 天，非 LOD 基準線。
+		- 待定：切幾層（L0~L2 / L0~L3）、切層體驗（瞬間／淡入），詳見筆記。
+		- 時點：**Phase 2-2 測站點位做完後**再實作；會改寫地形架構（Terrain→TerrainLOD+TerrainTile+TileCache），blast radius 大，需最小步逐 tile 驗證。
 
 ### 2-2 InstancedMesh 即時點位渲染
 - 狀態：待辦
