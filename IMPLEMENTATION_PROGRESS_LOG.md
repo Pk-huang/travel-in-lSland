@@ -266,13 +266,14 @@
 	- b-1/b-2：離線腳本 [scripts/fetch-dem.mjs](scripts/fetch-dem.mjs)（主源 Mapzen、連線失敗 fallback ASTER30m、限速 1req/s、落地存靜態檔）；產出 [public/dem/iceland-mapzen-128.json](public/dem/iceland-mapzen-128.json)（128×128、16384 點 0 null、-1592~2003m、僅 68KB）（commit c842ea1）。
 	- b-3：Terrain 讀 heightmap 取代 sin，頂點一對一對齊（segments=grid−1）、公尺÷500 換算 unit（垂直誇張 2×）；方位/形狀已確認為真冰島（commit dc52cee）。
 	- b-4：高度比例/海陸校正——由 bbox 推真實東西/南北 km 修正平面長寬比（不再正方形，南北≈27.9 units）；垂直高度改「公尺→km→除水平尺度得真實比例 × `VERTICAL_EXAGGERATION`(25)」，取代魔術數字 `METERS_PER_UNIT`；上色改用真實海拔公尺查色帶，海陸分界對齊真實 0m（與 y=0 SeaLevel 一致）。
+	- b-5：海岸線裁切——海拔 <0 的頂點高度夾平到 `SEA_FLOOR_UNIT`(-0.3)，消除深達 -1592m 的大碗，島形輪廓＝自然 0m 海岸線。**取捨已註記可還原**：犧牲水下真實深度換乾淨島形；heightmap 已含負值高程，日後要海底峽谷/大陸棚只需顯示端改用陸地同公式並調透明海面（見 Terrain.tsx `SEA_FLOOR_UNIT` TODO）。
 	- **技術債（待補，2026-07-01 記錄）**：
 		1. `fetch` 失敗僅 `console.error`，缺 error 狀態 UI（載入失敗會空白無提示）。
 		2. heightmap 未經 schema 驗證（`res.json()` 直接 as 型別）；專案已有 zod，之後用 zod parse 保護壞檔。
 		3. Terrain 對 geometry 用 `as unknown as BufferGeometry` / `as never` cast 繞過 drei BVH 型別，非漂亮但無功能影響。
 		4. `"/dem/..."` 路徑與地形尺度/誇張常數為硬編；未來多地形來源時抽 config。
 		5. heightmap 讀取邏輯目前僅 Terrain 使用，暫不抽 hook；若日後 MiniMap／測站貼地形共用再抽 `useHeightmap`（YAGNI）。
-	- 下一步：**b-5 海岸線裁切**（低於海平面的地形隱藏／島形輪廓收乾淨）。
+	- 下一步：**正式配色／光影微調**，Phase 2-1b 地形主體完成。
 
 ### 2-2 InstancedMesh 即時點位渲染
 - 狀態：待辦
