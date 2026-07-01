@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   PlaneGeometry,
   Float32BufferAttribute,
@@ -11,17 +11,30 @@ import {
 /**
  * Terrain：地形地塊。
  *
- * 子步驟 2c（本版）：依高度做逐頂點上色（vertex colors）。
- * - 高度寫進 local Z（旋轉後成世界 Y）。
- * - 同一迴圈順便依高度查色帶（海→岸→陸→岩→雪），寫入 color attribute。
- * - material 開 vertexColors，GPU 會在三角形內插值出漸層。
- * - 開發期用較強烈、分層清楚的顏色，確認分層正確；正式微調留待之後。
+ * 子步驟 2-1b b-3-ii（本版）：以真實 DEM heightmap 取代 sin 假高度。
+ *
+ * - fetch 靜態 heightmap（public/dem），拿到後才建 geometry（useMemo 依賴 heightmap）。
+ * - 頂點與 heightmap 一對一對齊：PlaneGeometry segments = grid-1 → 頂點數 = grid×grid，
+ *   ix/iy 直接對應 elevations[iy*grid+ix]，無需內插。
+ * - 單位換算：公尺 ÷ 500（垂直誇張 2×，1000m→2units），落在 unit 尺度便於觀察與沿用色帶。
+ * - 高度寫進 local Z（旋轉後成世界 Y）；依高度查色帶逐頂點上色。
  *
  * 座標約定（保留）：1 unit = 1 km，中心 = 冰島大致中心。
- * 後續：海平面水面 mesh、CameraRig、2-1b 換真實 DEM。
+ * 後續：b-4 高度比例/海陸校正、b-5 海岸線裁切。
  */
 
-/** 依高度回傳顏色（height 約 -4 ~ +4）。分層清楚便於驗證。 */
+/** heightmap JSON 結構（由 scripts/fetch-dem.mjs 產生）。 */
+type HeightmapData = {
+  grid: number;
+  min: number;
+  max: number;
+  elevations: number[]; // 長度 grid²，row-major（南→北、每列西→東），單位公尺
+};
+
+/** 公尺 → unit 的垂直縮放（÷500 = 垂直誇張 2×）。 */
+const METERS_PER_UNIT = 500;
+
+/** 依高度回傳顏色（height 單位為 unit，約 -3.2 ~ 4）。分層清楚便於驗證。 */
 function heightToColor(height: number, targetColor: Color) {
   if (height < -1) return targetColor.set("#1f4e79"); // 深海
   if (height < 0) return targetColor.set("#3d85c6"); // 淺海
@@ -32,19 +45,37 @@ function heightToColor(height: number, targetColor: Color) {
 }
 
 export function Terrain() {
+  const [heightmap, setHeightmap] = useState<HeightmapData | null>(null);
+
+  // 讀取真實高程靜態檔（一次）
+  useEffect(() => {
+    let alive = true;
+    fetch("/dem/iceland-mapzen-128.json")
+      .then((res) => res.json())
+      .then((data: HeightmapData) => {
+        if (alive) setHeightmap(data);
+      })
+      .catch((err) => console.error("[Terrain] heightmap 載入失敗：", err));
+    return () => {
+      alive = false;
+    };
+  }, []);
+
   const geometry = useMemo(() => {
-    const segments = 128;
+    if (!heightmap) return null;
+    const { grid, elevations } = heightmap;
+    const segments = grid - 1; // 頂點數 = grid，與 heightmap 一對一對齊
     const size = 40;
     const geo = new PlaneGeometry(size, size, segments, segments);
     const positions = geo.attributes.position;
     const colors = new Float32Array(positions.count * 3);
     const vertexColor = new Color();
+    const verts = segments + 1; // = grid
     for (let i = 0; i < positions.count; i++) {
-      const x = positions.getX(i);
-      const z = positions.getY(i); // 旋轉前的 Y → 旋轉後的南北(Z)
-      const height =
-        Math.sin(x * 0.4) * Math.cos(z * 0.4) * 1.5 +
-        Math.sin(x * 0.15 + z * 0.1) * 2.5;
+      const ix = i % verts; // 東西格點索引（0..grid-1）
+      const iy = Math.floor(i / verts); // 南北格點索引
+      const meters = elevations[iy * grid + ix];
+      const height = meters / METERS_PER_UNIT; // 公尺 → unit
       positions.setZ(i, height); // 旋轉前的 Z → 旋轉後的高度(世界 Y)
       heightToColor(height, vertexColor);
       colors[i * 3] = vertexColor.r;
@@ -54,7 +85,10 @@ export function Terrain() {
     geo.setAttribute("color", new Float32BufferAttribute(colors, 3));
     geo.computeVertexNormals();
     return geo as unknown as BufferGeometry;
-  }, []);
+  }, [heightmap]);
+
+  // heightmap 尚未載入 → 先不畫（loading fallback 由 MapCanvasLoader 提供）
+  if (!geometry) return null;
 
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} geometry={geometry as never}>
