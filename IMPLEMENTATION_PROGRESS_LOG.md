@@ -288,9 +288,16 @@
 		- 時點：**Phase 2-2 測站點位做完後**再實作；會改寫地形架構（Terrain→TerrainLOD+TerrainTile+TileCache），blast radius 大，需最小步逐 tile 驗證。
 
 ### 2-2 InstancedMesh 即時點位渲染
-- 狀態：待辦
-- 產出：
+- 狀態：完成（2026-07-02）
+- 產出（依最小步逐步）：
+	- 2-2a 共用座標映射 [src/lib/map/coords.ts](src/lib/map/coords.ts)：`ICELAND_BBOX`（與 fetch-dem 同值，單一真相源）、`computePlaneDepth()`、`lonLatToSceneXZ(lon,lat)→{x,z}`；node 驗證雷克雅未克/阿克雷里/赫本落點方位與四角皆正確、planeDepth≈27.84 與 Terrain 一致。
+	- 2-2b 測站點位 [src/components/map/StationLayer.tsx](src/components/map/StationLayer.tsx)：InstancedMesh 一次 draw call 畫全部測站，matrix 用 useMemo+useLayoutEffect 預算；資料由 [MapCanvas.tsx](src/components/map/MapCanvas.tsx) 以 prop 傳入（R3F Canvas 是獨立 render root、context 不穿透）。
+	- 2-2c 貼地形表面：coords 加共用高度公式 `computeKmPerUnit()`/`elevationToSceneY(m)`/`sampleElevationMeters(hm,lon,lat)`（與 Terrain 同一條換算）；heightmap 讀取抽成 hook [src/lib/map/use-heightmap.ts](src/lib/map/use-heightmap.ts)（收斂技術債 #5）；測站 Y＝地表高度＋半徑＋偏移，坐在地表上。
+	- 2-2d 風險配色：依 `alertLevel`（low 綠/medium 琥珀/high 紅）用 `setColorAt` 寫 instanceColor 逐站上色，取代除錯亮橙。
 - 驗收結果：
+	- 每步 `get_errors` 無誤、`corepack pnpm lint` 通過、home 200；本批動共用型別/模組，`corepack pnpm build` 成功。
+	- node 取樣驗證：內陸站高（冰川 1648m→Y3.12）、低地站貼海平面；沿海站在 128 粗網格（~4km）最近格點偶落海被夾平（已知限制，解析度提高後改善）。
+- 技術債（本階段新增）：`VERTICAL_EXAGGERATION`/`SEA_FLOOR_UNIT` 目前 Terrain 與 coords 各有一份同值常數，尚未收斂單一真相源（已於 coords.ts 註記，須保持同值）。
 
 ### 2-3 2D/3D 聯動時間軸
 - 狀態：待辦
