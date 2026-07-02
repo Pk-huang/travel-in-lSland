@@ -60,13 +60,13 @@ export function lonLatToSceneXZ(
 
 // --- 高度換算（與 Terrain 對齊的共用公式；測站等點位貼地形用） ---
 //
-// 注意：VERTICAL_EXAGGERATION / SEA_FLOOR_UNIT 目前於 Terrain.tsx 亦各有一份同值常數，
-// 尚未收斂為單一真相源（技術債）。本處數值必須與 Terrain 保持一致，否則測站會浮空/陷地。
+// 單一真相源：Terrain 與 StationLayer 皆從此處取用高度常數與公式（2026-07-02 收斂完成），
+// 不再各自持有同值常數。
 
-/** 垂直誇張倍率（須與 Terrain.tsx 同值）。 */
+/** 垂直誇張倍率（地形與點位共用）。 */
 export const VERTICAL_EXAGGERATION = 25;
 
-/** 海床夾平高度（unit，須與 Terrain.tsx 同值）。 */
+/** 海床夾平高度（unit，地形與點位共用）。 */
 export const SEA_FLOOR_UNIT = -0.3;
 
 /** heightmap 取樣所需的最小結構。 */

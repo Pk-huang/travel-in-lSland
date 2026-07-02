@@ -298,6 +298,7 @@
 	- 每步 `get_errors` 無誤、`corepack pnpm lint` 通過、home 200；本批動共用型別/模組，`corepack pnpm build` 成功。
 	- node 取樣驗證：內陸站高（冰川 1648m→Y3.12）、低地站貼海平面；沿海站在 128 粗網格（~4km）最近格點偶落海被夾平（已知限制，解析度提高後改善）。
 - 技術債（本階段新增）：`VERTICAL_EXAGGERATION`/`SEA_FLOOR_UNIT` 目前 Terrain 與 coords 各有一份同值常數，尚未收斂單一真相源（已於 coords.ts 註記，須保持同值）。
+	- **已收斂（2026-07-02）**：Terrain 改用 coords 的共用常數/函式（`PLANE_WIDTH`/`computePlaneDepth()`/`elevationToSceneY()`）與 `useHeightmap` hook，高度常數只存 coords 一份；Terrain 僅保留專屬 `elevationToColor` 色帶。地形與測站真正共用同一套 bbox/尺度/高度公式（單一真相源）。lint/home 200/build 皆通過、視覺不變。
 
 ### 2-3 2D/3D 聯動時間軸
 - 狀態：待辦
