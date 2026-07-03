@@ -1,6 +1,7 @@
 import { MapCanvasLoader } from "@/src/components/map/MapCanvasLoader";
 import { FloatingPanel } from "@/src/components/panel/FloatingPanel";
 import { WorkspaceProvider } from "@/src/components/providers/WorkspaceProvider";
+import { TimelineControl } from "@/src/components/timeline/TimelineControl";
 
 /**
  * 首頁：Server Component（全螢幕版面外框，Google Maps 風格）。
@@ -22,6 +23,7 @@ export default function HomePage() {
         {/* 上層：浮動操作面板（pointer-events 由子層各自開啟） */}
         <div className="pointer-events-none absolute inset-0">
           <FloatingPanel />
+          <TimelineControl />
         </div>
       </WorkspaceProvider>
     </main>

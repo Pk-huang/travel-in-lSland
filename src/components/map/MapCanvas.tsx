@@ -6,6 +6,7 @@ import { Terrain } from "@/src/components/map/Terrain";
 import { SeaLevel } from "@/src/components/map/SeaLevel";
 import { StationLayer } from "@/src/components/map/StationLayer";
 import { CameraRig } from "@/src/components/map/CameraRig";
+import { Lighting, computeLighting } from "@/src/components/map/Lighting";
 import { useWorkspaceData } from "@/src/components/providers/WorkspaceProvider";
 import { REGION_LABELS } from "@/src/lib/config/app";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
@@ -19,21 +20,25 @@ import { useWorkspaceStore } from "@/src/lib/store/workspace";
  */
 export function MapCanvas() {
   const region = useWorkspaceStore((s) => s.region);
+  const selectedTime = useWorkspaceStore((s) => s.time);
   const { data, loading } = useWorkspaceData();
   const stationCount = data?.weather.length ?? 0;
+  const lightingDebug = computeLighting(selectedTime ? new Date(selectedTime) : new Date());
 
   return (
     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_oklch(0.22_0.03_250)_0%,_oklch(0.13_0.02_250)_100%)]">
       <Canvas camera={{ position: [12, 12, 12], fov: 50 }} dpr={[1, 2]}>
-        {/* 半球光：天空冷藍、地面暗色，模擬冰島冷冽天光的環境光。 */}
-        <hemisphereLight color="#bcd3e6" groundColor="#2e3226" intensity={0.75} />
-        {/* 方向光當太陽：壓低角度讓 flatShading 地形面產生明暗立體感。 */}
-        <directionalLight position={[8, 6, 4]} intensity={1.4} color="#fdf6ec" />
+        <Lighting />
         <Terrain />
         <SeaLevel />
         <StationLayer stations={data?.weather ?? []} />
         <CameraRig />
       </Canvas>
+
+      {/* 角落資訊：驗證資料連動仍在 */}
+      <div className="pointer-events-none absolute top-4 right-4 text-right text-[11px] text-white/65">
+        光照 debug · {lightingDebug.hour.toFixed(1)}h · day {lightingDebug.daylight.toFixed(2)} · sun {lightingDebug.sunIntensity.toFixed(2)}
+      </div>
 
       {/* 角落資訊：驗證資料連動仍在 */}
       <div className="pointer-events-none absolute right-4 bottom-4 text-right">
