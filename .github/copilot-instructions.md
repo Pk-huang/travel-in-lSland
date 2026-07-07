@@ -18,6 +18,7 @@
    - `get_errors`（型別/編譯）
    - `corepack pnpm lint`
    - `curl -s -o /dev/null -w "home:%{http_code}\n" http://localhost:3000/`（確認 200；dev server 多半已在背景跑）
+   - **Markdown 例外**：若本步驟僅修改 `.md` 文件，可略過驗證三連與額外 build。
    - **額外 build**：若這一步牽涉「設定檔 / 相依套件 / 型別契約（types、schemas、API 形狀）」，必須再跑 `corepack pnpm build`。理由：dev/lint 過 ≠ 能部署（已踩過 Vercel build 才爆的雷）。
 4. **給使用者看**：說明改了什麼、驗證結果，請他在瀏覽器確認視覺。
 5. **commit 前必先問**：絕不自行 commit。使用者說 commit 才執行 `git add -A && git commit && git push`。
