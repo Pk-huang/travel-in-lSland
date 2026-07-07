@@ -301,9 +301,20 @@
 	- **已收斂（2026-07-02）**：Terrain 改用 coords 的共用常數/函式（`PLANE_WIDTH`/`computePlaneDepth()`/`elevationToSceneY()`）與 `useHeightmap` hook，高度常數只存 coords 一份；Terrain 僅保留專屬 `elevationToColor` 色帶。地形與測站真正共用同一套 bbox/尺度/高度公式（單一真相源）。lint/home 200/build 皆通過、視覺不變。
 
 ### 2-3 2D/3D 聯動時間軸
-- 狀態：待辦
+- 狀態：進行中
 - 產出：
+	- **2-3a 光影 preset 基礎完成（2026-07-07）**：
+		- 型別：新增 `LightingPresetId` / `LightingPreset`（[src/types/domain.ts](src/types/domain.ts)）。
+		- 設定：新增三組 preset（`realistic` / `cinematic` / `seasonal`）與預設值（[src/lib/config/app.ts](src/lib/config/app.ts)）。
+		- 渲染：`Lighting` 改為由 preset 參數驅動，維持同一渲染邏輯只切參數（[src/components/map/Lighting.tsx](src/components/map/Lighting.tsx)）。
+		- 內部切換入口：新增 `INTERNAL_LIGHTING_PRESET_OVERRIDE`，可先不用 UI 驗證樣式（[src/lib/config/app.ts](src/lib/config/app.ts)）。
+		- UI 切換：ControlPanel 新增下拉選單，接 `workspace` store 的 `lightingPresetId`（[src/components/panel/ControlPanel.tsx](src/components/panel/ControlPanel.tsx)、[src/lib/store/workspace.ts](src/lib/store/workspace.ts)）。
+		- 一致性：`MapCanvas` debug 顯示改為與實際 active preset 同步（[src/components/map/MapCanvas.tsx](src/components/map/MapCanvas.tsx)）。
+		- override 優先序：`INTERNAL_LIGHTING_PRESET_OVERRIDE` > UI 選擇 > 預設值。
 - 驗收結果：
+	- `get_errors` 無誤、`corepack pnpm lint` 通過、home 200。
+	- 因本步涉及 config/type/store，`corepack pnpm build` 通過。
+	- commit：`e2dd104`（`feat(lighting): add preset selector wiring (phase 2-3)`）。
 
 ### 2-4 行動端手勢隔離
 - 狀態：待辦
