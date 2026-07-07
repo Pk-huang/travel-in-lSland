@@ -1,5 +1,25 @@
 export type Region = "south" | "west" | "north" | "east" | "all";
 
+export type LightingPresetId = "realistic" | "cinematic" | "seasonal";
+
+export type LightingPreset = {
+  id: LightingPresetId;
+  label: string;
+  skyDayColor: string;
+  skyNightColor: string;
+  groundDayColor: string;
+  groundNightColor: string;
+  sunDayColor: string;
+  sunNightColor: string;
+  ambientBaseIntensity: number;
+  ambientDaylightBoost: number;
+  sunBaseIntensity: number;
+  sunDaylightBoost: number;
+  sunOrbitRadius: number;
+  sunBaseHeight: number;
+  sunDaylightHeightBoost: number;
+};
+
 export type AlertLevel = "low" | "medium" | "high";
 export type RoadStatus = "open" | "caution" | "closed";
 export type CacheState = "hit" | "miss" | "stale";

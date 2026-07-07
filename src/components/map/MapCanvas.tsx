@@ -8,7 +8,12 @@ import { StationLayer } from "@/src/components/map/StationLayer";
 import { CameraRig } from "@/src/components/map/CameraRig";
 import { Lighting, computeLighting } from "@/src/components/map/Lighting";
 import { useWorkspaceData } from "@/src/components/providers/WorkspaceProvider";
-import { REGION_LABELS } from "@/src/lib/config/app";
+import {
+  DEFAULT_LIGHTING_PRESET_ID,
+  INTERNAL_LIGHTING_PRESET_OVERRIDE,
+  LIGHTING_PRESETS,
+  REGION_LABELS,
+} from "@/src/lib/config/app";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
 
 /**
@@ -21,9 +26,15 @@ import { useWorkspaceStore } from "@/src/lib/store/workspace";
 export function MapCanvas() {
   const region = useWorkspaceStore((s) => s.region);
   const selectedTime = useWorkspaceStore((s) => s.time);
+  const selectedLightingPresetId = useWorkspaceStore((s) => s.lightingPresetId);
   const { data, loading } = useWorkspaceData();
   const stationCount = data?.weather.length ?? 0;
-  const lightingDebug = computeLighting(selectedTime ? new Date(selectedTime) : new Date());
+  const activePresetId =
+    INTERNAL_LIGHTING_PRESET_OVERRIDE ?? selectedLightingPresetId ?? DEFAULT_LIGHTING_PRESET_ID;
+  const lightingDebug = computeLighting(
+    selectedTime ? new Date(selectedTime) : new Date(),
+    LIGHTING_PRESETS[activePresetId],
+  );
 
   return (
     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_oklch(0.22_0.03_250)_0%,_oklch(0.13_0.02_250)_100%)]">

@@ -1,7 +1,7 @@
 import { create } from "zustand";
 
-import { DEFAULT_REGION } from "@/src/lib/config/app";
-import type { Region } from "@/src/types";
+import { DEFAULT_LIGHTING_PRESET_ID, DEFAULT_REGION } from "@/src/lib/config/app";
+import type { LightingPresetId, Region } from "@/src/types";
 
 /**
  * Workspace 意圖狀態（client state）。
@@ -16,22 +16,27 @@ import type { Region } from "@/src/types";
 export type WorkspaceState = {
   /** 目前選擇的地區（驅動資料抓取）。 */
   region: Region;
+  /** 目前選擇的光影樣式。 */
+  lightingPresetId: LightingPresetId;
   /** 時間軸選擇的時刻（Phase 2-3 啟用，先定型別）。 */
   time: string | null;
   /** 被點選的測站 id（Phase 2-2 啟用，先定型別）。 */
   selectedStationId: string | null;
 
   setRegion: (region: Region) => void;
+  setLightingPresetId: (lightingPresetId: LightingPresetId) => void;
   setTime: (time: string | null) => void;
   selectStation: (id: string | null) => void;
 };
 
 export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   region: DEFAULT_REGION,
+  lightingPresetId: DEFAULT_LIGHTING_PRESET_ID,
   time: null,
   selectedStationId: null,
 
   setRegion: (region) => set({ region }),
+  setLightingPresetId: (lightingPresetId) => set({ lightingPresetId }),
   setTime: (time) => set({ time }),
   selectStation: (selectedStationId) => set({ selectedStationId }),
 }));
