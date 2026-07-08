@@ -219,25 +219,16 @@
 ### 2-3 時間軸 × 日照模型（2026-07-08 除錯紀錄）
 - 狀態：進行中（核心閃爍問題已收斂，進入視覺驗證）
 - 問題現象：07/08 10:00 ~ 11:36 間光照偶發「亮度突然變高再變低」，使用者觀察到 `day` 與 `sun` debug 值瞬間跳動。
-- 根因定位：
-	- 前端同時存在兩條光照計算路徑：
-		- `daylightFromSun`：依第三方 sunrise/sunset/twilight 邊界計算
-		- `fallbackDaylight`：依系統時間的舊正弦公式計算
-	- 同一個 `selectedTime` 被兩套模型各算一次，再做混合，導致某些時刻兩者差距過大時產生閃爍。
-- 除錯步驟：
-	- 先接入獨立 `/data/sun-times` 路由與第三方 client，確認第三方日照資料可穩定取得。
-	- 將 `sun` 併入 `/data/iceland-status`，再擴充成三天邊界（`previous/current/next`）供跨午夜連續插值使用。
-	- 在 [src/components/map/Lighting.tsx](src/components/map/Lighting.tsx) 加入 threshold-based debug log，觀察跳變時的 `daylightFromSun` / `fallbackDaylight` / `contextSource`。
-	- 根據 log 確認閃爍並非函數錯誤，而是雙路模型混用。
-- 決策修正：
-	- 後端新增 `sunModel`（單一路徑決策）：
-		- `source = "sun"`：使用清洗後的有效邊界 timestamp
-		- `source = "fallback"`：第三方失效時退回舊公式
-	- 前端 `Lighting` 改為只吃 `sunModel`，不再混合 `sun` 與 fallback。
-	- BFF 保留 `sun` / `sunBoundary` 供過渡與 debug，相容既有前端，但實際渲染只依 `sunModel`。
+- 根因摘要：前端同時混用第三方日照邊界模型與系統時間 fallback 模型，造成同一個 `selectedTime` 被兩套路徑各算一次後再混合，部分時段產生亮度尖峰。
+- 修正摘要：
+	- 新增獨立 `/data/sun-times` 與第三方 client
+	- BFF 建立三天邊界 `sunBoundary`
+	- 加入 threshold-based debug log 確認根因
+	- 最終改為後端決策單一路徑 `sunModel`，前端 `Lighting` 只吃 `sunModel`
 - 目前結果：
 	- `get_errors` / `corepack pnpm lint` / `corepack pnpm build` / `home:200` 全數通過。
 	- `/data/iceland-status?region=south` 已可回 `sunModelSource: sun` 與有效 `boundary`。
+- 詳細紀錄：見 [docs/notes/debug-log.md](docs/notes/debug-log.md)
 - 後續觀察重點：
 	- 重新驗證 07/08 10:00 ~ 11:36 是否仍有亮度突刺。
 	- 若仍有問題，下一步直接比對 `sunModel.boundary` 對應時刻的輸入值，而不再回頭調整混合函數。
