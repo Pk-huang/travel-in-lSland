@@ -34,6 +34,7 @@ export function MapCanvas() {
   const lightingDebug = computeLighting(
     selectedTime ? new Date(selectedTime) : new Date(),
     LIGHTING_PRESETS[activePresetId],
+    data?.sunModel,
   );
 
   return (

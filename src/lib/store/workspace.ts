@@ -3,6 +3,9 @@ import { create } from "zustand";
 import { DEFAULT_LIGHTING_PRESET_ID, DEFAULT_REGION } from "@/src/lib/config/app";
 import type { LightingPresetId, Region } from "@/src/types";
 
+export type PlaybackState = "playing" | "paused";
+export type PlaybackSpeed = 0.5 | 1 | 2;
+
 /**
  * Workspace 意圖狀態（client state）。
  *
@@ -18,14 +21,21 @@ export type WorkspaceState = {
   region: Region;
   /** 目前選擇的光影樣式。 */
   lightingPresetId: LightingPresetId;
-  /** 時間軸選擇的時刻（Phase 2-3 啟用，先定型別）。 */
-  time: string | null;
+  /** 時間軸選擇的時刻（epoch ms；null 代表「現在」）。 */
+  time: number | null;
+  /** 時間軸播放狀態（Phase 2-3 播放器）。 */
+  playbackState: PlaybackState;
+  /** 時間軸播放倍速（Phase 2-3 播放器）。 */
+  playbackSpeed: PlaybackSpeed;
   /** 被點選的測站 id（Phase 2-2 啟用，先定型別）。 */
   selectedStationId: string | null;
 
   setRegion: (region: Region) => void;
   setLightingPresetId: (lightingPresetId: LightingPresetId) => void;
-  setTime: (time: string | null) => void;
+  setTime: (time: number | null) => void;
+  play: () => void;
+  pause: () => void;
+  setSpeed: (playbackSpeed: PlaybackSpeed) => void;
   selectStation: (id: string | null) => void;
 };
 
@@ -33,10 +43,15 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   region: DEFAULT_REGION,
   lightingPresetId: DEFAULT_LIGHTING_PRESET_ID,
   time: null,
+  playbackState: "paused",
+  playbackSpeed: 1,
   selectedStationId: null,
 
   setRegion: (region) => set({ region }),
   setLightingPresetId: (lightingPresetId) => set({ lightingPresetId }),
   setTime: (time) => set({ time }),
+  play: () => set({ playbackState: "playing" }),
+  pause: () => set({ playbackState: "paused" }),
+  setSpeed: (playbackSpeed) => set({ playbackSpeed }),
   selectStation: (selectedStationId) => set({ selectedStationId }),
 }));

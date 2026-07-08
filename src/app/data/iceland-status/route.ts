@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { DEFAULT_REGION } from "@/src/lib/config/app";
+import { fetchSunTimes } from "@/src/lib/api/sun-times";
 import { fetchVedurObservations } from "@/src/lib/api/vedur";
 import { deriveRoads } from "@/src/lib/adapters/road";
 import { parseWeather } from "@/src/lib/adapters/weather";
@@ -20,8 +21,135 @@ import type {
   IcelandStatusResponse,
   Region,
   RoadSegment,
+  SunLightingModel,
+  SunTimesBoundary,
+  SunTimes,
 } from "@/src/types";
 import snapshot from "@/fixtures/iceland-status.normal.json";
+
+const REGION_SUN_CENTER: Record<Region, { lat: number; lon: number }> = {
+  south: { lat: 63.9, lon: -19.1 },
+  west: { lat: 64.9, lon: -22.5 },
+  north: { lat: 65.7, lon: -18.1 },
+  east: { lat: 65.1, lon: -14.3 },
+  all: { lat: 64.9631, lon: -19.0208 },
+};
+
+function resolveSunDate(at?: string): string {
+  const base = at ? new Date(at) : new Date();
+  return base.toISOString().slice(0, 10);
+}
+
+function shiftDate(yyyyMmDd: string, offsetDays: number): string {
+  const base = new Date(`${yyyyMmDd}T00:00:00.000Z`);
+  base.setUTCDate(base.getUTCDate() + offsetDays);
+  return base.toISOString().slice(0, 10);
+}
+
+function resolveSunBoundaryDates(at?: string): {
+  previous: string;
+  current: string;
+  next: string;
+} {
+  const current = resolveSunDate(at);
+  return {
+    previous: shiftDate(current, -1),
+    current,
+    next: shiftDate(current, 1),
+  };
+}
+
+async function fetchSunTimesSafe(
+  region: Region,
+  date: string,
+  requestId: string,
+): Promise<SunTimes | null> {
+  try {
+    const center = REGION_SUN_CENTER[region];
+    return await fetchSunTimes({
+      lat: center.lat,
+      lon: center.lon,
+      date,
+    });
+  } catch (error) {
+    logEvent("warn", "sun-times fetch failed", {
+      requestId,
+      region,
+      source: "sunrise-sunset",
+      date,
+      error: error instanceof Error ? error.message : String(error),
+      fallback: "null",
+    });
+    return null;
+  }
+}
+
+async function fetchSunBoundarySafe(
+  region: Region,
+  at: string | undefined,
+  requestId: string,
+): Promise<SunTimesBoundary> {
+  const dates = resolveSunBoundaryDates(at);
+  const [previous, current, next] = await Promise.all([
+    fetchSunTimesSafe(region, dates.previous, requestId),
+    fetchSunTimesSafe(region, dates.current, requestId),
+    fetchSunTimesSafe(region, dates.next, requestId),
+  ]);
+
+  return {
+    previous,
+    current,
+    next,
+  };
+}
+
+function parseValidSunTimestamp(iso: string | undefined): number | null {
+  if (!iso) {
+    return null;
+  }
+
+  const timestamp = Date.parse(iso);
+  if (!Number.isFinite(timestamp)) {
+    return null;
+  }
+
+  const date = new Date(timestamp);
+  if (date.getUTCFullYear() < 2000) {
+    return null;
+  }
+
+  return timestamp;
+}
+
+function buildSunLightingModel(
+  sunBoundary: SunTimesBoundary | null | undefined,
+): SunLightingModel {
+  const currentSun = sunBoundary?.current;
+  const sunriseTs = parseValidSunTimestamp(currentSun?.sunrise);
+  const sunsetTs = parseValidSunTimestamp(currentSun?.sunset);
+
+  if (!currentSun || sunriseTs === null || sunsetTs === null || sunsetTs <= sunriseTs) {
+    return {
+      source: "fallback",
+      tzid: currentSun?.tzid ?? "Atlantic/Reykjavik",
+      boundary: null,
+      fallbackReason: "missing-valid-sun-boundary",
+    };
+  }
+
+  return {
+    source: "sun",
+    tzid: currentSun.tzid,
+    boundary: {
+      previousSunsetTs: parseValidSunTimestamp(sunBoundary?.previous?.sunset),
+      sunriseTs,
+      sunsetTs,
+      nextSunriseTs: parseValidSunTimestamp(sunBoundary?.next?.sunrise),
+      civilBeginTs: parseValidSunTimestamp(currentSun.civilTwilightBegin),
+      civilEndTs: parseValidSunTimestamp(currentSun.civilTwilightEnd),
+    },
+  };
+}
 
 function errorBody(
   code: string,
@@ -49,11 +177,16 @@ function buildSummary(roads: RoadSegment[]): IcelandStatusResponse["summary"] {
 }
 
 /** 從上游抓取並組裝統一回應（cache: miss、fallback: false）。 */
-async function fetchFresh(region: Region): Promise<IcelandStatusResponse> {
+async function fetchFresh(
+  region: Region,
+  at: string | undefined,
+  requestId: string,
+): Promise<IcelandStatusResponse> {
   // 觀測與測站主檔可並行抓取；主檔有 24h 快取，多數情況近乎零成本。
-  const [raw, coords] = await Promise.all([
+  const [raw, coords, sunBoundary] = await Promise.all([
     fetchVedurObservations({ region }),
     getStationCoords(region),
+    fetchSunBoundarySafe(region, at, requestId),
   ]);
   const weather = parseWeather(raw, coords);
   const roads = deriveRoads(raw);
@@ -68,6 +201,9 @@ async function fetchFresh(region: Region): Promise<IcelandStatusResponse> {
     weather,
     roads,
     aurora: [],
+    sun: sunBoundary.current,
+    sunBoundary,
+    sunModel: buildSunLightingModel(sunBoundary),
     summary: buildSummary(roads),
   });
 }
@@ -105,6 +241,7 @@ type RevalidateResult =
  */
 async function revalidate(
   region: Region,
+  at: string | undefined,
   key: string,
   requestId: string,
 ): Promise<RevalidateResult> {
@@ -120,7 +257,9 @@ async function revalidate(
 
   const startedAt = Date.now();
   try {
-    const fresh = await statusSingleFlight.run(key, () => fetchFresh(region));
+    const fresh = await statusSingleFlight.run(key, () =>
+      fetchFresh(region, at, requestId),
+    );
     vedurBreaker.recordSuccess();
     await cache.set(key, fresh, CACHE_TTL_MS);
     logEvent("info", "upstream fetch ok", {
@@ -231,18 +370,39 @@ export async function GET(request: Request): Promise<NextResponse> {
 
   // 2a. 新鮮 → 直接回 hit
   if (cached && isFresh(cached)) {
+    const sunBoundary =
+      cached.value.sunBoundary ??
+      (await fetchSunBoundarySafe(region, atParam ?? undefined, requestId));
+    const sun = cached.value.sun ?? sunBoundary.current;
+    const sunModel = buildSunLightingModel(sunBoundary);
+
     return respond(
-      { ...cached.value, meta: { ...cached.value.meta, cache: "hit" } },
+      {
+        ...cached.value,
+        sun,
+        sunBoundary,
+        sunModel,
+        meta: { ...cached.value.meta, cache: "hit" },
+      },
       { requestId, startedAt, region, cacheState: "hit", fallback: false },
     );
   }
 
   // 2b. 過期 → 立刻回 stale，背景 single-flight 更新（不 await）
   if (cached) {
-    void revalidate(region, key, requestId);
+    void revalidate(region, atParam ?? undefined, key, requestId);
+    const sunBoundary =
+      cached.value.sunBoundary ??
+      (await fetchSunBoundarySafe(region, atParam ?? undefined, requestId));
+    const sun = cached.value.sun ?? sunBoundary.current;
+    const sunModel = buildSunLightingModel(sunBoundary);
+
     return respond(
       {
         ...cached.value,
+        sun,
+        sunBoundary,
+        sunModel,
         meta: { ...cached.value.meta, cache: "stale", fallback: true },
       },
       { requestId, startedAt, region, cacheState: "stale", fallback: true },
@@ -250,7 +410,7 @@ export async function GET(request: Request): Promise<NextResponse> {
   }
 
   // 3. 無快取 → 同步取上游（single-flight）
-  const result = await revalidate(region, key, requestId);
+  const result = await revalidate(region, atParam ?? undefined, key, requestId);
 
   if (result.status === "ok") {
     return respond(result.data, {

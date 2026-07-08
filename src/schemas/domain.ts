@@ -55,6 +55,51 @@ export const auroraConditionsSchema = z.object({
   coordinates: z.array(z.tuple([z.number(), z.number(), z.number()])),
 });
 
+export const sunTimesSchema = z.object({
+  source: z.literal("sunrise-sunset"),
+  date: z.string(),
+  tzid: z.string(),
+  lat: z.number(),
+  lon: z.number(),
+  sunrise: z.string().datetime({ offset: true }),
+  sunset: z.string().datetime({ offset: true }),
+  solarNoon: z.string().datetime({ offset: true }),
+  dayLengthSeconds: z.number().int().nonnegative(),
+  civilTwilightBegin: z.string().datetime({ offset: true }),
+  civilTwilightEnd: z.string().datetime({ offset: true }),
+  nauticalTwilightBegin: z.string().datetime({ offset: true }),
+  nauticalTwilightEnd: z.string().datetime({ offset: true }),
+  astronomicalTwilightBegin: z.string().datetime({ offset: true }),
+  astronomicalTwilightEnd: z.string().datetime({ offset: true }),
+});
+
+export const sunTimesResponseSchema = z.object({
+  generatedAt: z.string().datetime(),
+  sun: sunTimesSchema,
+});
+
+export const sunTimesBoundarySchema = z.object({
+  previous: sunTimesSchema.nullable(),
+  current: sunTimesSchema.nullable(),
+  next: sunTimesSchema.nullable(),
+});
+
+export const sunLightingBoundarySchema = z.object({
+  previousSunsetTs: z.number().int().nullable(),
+  sunriseTs: z.number().int(),
+  sunsetTs: z.number().int(),
+  nextSunriseTs: z.number().int().nullable(),
+  civilBeginTs: z.number().int().nullable(),
+  civilEndTs: z.number().int().nullable(),
+});
+
+export const sunLightingModelSchema = z.object({
+  source: z.enum(["sun", "fallback"]),
+  tzid: z.string(),
+  boundary: sunLightingBoundarySchema.nullable(),
+  fallbackReason: z.string().optional(),
+});
+
 export const icelandStatusMetaSchema = z.object({
   region: regionSchema,
   generatedAt: z.string().datetime(),
@@ -72,6 +117,9 @@ export const icelandStatusResponseSchema = z.object({
   weather: z.array(weatherConditionsSchema),
   roads: z.array(roadSegmentSchema),
   aurora: z.array(auroraConditionsSchema),
+  sun: sunTimesSchema.nullable().optional(),
+  sunBoundary: sunTimesBoundarySchema.nullable().optional(),
+  sunModel: sunLightingModelSchema.optional(),
   summary: icelandStatusSummarySchema,
 });
 

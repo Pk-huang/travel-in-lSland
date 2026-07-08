@@ -74,6 +74,51 @@ export type AuroraConditions = {
   coordinates: Array<[number, number, number]>;
 };
 
+export type SunTimes = {
+  source: "sunrise-sunset";
+  date: string;
+  tzid: string;
+  lat: number;
+  lon: number;
+  sunrise: string;
+  sunset: string;
+  solarNoon: string;
+  dayLengthSeconds: number;
+  civilTwilightBegin: string;
+  civilTwilightEnd: string;
+  nauticalTwilightBegin: string;
+  nauticalTwilightEnd: string;
+  astronomicalTwilightBegin: string;
+  astronomicalTwilightEnd: string;
+};
+
+export type SunTimesResponse = {
+  generatedAt: string;
+  sun: SunTimes;
+};
+
+export type SunTimesBoundary = {
+  previous: SunTimes | null;
+  current: SunTimes | null;
+  next: SunTimes | null;
+};
+
+export type SunLightingBoundary = {
+  previousSunsetTs: number | null;
+  sunriseTs: number;
+  sunsetTs: number;
+  nextSunriseTs: number | null;
+  civilBeginTs: number | null;
+  civilEndTs: number | null;
+};
+
+export type SunLightingModel = {
+  source: "sun" | "fallback";
+  tzid: string;
+  boundary: SunLightingBoundary | null;
+  fallbackReason?: string;
+};
+
 export type IcelandStatusMeta = {
   region: Region;
   generatedAt: string;
@@ -91,6 +136,9 @@ export type IcelandStatusResponse = {
   weather: WeatherConditions[];
   roads: RoadSegment[];
   aurora: AuroraConditions[];
+  sun?: SunTimes | null;
+  sunBoundary?: SunTimesBoundary | null;
+  sunModel?: SunLightingModel;
   summary: IcelandStatusSummary;
 };
 

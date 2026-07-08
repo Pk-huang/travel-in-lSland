@@ -20,8 +20,7 @@ export function ControlPanel() {
   const setLightingPresetId = useWorkspaceStore((s) => s.setLightingPresetId);
   const { data, loading, error, refetch } = useWorkspaceData();
   const isLightingPresetLocked = INTERNAL_LIGHTING_PRESET_OVERRIDE != null;
-  console.log(isLightingPresetLocked, INTERNAL_LIGHTING_PRESET_OVERRIDE != null );
-
+ 
   return (
     <div className="space-y-4">
       <RegionSelector value={region} onChange={setRegion} disabled={loading} />
