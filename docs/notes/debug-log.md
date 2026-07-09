@@ -4,6 +4,83 @@
 
 ---
 
+## 2026-06-25 CI/CD（Vercel）部署除錯彙整
+
+### 問題範圍
+
+- 平台：Vercel（Next.js App Router）
+- 套件管理：pnpm 11.8.0（透過 corepack）
+- 症狀：本機可跑，但雲端建置失敗；錯誤訊息與 pnpm 版本差異強相關。
+
+### 主要故障與根因
+
+#### 1. lockfile 解析失敗
+
+**症狀**
+- Vercel 端解析 `pnpm-lock.yaml` 失敗，安裝階段即中止。
+
+**根因**
+- 曾使用 `devEngines.onFail: download`，導致 lockfile 寫入 `packageManagerDependencies` / `@pnpm/exe`（pnpm-11 特定欄位）。
+- 雲端解析策略與本機狀態不一致時，會在 install 前失敗。
+
+**解法**
+- 移除 `devEngines` 該設定。
+- 重新生成 lockfile，確保 lockfile 與部署端可解析。
+
+#### 2. `ERR_PNPM_IGNORED_BUILDS`（CI exit 1）
+
+**症狀**
+- 本機通常只警告，但 CI/Vercel 直接失敗。
+- 受影響套件如 `@sentry/cli`、`sharp`、`unrs-resolver`（含 build scripts）。
+
+**根因**
+- pnpm v11 安全模型要求對 build scripts 顯式表態。
+- 舊鍵（`onlyBuiltDependencies` / `ignoredBuiltDependencies` 等）在 v11 已移除或不再生效。
+- `package.json` 的 `pnpm` 欄位在此情境不再作為可信來源。
+
+**解法**
+- 使用 `pnpm-workspace.yaml` 的 `allowBuilds`（v10.26+）明確宣告允許/拒絕。
+- 不再使用舊鍵名，避免看似設定了但實際無效。
+
+#### 3. `pnpm-workspace.yaml` 重複鍵造成 YAML 解析失敗
+
+**症狀**
+- 安裝錯誤後，下一次直接因 YAML 重複鍵失敗。
+
+**根因**
+- 某些失敗流程後，workspace 檔案可能殘留/插入 placeholder `allowBuilds:` 區塊。
+- 與手寫區塊並存後形成 duplicate key。
+
+**解法**
+- 合併為單一 `allowBuilds` 區塊。
+- 每次修改後先跑 YAML 檢查與 `pnpm install --frozen-lockfile` 預演。
+
+### 已驗證可行的部署前預演
+
+```bash
+rm -rf node_modules
+CI=1 corepack pnpm install --frozen-lockfile
+corepack pnpm build
+```
+
+以上在本專案可通過，且與 Vercel 流程一致度高。
+
+### 快速排查清單（建議固定流程）
+
+1. 先確認 `packageManager` 鎖定 pnpm 版本（例如 `pnpm@11.8.0`）。
+2. 檢查 `pnpm-workspace.yaml`：只保留一個 `allowBuilds`。
+3. 不使用 pnpm v11 已淘汰鍵名（避免假設定）。
+4. 以 `CI=1 ... --frozen-lockfile` 在本機預演安裝。
+5. `corepack pnpm build` 通過後再 push。
+
+### 補充：與本地沙盒權限錯誤的區別
+
+- 本地開發工具曾出現 `EPERM ... ~/.cache/node/corepack`，這是「執行沙盒權限」問題，
+  不是 CI/CD 管線配置錯誤。
+- CI/CD 章節聚焦於 Vercel 建置失敗（lockfile / pnpm 設定 / YAML 配置）三類根因。
+
+---
+
 ## 2026-07-08 日照模型閃爍除錯
 
 ### 問題現象
