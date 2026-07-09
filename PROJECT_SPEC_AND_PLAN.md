@@ -313,7 +313,7 @@ export type AuroraConditions = {
 - 交付物：高密度資料渲染穩定
 
 ### 計畫項目 2-3：2D/3D 聯動時間軸
-- 狀態：主線必做（目前進行中）
+- 狀態：主線必做（已完成，2026-07-09 驗收通過）
 - 目標：一天（24 小時）時間軸可自動播放，且 2D/3D 顯示與 API 資料在同一時間語意下同步更新
 - 解決方案：
   1. Zustand 單一狀態源 `selectedTime` + `playbackState`（playing/paused/speed）
@@ -453,9 +453,9 @@ export type AuroraConditions = {
 
 ## 6. 立即執行清單（Next 5 Actions）
 
-1. 完成 2-3 主線播放器：24 小時時間軸自動播放（play/pause/speed/scrub）
-2. 建立時間槽 API 同步策略：`selectedTime` 與 BFF 請求同語意（切槽才請求）
-3. 串接 2D/3D 聯動：面板摘要、測站點位、相機行為都由同一時間源更新
+1. （已完成）2-3 主線播放器：24 小時時間軸自動播放（play/pause/speed/scrub）
+2. （已完成）時間槽 API 同步策略：`selectedTime` 與 BFF 請求同語意（切槽才請求）
+3. （已完成）2D/3D 聯動：面板摘要、測站點位、相機行為都由同一時間源更新
 4. 完成 2-4 行動端手勢隔離：面板與地圖事件邊界、iOS Safari 實機驗證
 5. 選配評估決策：雲層（1.5~3 天）/ LOD MVP（2.5~3 天）/ 光影增強（1.5~4 天）擇一優先
 
