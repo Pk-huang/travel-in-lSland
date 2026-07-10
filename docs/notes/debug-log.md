@@ -4,6 +4,39 @@
 
 ---
 
+## 2026-07-10 光影 preset URL 同步迴圈
+
+### 問題現象
+
+- 切換光影 preset（例如 realistic -> cinematic）時，畫面來回切換，瀏覽器出現持續重複更新。
+- URL query `preset` 與 UI 下拉值互相覆寫，導致看似無限迴圈。
+
+### 根因
+
+- `ControlPanel` 同時存在兩個 effect：
+  - URL -> store：看到不一致就 `setLightingPresetId`
+  - store -> URL：看到不一致就 `router.replace`
+- 一次 UI 切換會先改 store，再改 URL；URL 尚未更新完成前，URL -> store effect 可能讀到舊值並把 store 拉回。
+- 兩邊都主動修正對方，形成互相搶寫。
+
+### 修正策略
+
+- 採單主控：store 是唯一真相源，URL 只做鏡像。
+- URL -> store 僅處理外部導覽（貼連結 / 手改 query / 上下頁）時的同步。
+- store -> URL 改為 `window.history.replaceState`，避免 `router.replace` 導覽流程額外觸發同步鏈。
+
+### 實作位置
+
+- [src/components/panel/ControlPanel.tsx](src/components/panel/ControlPanel.tsx)
+
+### 驗證重點
+
+1. UI 切換 preset 時，畫面應只發生一次主切換，不再來回抖動。
+2. URL `preset` 會同步成相同值，且可重整保留。
+3. 手動貼 `?preset=cinematic` 進站時，UI 與 store 能正確對齊。
+
+---
+
 ## 2026-06-25 CI/CD（Vercel）部署除錯彙整
 
 ### 問題範圍

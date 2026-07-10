@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 
 import { RegionSelector } from "@/src/components/panel/RegionSelector";
 import { StatusPanel } from "@/src/components/panel/StatusPanel";
@@ -29,7 +29,6 @@ function isLightingPresetId(value: string | null): value is LightingPresetId {
  * 與 MapCanvas 為對等兄弟，兩者透過 store / context 連動，而非父子關係。
  */
 export function ControlPanel() {
-  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const region = useWorkspaceStore((s) => s.region);
@@ -38,6 +37,7 @@ export function ControlPanel() {
   const setLightingPresetId = useWorkspaceStore((s) => s.setLightingPresetId);
   const { data, loading, error, refetch } = useWorkspaceData();
   const isLightingPresetLocked = INTERNAL_LIGHTING_PRESET_OVERRIDE != null;
+  const isAlreadyDefaultPreset = lightingPresetId === DEFAULT_LIGHTING_PRESET_ID;
 
   useEffect(() => {
     if (isLightingPresetLocked) {
@@ -49,25 +49,30 @@ export function ControlPanel() {
       ? presetFromUrl
       : DEFAULT_LIGHTING_PRESET_ID;
 
-    if (resolvedPreset !== lightingPresetId) {
+    // URL 僅在外部導覽（貼連結 / 手改 query / 上下頁）時回寫 store。
+    const currentPreset = useWorkspaceStore.getState().lightingPresetId;
+    if (resolvedPreset !== currentPreset) {
       setLightingPresetId(resolvedPreset);
     }
-  }, [isLightingPresetLocked, searchParams, lightingPresetId, setLightingPresetId]);
+  }, [isLightingPresetLocked, searchParams, setLightingPresetId]);
 
   useEffect(() => {
     if (isLightingPresetLocked) {
       return;
     }
 
-    const currentPresetInUrl = searchParams.get("preset");
-    if (currentPresetInUrl === lightingPresetId) {
+    const currentUrl = new URL(window.location.href);
+    const currentPresetInUrl = currentUrl.searchParams.get("preset");
+    if (currentPresetInUrl === lightingPresetId && currentUrl.pathname === pathname) {
       return;
     }
 
-    const nextParams = new URLSearchParams(searchParams.toString());
-    nextParams.set("preset", lightingPresetId);
-    router.replace(`${pathname}?${nextParams.toString()}`, { scroll: false });
-  }, [isLightingPresetLocked, searchParams, lightingPresetId, router, pathname]);
+    currentUrl.pathname = pathname;
+    currentUrl.searchParams.set("preset", lightingPresetId);
+
+    // 用 replaceState 鏡像 URL，避免 router navigation 造成額外同步迴圈。
+    window.history.replaceState(window.history.state, "", currentUrl.toString());
+  }, [isLightingPresetLocked, lightingPresetId, pathname]);
  
   return (
     <div className="space-y-4">
@@ -89,6 +94,14 @@ export function ControlPanel() {
             </option>
           ))}
         </select>
+        <button
+          type="button"
+          onClick={() => setLightingPresetId(DEFAULT_LIGHTING_PRESET_ID)}
+          disabled={isLightingPresetLocked || isAlreadyDefaultPreset}
+          className="w-full rounded-md border border-white/20 bg-black/20 px-3 py-2 text-xs font-medium tracking-wide text-white/85 transition hover:bg-black/30 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Reset to realistic
+        </button>
         {isLightingPresetLocked ? (
           <p className="text-[11px] text-amber-200/80">
             目前使用內部 override，若要啟用下拉切換，請先把 INTERNAL_LIGHTING_PRESET_OVERRIDE 設為 null。
