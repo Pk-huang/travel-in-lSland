@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
+import { Color, type DirectionalLight, type HemisphereLight } from "three";
 
 import {
   DEFAULT_LIGHTING_PRESET_ID,
@@ -9,7 +11,7 @@ import {
 } from "@/src/lib/config/app";
 import { useWorkspaceData } from "@/src/components/providers/WorkspaceProvider";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
-import type { LightingPreset, SunLightingModel } from "@/src/types";
+import type { LightingPreset, LightingPresetId, SunLightingModel } from "@/src/types";
 
 /**
  * Lighting：3D 場景光照層。
@@ -87,6 +89,66 @@ type LightingComputed = {
     usedSunPath: boolean;
   };
 };
+
+type RuntimeLighting = {
+  skyColor: Color;
+  groundColor: Color;
+  ambientIntensity: number;
+  sunIntensity: number;
+  sunColor: Color;
+  sunPosition: [number, number, number];
+};
+
+function toRuntimeLighting(lighting: LightingComputed): RuntimeLighting {
+  return {
+    skyColor: new Color(lighting.skyColor),
+    groundColor: new Color(lighting.groundColor),
+    ambientIntensity: lighting.ambientIntensity,
+    sunIntensity: lighting.sunIntensity,
+    sunColor: new Color(lighting.sunColor),
+    sunPosition: [...lighting.sunPosition],
+  };
+}
+
+function applyLightingToRefs(
+  runtime: RuntimeLighting,
+  hemisphereLight: HemisphereLight | null,
+  directionalLight: DirectionalLight | null,
+) {
+  if (hemisphereLight) {
+    hemisphereLight.color.copy(runtime.skyColor);
+    hemisphereLight.groundColor.copy(runtime.groundColor);
+    hemisphereLight.intensity = runtime.ambientIntensity;
+  }
+
+  if (directionalLight) {
+    directionalLight.color.copy(runtime.sunColor);
+    directionalLight.intensity = runtime.sunIntensity;
+    directionalLight.position.set(...runtime.sunPosition);
+  }
+}
+
+function isRuntimeLightingClose(current: RuntimeLighting, target: RuntimeLighting): boolean {
+  const intensityClose =
+    Math.abs(current.ambientIntensity - target.ambientIntensity) < 0.002 &&
+    Math.abs(current.sunIntensity - target.sunIntensity) < 0.002;
+  const positionClose =
+    Math.abs(current.sunPosition[0] - target.sunPosition[0]) < 0.01 &&
+    Math.abs(current.sunPosition[1] - target.sunPosition[1]) < 0.01 &&
+    Math.abs(current.sunPosition[2] - target.sunPosition[2]) < 0.01;
+  const colorClose =
+    Math.abs(current.skyColor.r - target.skyColor.r) < 0.004 &&
+    Math.abs(current.skyColor.g - target.skyColor.g) < 0.004 &&
+    Math.abs(current.skyColor.b - target.skyColor.b) < 0.004 &&
+    Math.abs(current.groundColor.r - target.groundColor.r) < 0.004 &&
+    Math.abs(current.groundColor.g - target.groundColor.g) < 0.004 &&
+    Math.abs(current.groundColor.b - target.groundColor.b) < 0.004 &&
+    Math.abs(current.sunColor.r - target.sunColor.r) < 0.004 &&
+    Math.abs(current.sunColor.g - target.sunColor.g) < 0.004 &&
+    Math.abs(current.sunColor.b - target.sunColor.b) < 0.004;
+
+  return intensityClose && positionClose && colorClose;
+}
 
 function composeLighting(
   date: Date,
@@ -261,6 +323,72 @@ export function Lighting() {
     );
   }, [selectedTime, preset, data?.sunModel]);
 
+  const hemisphereLightRef = useRef<HemisphereLight | null>(null);
+  const directionalLightRef = useRef<DirectionalLight | null>(null);
+  const runtimeCurrentRef = useRef<RuntimeLighting>(toRuntimeLighting(lighting));
+  const runtimeTargetRef = useRef<RuntimeLighting>(toRuntimeLighting(lighting));
+  const isPresetTransitioningRef = useRef(false);
+  const previousPresetIdRef = useRef<LightingPresetId>(activePresetId);
+
+  useEffect(() => {
+    const target = toRuntimeLighting(lighting);
+    const presetChanged = previousPresetIdRef.current !== activePresetId;
+    previousPresetIdRef.current = activePresetId;
+
+    runtimeTargetRef.current = target;
+    if (presetChanged) {
+      isPresetTransitioningRef.current = true;
+      return;
+    }
+
+    // 時間軸推進維持即時更新，避免白天/夜晚卡在中間值。
+    runtimeCurrentRef.current = toRuntimeLighting(lighting);
+    applyLightingToRefs(
+      runtimeCurrentRef.current,
+      hemisphereLightRef.current,
+      directionalLightRef.current,
+    );
+  }, [lighting, activePresetId]);
+
+  useFrame((_, delta) => {
+    if (!isPresetTransitioningRef.current) {
+      return;
+    }
+
+    const current = runtimeCurrentRef.current;
+    const target = runtimeTargetRef.current;
+    const factor = 1 - Math.pow(0.05, delta);
+
+    current.ambientIntensity +=
+      (target.ambientIntensity - current.ambientIntensity) * factor;
+    current.sunIntensity += (target.sunIntensity - current.sunIntensity) * factor;
+    current.sunPosition[0] += (target.sunPosition[0] - current.sunPosition[0]) * factor;
+    current.sunPosition[1] += (target.sunPosition[1] - current.sunPosition[1]) * factor;
+    current.sunPosition[2] += (target.sunPosition[2] - current.sunPosition[2]) * factor;
+    current.skyColor.lerp(target.skyColor, factor);
+    current.groundColor.lerp(target.groundColor, factor);
+    current.sunColor.lerp(target.sunColor, factor);
+
+    applyLightingToRefs(current, hemisphereLightRef.current, directionalLightRef.current);
+
+    if (isRuntimeLightingClose(current, target)) {
+      runtimeCurrentRef.current = {
+        skyColor: target.skyColor.clone(),
+        groundColor: target.groundColor.clone(),
+        ambientIntensity: target.ambientIntensity,
+        sunIntensity: target.sunIntensity,
+        sunColor: target.sunColor.clone(),
+        sunPosition: [...target.sunPosition],
+      };
+      applyLightingToRefs(
+        runtimeCurrentRef.current,
+        hemisphereLightRef.current,
+        directionalLightRef.current,
+      );
+      isPresetTransitioningRef.current = false;
+    }
+  });
+
   const lastLightingRef = useRef<LightingComputed | null>(null);
   useEffect(() => {
     const previous = lastLightingRef.current;
@@ -301,11 +429,13 @@ export function Lighting() {
   return (
     <>
       <hemisphereLight
+        ref={hemisphereLightRef}
         color={lighting.skyColor}
         groundColor={lighting.groundColor}
         intensity={lighting.ambientIntensity}
       />
       <directionalLight
+        ref={directionalLightRef}
         position={lighting.sunPosition}
         intensity={lighting.sunIntensity}
         color={lighting.sunColor}
