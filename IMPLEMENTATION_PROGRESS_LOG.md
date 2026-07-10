@@ -327,10 +327,16 @@
 		- UI 切換：ControlPanel 新增下拉選單，接 `workspace` store 的 `lightingPresetId`（[src/components/panel/ControlPanel.tsx](src/components/panel/ControlPanel.tsx)、[src/lib/store/workspace.ts](src/lib/store/workspace.ts)）。
 		- 一致性：`MapCanvas` debug 顯示改為與實際 active preset 同步（[src/components/map/MapCanvas.tsx](src/components/map/MapCanvas.tsx)）。
 		- override 優先序：`INTERNAL_LIGHTING_PRESET_OVERRIDE` > UI 選擇 > 預設值。
+	- **2-C1 光影體感 + 可分享連結（2026-07-10）**：
+		- C1-1 平滑過渡：`Lighting` 新增 `useFrame + ref` 插值路徑，僅在 preset 切換時平滑過渡；時間軸驅動的光照更新維持即時（[src/components/map/Lighting.tsx](src/components/map/Lighting.tsx)）。
+		- C1-2 preset URL 同步：`ControlPanel` 新增 query `preset` 與 store 雙向同步，支援分享連結與重整保留；無效值回退 `realistic`（[src/components/panel/ControlPanel.tsx](src/components/panel/ControlPanel.tsx)）。
 - 驗收結果：
 	- `get_errors` 無誤、`corepack pnpm lint` 通過、home 200。
 	- 因本步涉及 config/type/store，`corepack pnpm build` 通過。
 	- commit：`e2dd104`（`feat(lighting): add preset selector wiring (phase 2-3)`）。
+	- C1-1 驗證：`get_errors` / `corepack pnpm lint` 通過；當下 dev server 未啟動，home `000`（功能驗證已人工確認後再續做 C1-2）。
+	- C1-1 commit：`36eb0d0`（`feat(map): smooth lighting preset transition (phase 2-c1-1)`）。
+	- C1-2 驗證：`get_errors` / `corepack pnpm lint` / home 200 全數通過。
 
 ### 2-4 行動端手勢隔離
 - 狀態：暫緩（主線先以桌機互動為主）

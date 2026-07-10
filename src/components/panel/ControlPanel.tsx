@@ -1,10 +1,25 @@
 "use client";
 
+import { useEffect } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
 import { RegionSelector } from "@/src/components/panel/RegionSelector";
 import { StatusPanel } from "@/src/components/panel/StatusPanel";
 import { useWorkspaceData } from "@/src/components/providers/WorkspaceProvider";
-import { INTERNAL_LIGHTING_PRESET_OVERRIDE, LIGHTING_PRESETS } from "@/src/lib/config/app";
+import {
+  DEFAULT_LIGHTING_PRESET_ID,
+  INTERNAL_LIGHTING_PRESET_OVERRIDE,
+  LIGHTING_PRESETS,
+} from "@/src/lib/config/app";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
+import type { LightingPresetId } from "@/src/types";
+
+function isLightingPresetId(value: string | null): value is LightingPresetId {
+  if (value === null) {
+    return false;
+  }
+  return value in LIGHTING_PRESETS;
+}
 
 /**
  * ControlPanel：操作面板島（client island）。
@@ -14,12 +29,45 @@ import { useWorkspaceStore } from "@/src/lib/store/workspace";
  * 與 MapCanvas 為對等兄弟，兩者透過 store / context 連動，而非父子關係。
  */
 export function ControlPanel() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const region = useWorkspaceStore((s) => s.region);
   const setRegion = useWorkspaceStore((s) => s.setRegion);
   const lightingPresetId = useWorkspaceStore((s) => s.lightingPresetId);
   const setLightingPresetId = useWorkspaceStore((s) => s.setLightingPresetId);
   const { data, loading, error, refetch } = useWorkspaceData();
   const isLightingPresetLocked = INTERNAL_LIGHTING_PRESET_OVERRIDE != null;
+
+  useEffect(() => {
+    if (isLightingPresetLocked) {
+      return;
+    }
+
+    const presetFromUrl = searchParams.get("preset");
+    const resolvedPreset = isLightingPresetId(presetFromUrl)
+      ? presetFromUrl
+      : DEFAULT_LIGHTING_PRESET_ID;
+
+    if (resolvedPreset !== lightingPresetId) {
+      setLightingPresetId(resolvedPreset);
+    }
+  }, [isLightingPresetLocked, searchParams, lightingPresetId, setLightingPresetId]);
+
+  useEffect(() => {
+    if (isLightingPresetLocked) {
+      return;
+    }
+
+    const currentPresetInUrl = searchParams.get("preset");
+    if (currentPresetInUrl === lightingPresetId) {
+      return;
+    }
+
+    const nextParams = new URLSearchParams(searchParams.toString());
+    nextParams.set("preset", lightingPresetId);
+    router.replace(`${pathname}?${nextParams.toString()}`, { scroll: false });
+  }, [isLightingPresetLocked, searchParams, lightingPresetId, router, pathname]);
  
   return (
     <div className="space-y-4">
@@ -30,7 +78,7 @@ export function ControlPanel() {
           id="lighting-preset"
           name="lighting-preset"
           value={lightingPresetId}
-          onChange={(event) => setLightingPresetId(event.target.value as keyof typeof LIGHTING_PRESETS)}
+          onChange={(event) => setLightingPresetId(event.target.value as LightingPresetId)}
           disabled={isLightingPresetLocked}
           className="w-full rounded-md border border-white/20 bg-black/30 px-3 py-2 text-sm text-white outline-none transition focus:border-white/40 disabled:cursor-not-allowed disabled:opacity-60"
           aria-label="光影風格"
