@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import { MapCanvasLoader } from "@/src/components/map/MapCanvasLoader";
 import { FloatingPanel } from "@/src/components/panel/FloatingPanel";
 import { WorkspaceProvider } from "@/src/components/providers/WorkspaceProvider";
@@ -22,7 +24,9 @@ export default function HomePage() {
         <MapCanvasLoader />
         {/* 上層：浮動操作面板（pointer-events 由子層各自開啟） */}
         <div className="pointer-events-none absolute inset-0">
-          <FloatingPanel />
+          <Suspense fallback={null}>
+            <FloatingPanel />
+          </Suspense>
           <TimelineControl />
         </div>
       </WorkspaceProvider>
