@@ -1,7 +1,11 @@
 import { create } from "zustand";
 
-import { DEFAULT_LIGHTING_PRESET_ID, DEFAULT_REGION } from "@/src/lib/config/app";
-import type { LightingPresetId, Region } from "@/src/types";
+import {
+  DEFAULT_LIGHTING_PRESET_ID,
+  DEFAULT_REGION,
+  DEFAULT_TERRAIN_EXPERIMENT_MODE,
+} from "@/src/lib/config/app";
+import type { LightingPresetId, Region, TerrainExperimentMode } from "@/src/types";
 
 export type PlaybackState = "playing" | "paused";
 export type PlaybackSpeed = 0.5 | 1 | 2;
@@ -21,6 +25,8 @@ export type WorkspaceState = {
   region: Region;
   /** 目前選擇的光影樣式。 */
   lightingPresetId: LightingPresetId;
+  /** 地形渲染實驗模式（方案六開關）。 */
+  terrainExperimentMode: TerrainExperimentMode;
   /** 時間軸選擇的時刻（epoch ms；null 代表「現在」）。 */
   time: number | null;
   /** 時間軸播放狀態（Phase 2-3 播放器）。 */
@@ -32,6 +38,7 @@ export type WorkspaceState = {
 
   setRegion: (region: Region) => void;
   setLightingPresetId: (lightingPresetId: LightingPresetId) => void;
+  setTerrainExperimentMode: (terrainExperimentMode: TerrainExperimentMode) => void;
   setTime: (time: number | null) => void;
   play: () => void;
   pause: () => void;
@@ -42,6 +49,7 @@ export type WorkspaceState = {
 export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   region: DEFAULT_REGION,
   lightingPresetId: DEFAULT_LIGHTING_PRESET_ID,
+  terrainExperimentMode: DEFAULT_TERRAIN_EXPERIMENT_MODE,
   time: null,
   playbackState: "paused",
   playbackSpeed: 1,
@@ -49,6 +57,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
 
   setRegion: (region) => set({ region }),
   setLightingPresetId: (lightingPresetId) => set({ lightingPresetId }),
+  setTerrainExperimentMode: (terrainExperimentMode) => set({ terrainExperimentMode }),
   setTime: (time) => set({ time }),
   play: () => set({ playbackState: "playing" }),
   pause: () => set({ playbackState: "paused" }),

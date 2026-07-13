@@ -1,4 +1,9 @@
-import type { LightingPreset, LightingPresetId, Region } from "@/src/types";
+import type {
+  LightingPreset,
+  LightingPresetId,
+  Region,
+  TerrainExperimentMode,
+} from "@/src/types";
 
 /**
  * App 級別、跨來源共用的設定。
@@ -15,6 +20,7 @@ export const REGION_LABELS: Record<Region, string> = {
 };
 
 export const DEFAULT_LIGHTING_PRESET_ID: LightingPresetId = "realistic";
+export const DEFAULT_TERRAIN_EXPERIMENT_MODE: TerrainExperimentMode = "baseline";
 
 /**
  * 內部驗證用切換入口：
@@ -22,6 +28,7 @@ export const DEFAULT_LIGHTING_PRESET_ID: LightingPresetId = "realistic";
  * - 設為 "cinematic" / "seasonal"：可先驗證視覺，不需接 UI。
  */
 export const INTERNAL_LIGHTING_PRESET_OVERRIDE: LightingPresetId  | null = null;
+export const INTERNAL_TERRAIN_EXPERIMENT_MODE_OVERRIDE: TerrainExperimentMode | null = null;
 
 export const LIGHTING_PRESETS: Record<LightingPresetId, LightingPreset> = {
   realistic: {

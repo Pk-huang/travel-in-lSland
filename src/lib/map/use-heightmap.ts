@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import type { HeightmapGrid } from "@/src/lib/map/coords";
 
 /** 靜態 heightmap 路徑（由 scripts/fetch-dem.mjs 產生）。 */
-const HEIGHTMAP_URL = "/dem/iceland-mapzen-128.json";
+const HEIGHTMAP_URL = "/dem/iceland-mapzen-768.json";
 
 /**
  * useHeightmap：讀取靜態高程檔（一次），供地形與點位共用。

@@ -1,6 +1,7 @@
 export type Region = "south" | "west" | "north" | "east" | "all";
 
 export type LightingPresetId = "realistic" | "cinematic" | "seasonal";
+export type TerrainExperimentMode = "baseline" | "experimental-procedural";
 
 export type LightingPreset = {
   id: LightingPresetId;
