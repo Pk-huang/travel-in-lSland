@@ -290,3 +290,43 @@ type SunLightingModel = {
 ### 一句結論
 
 這次日照閃爍的根因不是函數曲線，而是「同一個時間被兩套模型同時計算並混合」。最終解法是把來源決策移回後端，前端只走單一路徑 `sunModel`。
+
+---
+
+## 2026-07-13 首頁 prerender 失敗修復
+
+### 問題現象
+
+- `pnpm build` 失敗，錯誤為：`Error occurred prerendering page "/"`。
+- Next.js build worker 以 code 1 結束，導致部署中斷。
+
+### 根因
+
+- 首頁 [src/app/page.tsx](src/app/page.tsx) 為 Server Component。
+- 首頁掛載的面板鏈路中， [src/components/panel/ControlPanel.tsx](src/components/panel/ControlPanel.tsx) 使用 `useSearchParams`。
+- 這條 client 鏈路在首頁沒有 Suspense 邊界，導致 App Router 在 prerender `/` 時失敗。
+
+### 修正策略
+
+- 在 [src/app/page.tsx](src/app/page.tsx) 針對 [src/components/panel/FloatingPanel.tsx](src/components/panel/FloatingPanel.tsx) 加上 `Suspense` 邊界（`fallback={null}`）。
+- 保持最小變更，不調整既有業務邏輯與 store 同步流程。
+
+### 實作位置
+
+- [src/app/page.tsx](src/app/page.tsx)
+
+### 驗證結果
+
+- `get_errors`（page 檔案）：通過
+- `corepack pnpm lint`：通過
+- `curl -s -o /dev/null -w "home:%{http_code}\\n" http://localhost:3000/`：`home:200`
+- `corepack pnpm build`：通過，`/` 成功 prerender
+
+### 版本資訊
+
+- Commit: `6f9674b`
+- Message: `fix(app): add suspense boundary for homepage prerender`
+
+### 一句結論
+
+這次 build 失敗是首頁缺少 Suspense 邊界，不是資料或型別問題；補上邊界後，lint 與 build 全部恢復綠燈。
