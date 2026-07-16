@@ -1,10 +1,21 @@
 "use client";
 
-import { useRef, type ElementRef } from "react";
+import { useEffect, useRef, type ElementRef } from "react";
 import { OrbitControls } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 
-import { useWorkspaceStore } from "@/src/lib/store/workspace";
+import {
+  useWorkspaceStore,
+  type TerrainDetailLevel,
+} from "@/src/lib/store/workspace";
+import {
+  isHeightmapReadyForDetailLevel,
+  preloadHeightmapForDetailLevel,
+} from "@/src/lib/map/use-heightmap";
+import {
+  isLandcoverReadyForDetailLevel,
+  preloadLandcoverForDetailLevel,
+} from "@/src/lib/map/use-landcover";
 
 const DEM_NEAR_ENTER_DISTANCE = 10;
 const DEM_FAR_ENTER_DISTANCE = 11;
@@ -23,49 +34,99 @@ const DEM_SWITCH_COOLDOWN_MS = 300;
  */
 export function CameraRig() {
   const controlsRef = useRef<ElementRef<typeof OrbitControls> | null>(null);
+  const terrainDetailLevel = useWorkspaceStore((s) => s.terrainDetailLevel);
   const setCameraDistance = useWorkspaceStore((s) => s.setCameraDistance);
   const setTerrainDetailLevel = useWorkspaceStore((s) => s.setTerrainDetailLevel);
   const lastDistanceRef = useRef<number | null>(null);
   const detailLevelRef = useRef(useWorkspaceStore.getState().terrainDetailLevel);
   const lastSwitchAtRef = useRef(0);
+  const pendingTargetLevelRef = useRef<TerrainDetailLevel | null>(null);
+  const pendingRequestIdRef = useRef(0);
+
+  useEffect(() => {
+    detailLevelRef.current = terrainDetailLevel;
+  }, [terrainDetailLevel]);
+
+  const switchDetailLevel = (target: TerrainDetailLevel, distance: number) => {
+    detailLevelRef.current = target;
+    lastSwitchAtRef.current = performance.now();
+    setTerrainDetailLevel(target);
+    if (process.env.NODE_ENV !== "production") {
+      console.info(
+        `[CameraRig] terrainDetailLevel -> ${target} | distance=${distance.toFixed(2)} | cooldown=${DEM_SWITCH_COOLDOWN_MS}ms`,
+      );
+    }
+  };
+
+  const requestSwitchWhenReady = (target: TerrainDetailLevel, distance: number) => {
+    const currentDetailLevel = detailLevelRef.current;
+    if (target === currentDetailLevel) return;
+
+    const heightmapReady = isHeightmapReadyForDetailLevel(target);
+    const landcoverReady = isLandcoverReadyForDetailLevel(target);
+    if (heightmapReady && landcoverReady) {
+      switchDetailLevel(target, distance);
+      return;
+    }
+
+    if (pendingTargetLevelRef.current === target) {
+      return;
+    }
+
+    pendingTargetLevelRef.current = target;
+    const requestId = ++pendingRequestIdRef.current;
+
+    if (process.env.NODE_ENV !== "production") {
+      console.info(
+        `[CameraRig] wait data ready | target=${target} | demReady=${heightmapReady} | landcoverReady=${landcoverReady}`,
+      );
+    }
+
+    void Promise.all([
+      preloadHeightmapForDetailLevel(target),
+      preloadLandcoverForDetailLevel(target),
+    ]).then(() => {
+      if (pendingRequestIdRef.current !== requestId) return;
+      pendingTargetLevelRef.current = null;
+
+      const latestDistance = lastDistanceRef.current ?? distance;
+      const cooldownReady =
+        performance.now() - lastSwitchAtRef.current >= DEM_SWITCH_COOLDOWN_MS;
+      const stillEligible =
+        target === "near"
+          ? latestDistance <= DEM_NEAR_ENTER_DISTANCE
+          : latestDistance >= DEM_FAR_ENTER_DISTANCE;
+      if (!cooldownReady || !stillEligible) return;
+
+      if (detailLevelRef.current !== target) {
+        switchDetailLevel(target, latestDistance);
+      }
+    });
+  };
 
   useFrame(() => {
     const controls = controlsRef.current;
     if (!controls) return;
     const now = performance.now();
     const distance = controls.object.position.distanceTo(controls.target);
+    const previousDistance = lastDistanceRef.current;
+    lastDistanceRef.current = distance;
     const currentDetailLevel = detailLevelRef.current;
     if (
       currentDetailLevel === "far" &&
       distance <= DEM_NEAR_ENTER_DISTANCE &&
       now - lastSwitchAtRef.current >= DEM_SWITCH_COOLDOWN_MS
     ) {
-      detailLevelRef.current = "near";
-      lastSwitchAtRef.current = now;
-      setTerrainDetailLevel("near");
-      if (process.env.NODE_ENV !== "production") {
-        console.info(
-          `[CameraRig] terrainDetailLevel -> near | distance=${distance.toFixed(2)} (<= ${DEM_NEAR_ENTER_DISTANCE}) | cooldown=${DEM_SWITCH_COOLDOWN_MS}ms`,
-        );
-      }
+      requestSwitchWhenReady("near", distance);
     } else if (
       currentDetailLevel === "near" &&
       distance >= DEM_FAR_ENTER_DISTANCE &&
       now - lastSwitchAtRef.current >= DEM_SWITCH_COOLDOWN_MS
     ) {
-      detailLevelRef.current = "far";
-      lastSwitchAtRef.current = now;
-      setTerrainDetailLevel("far");
-      if (process.env.NODE_ENV !== "production") {
-        console.info(
-          `[CameraRig] terrainDetailLevel -> far  | distance=${distance.toFixed(2)} (>= ${DEM_FAR_ENTER_DISTANCE}) | cooldown=${DEM_SWITCH_COOLDOWN_MS}ms`,
-        );
-      }
+      requestSwitchWhenReady("far", distance);
     }
 
-    const lastDistance = lastDistanceRef.current;
-    if (lastDistance !== null && Math.abs(lastDistance - distance) < 0.02) return;
-    lastDistanceRef.current = distance;
+    if (previousDistance !== null && Math.abs(previousDistance - distance) < 0.02) return;
     setCameraDistance(distance);
   });
 

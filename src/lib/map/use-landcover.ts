@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useWorkspaceStore } from "@/src/lib/store/workspace";
+import {
+  useWorkspaceStore,
+  type TerrainDetailLevel,
+} from "@/src/lib/store/workspace";
 
 export type LandcoverGrid = {
   source: string;
@@ -21,6 +24,20 @@ const LANDCOVER_URL_BY_DETAIL_LEVEL = {
   far: "/landcover/iceland-worldcover-2021-768.json",
   near: "/landcover/iceland-worldcover-2021-2560.json",
 } as const;
+
+export function getLandcoverUrlByDetailLevel(level: TerrainDetailLevel): string {
+  return LANDCOVER_URL_BY_DETAIL_LEVEL[level];
+}
+
+export function isLandcoverReadyForDetailLevel(level: TerrainDetailLevel): boolean {
+  return landcoverCache.has(getLandcoverUrlByDetailLevel(level));
+}
+
+export function preloadLandcoverForDetailLevel(
+  level: TerrainDetailLevel,
+): Promise<LandcoverGrid | null> {
+  return loadLandcover(getLandcoverUrlByDetailLevel(level));
+}
 
 const landcoverCache = new Map<string, LandcoverGrid | null>();
 const landcoverRequestCache = new Map<string, Promise<LandcoverGrid | null>>();
@@ -66,7 +83,7 @@ function loadLandcover(url: string): Promise<LandcoverGrid | null> {
  */
 export function useLandcover(grid: number | null): LandcoverGrid | null {
   const terrainDetailLevel = useWorkspaceStore((s) => s.terrainDetailLevel);
-  const nearLandcoverUrl = LANDCOVER_URL_BY_DETAIL_LEVEL.near;
+  const nearLandcoverUrl = getLandcoverUrlByDetailLevel("near");
   const initialUrl = grid ? `/landcover/iceland-worldcover-2021-${grid}.json` : null;
   const [landcover, setLandcover] = useState<LandcoverGrid | null>(() => {
     if (!initialUrl) return null;
