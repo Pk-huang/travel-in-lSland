@@ -3,29 +3,12 @@
 import { useEffect, useState } from "react";
 
 import type { HeightmapGrid } from "@/src/lib/map/coords";
-import {
-  useWorkspaceStore,
-  type TerrainDetailLevel,
-} from "@/src/lib/store/workspace";
+import { useWorkspaceStore } from "@/src/lib/store/workspace";
 
 const HEIGHTMAP_URL_BY_DETAIL_LEVEL = {
   far: "/dem/iceland-mapzen-768.json",
   near: "/dem/iceland-mapzen-2560.json",
 } as const;
-
-export function getHeightmapUrlByDetailLevel(level: TerrainDetailLevel): string {
-  return HEIGHTMAP_URL_BY_DETAIL_LEVEL[level];
-}
-
-export function isHeightmapReadyForDetailLevel(level: TerrainDetailLevel): boolean {
-  return heightmapCache.has(getHeightmapUrlByDetailLevel(level));
-}
-
-export function preloadHeightmapForDetailLevel(
-  level: TerrainDetailLevel,
-): Promise<HeightmapGrid> {
-  return loadHeightmap(getHeightmapUrlByDetailLevel(level));
-}
 
 const heightmapCache = new Map<string, HeightmapGrid>();
 const heightmapRequestCache = new Map<string, Promise<HeightmapGrid>>();
@@ -66,8 +49,8 @@ function loadHeightmap(url: string): Promise<HeightmapGrid> {
  */
 export function useHeightmap(): HeightmapGrid | null {
   const terrainDetailLevel = useWorkspaceStore((s) => s.terrainDetailLevel);
-  const heightmapUrl = getHeightmapUrlByDetailLevel(terrainDetailLevel);
-  const nearHeightmapUrl = getHeightmapUrlByDetailLevel("near");
+  const heightmapUrl = HEIGHTMAP_URL_BY_DETAIL_LEVEL[terrainDetailLevel];
+  const nearHeightmapUrl = HEIGHTMAP_URL_BY_DETAIL_LEVEL.near;
   const [heightmap, setHeightmap] = useState<HeightmapGrid | null>(
     () => heightmapCache.get(heightmapUrl) ?? null,
   );
