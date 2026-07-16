@@ -2,20 +2,17 @@
 
 import { useEffect, useState } from "react";
 
-import type { ZoomLevel } from "@/src/lib/config/app";
 import type { HeightmapGrid } from "@/src/lib/map/coords";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
 
-/** 兩層 DEM 映射：遠景 z0 用 768，近景 z1/z2/z3 共用 2560。 */
-const HEIGHTMAP_URL_BY_ZOOM_LEVEL: Record<ZoomLevel, string> = {
-  z0: "/dem/iceland-mapzen-768.json",
-  z1: "/dem/iceland-mapzen-2560.json",
-  z2: "/dem/iceland-mapzen-2560.json",
-  z3: "/dem/iceland-mapzen-2560.json",
-};
+const HEIGHTMAP_URL_BY_DETAIL_LEVEL = {
+  far: "/dem/iceland-mapzen-768.json",
+  near: "/dem/iceland-mapzen-2560.json",
+} as const;
 
 const heightmapCache = new Map<string, HeightmapGrid>();
 const heightmapRequestCache = new Map<string, Promise<HeightmapGrid>>();
+let heightmapLoadSequence = 0;
 
 function loadHeightmap(url: string): Promise<HeightmapGrid> {
   const cachedHeightmap = heightmapCache.get(url);
@@ -51,30 +48,58 @@ function loadHeightmap(url: string): Promise<HeightmapGrid> {
  * 瀏覽器會快取同一靜態檔，多處使用不會重打網路。
  */
 export function useHeightmap(): HeightmapGrid | null {
-  const zoomLevel = useWorkspaceStore((state) => state.zoomLevel);
-  const setAppliedHeightmapGrid = useWorkspaceStore(
-    (state) => state.setAppliedHeightmapGrid,
-  );
-  const heightmapUrl = HEIGHTMAP_URL_BY_ZOOM_LEVEL[zoomLevel];
+  const terrainDetailLevel = useWorkspaceStore((s) => s.terrainDetailLevel);
+  const heightmapUrl = HEIGHTMAP_URL_BY_DETAIL_LEVEL[terrainDetailLevel];
+  const nearHeightmapUrl = HEIGHTMAP_URL_BY_DETAIL_LEVEL.near;
   const [heightmap, setHeightmap] = useState<HeightmapGrid | null>(
     () => heightmapCache.get(heightmapUrl) ?? null,
   );
 
   useEffect(() => {
     let alive = true;
+    const loadId = ++heightmapLoadSequence;
+
+    if (process.env.NODE_ENV !== "production") {
+      const isCached = heightmapCache.has(heightmapUrl);
+      console.info(
+        `[useHeightmap] load#${loadId} start | level=${terrainDetailLevel} | url=${heightmapUrl} | cached=${isCached}`,
+      );
+    }
 
     loadHeightmap(heightmapUrl)
       .then((data: HeightmapGrid) => {
         if (!alive) return;
         setHeightmap(data);
-        setAppliedHeightmapGrid(data.grid);
+        if (process.env.NODE_ENV !== "production") {
+          console.info(
+            `[useHeightmap] load#${loadId} done  | level=${terrainDetailLevel} | grid=${data.grid}`,
+          );
+        }
       })
       .catch((err) => console.error("[useHeightmap] 載入失敗：", err));
 
     return () => {
       alive = false;
     };
-  }, [heightmapUrl, setAppliedHeightmapGrid]);
+  }, [heightmapUrl, terrainDetailLevel]);
+
+  useEffect(() => {
+    if (terrainDetailLevel === "near") return;
+    if (heightmapCache.has(nearHeightmapUrl)) return;
+    if (heightmapRequestCache.has(nearHeightmapUrl)) return;
+
+    if (process.env.NODE_ENV !== "production") {
+      console.info(`[useHeightmap] preload start | level=near | url=${nearHeightmapUrl}`);
+    }
+
+    loadHeightmap(nearHeightmapUrl)
+      .then((data) => {
+        if (process.env.NODE_ENV !== "production") {
+          console.info(`[useHeightmap] preload done  | level=near | grid=${data.grid}`);
+        }
+      })
+      .catch((err) => console.error("[useHeightmap] 預熱載入失敗：", err));
+  }, [nearHeightmapUrl, terrainDetailLevel]);
 
   return heightmap;
 }
