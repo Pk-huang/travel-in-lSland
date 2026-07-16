@@ -45,6 +45,7 @@ function formatOffsetLabel(offset: number): string {
 export function TimelineControl() {
   const selectedTime = useWorkspaceStore((s) => s.time);
   const cameraDistance = useWorkspaceStore((s) => s.cameraDistance);
+  const terrainDetailLevel = useWorkspaceStore((s) => s.terrainDetailLevel);
   const playbackState = useWorkspaceStore((s) => s.playbackState);
   const playbackSpeed = useWorkspaceStore((s) => s.playbackSpeed);
   const setTime = useWorkspaceStore((s) => s.setTime);
@@ -73,6 +74,7 @@ export function TimelineControl() {
   );
 
   const selectedMinuteOffset = Math.round((effectiveTimeMs - windowStartMs) / MINUTE_MS);
+  const demGrid = terrainDetailLevel === "near" ? 2560 : 768;
 
   useEffect(() => {
     if (playbackState !== "playing") return;
@@ -169,6 +171,8 @@ export function TimelineControl() {
 
       <div className="mb-3 rounded-md border border-white/10 bg-black/20 px-3 py-2 text-[11px] text-white/75">
         相機距離：{cameraDistance.toFixed(2)}
+        <br />
+        DEM 層級：{terrainDetailLevel}（{demGrid}）
       </div>
 
       <input
