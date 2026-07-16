@@ -8,7 +8,6 @@ import { useWorkspaceStore } from "@/src/lib/store/workspace";
 
 const DEM_NEAR_ENTER_DISTANCE = 10;
 const DEM_FAR_ENTER_DISTANCE = 11;
-const DEM_SWITCH_COOLDOWN_MS = 300;
 
 /**
  * CameraRig：相機操控裝置（rig = 相機 + 控制的整套）。
@@ -27,38 +26,32 @@ export function CameraRig() {
   const setTerrainDetailLevel = useWorkspaceStore((s) => s.setTerrainDetailLevel);
   const lastDistanceRef = useRef<number | null>(null);
   const detailLevelRef = useRef(useWorkspaceStore.getState().terrainDetailLevel);
-  const lastSwitchAtRef = useRef(0);
 
   useFrame(() => {
     const controls = controlsRef.current;
     if (!controls) return;
-    const now = performance.now();
     const distance = controls.object.position.distanceTo(controls.target);
     const currentDetailLevel = detailLevelRef.current;
     if (
       currentDetailLevel === "far" &&
-      distance <= DEM_NEAR_ENTER_DISTANCE &&
-      now - lastSwitchAtRef.current >= DEM_SWITCH_COOLDOWN_MS
+      distance <= DEM_NEAR_ENTER_DISTANCE
     ) {
       detailLevelRef.current = "near";
-      lastSwitchAtRef.current = now;
       setTerrainDetailLevel("near");
       if (process.env.NODE_ENV !== "production") {
         console.info(
-          `[CameraRig] terrainDetailLevel -> near | distance=${distance.toFixed(2)} (<= ${DEM_NEAR_ENTER_DISTANCE}) | cooldown=${DEM_SWITCH_COOLDOWN_MS}ms`,
+          `[CameraRig] terrainDetailLevel -> near | distance=${distance.toFixed(2)} (<= ${DEM_NEAR_ENTER_DISTANCE})`,
         );
       }
     } else if (
       currentDetailLevel === "near" &&
-      distance >= DEM_FAR_ENTER_DISTANCE &&
-      now - lastSwitchAtRef.current >= DEM_SWITCH_COOLDOWN_MS
+      distance >= DEM_FAR_ENTER_DISTANCE
     ) {
       detailLevelRef.current = "far";
-      lastSwitchAtRef.current = now;
       setTerrainDetailLevel("far");
       if (process.env.NODE_ENV !== "production") {
         console.info(
-          `[CameraRig] terrainDetailLevel -> far  | distance=${distance.toFixed(2)} (>= ${DEM_FAR_ENTER_DISTANCE}) | cooldown=${DEM_SWITCH_COOLDOWN_MS}ms`,
+          `[CameraRig] terrainDetailLevel -> far  | distance=${distance.toFixed(2)} (>= ${DEM_FAR_ENTER_DISTANCE})`,
         );
       }
     }

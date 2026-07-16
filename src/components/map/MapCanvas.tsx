@@ -28,7 +28,6 @@ export function MapCanvas() {
   const selectedTime = useWorkspaceStore((s) => s.time);
   const selectedLightingPresetId = useWorkspaceStore((s) => s.lightingPresetId);
   const cameraDistance = useWorkspaceStore((s) => s.cameraDistance);
-  const terrainDetailLevel = useWorkspaceStore((s) => s.terrainDetailLevel);
   const { data, loading } = useWorkspaceData();
   const stationCount = data?.weather.length ?? 0;
   const activePresetId =
@@ -38,7 +37,6 @@ export function MapCanvas() {
     LIGHTING_PRESETS[activePresetId],
     data?.sunModel,
   );
-  const demGrid = terrainDetailLevel === "near" ? 2560 : 768;
 
   return (
     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_oklch(0.22_0.03_250)_0%,_oklch(0.13_0.02_250)_100%)]">
@@ -55,8 +53,6 @@ export function MapCanvas() {
         光照 debug · {lightingDebug.hour.toFixed(1)}h · day {lightingDebug.daylight.toFixed(2)} · sun {lightingDebug.sunIntensity.toFixed(2)}
         <br />
         相機距離 · {cameraDistance.toFixed(2)}
-        <br />
-        DEM 層級 · {terrainDetailLevel} ({demGrid})
       </div>
 
       {/* 角落資訊：驗證資料連動仍在 */}
