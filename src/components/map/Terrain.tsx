@@ -41,7 +41,6 @@ const COLOR_VEGETATION = new Color("#7f9a5f");
 const COLOR_BARE_GROUND = new Color("#7a6f56");
 const COLOR_BARE_STEEP = new Color("#665c49");
 const COLOR_SNOW = new Color("#d8d8d2");
-let terrainRebuildSequence = 0;
 
 function clamp01(value: number) {
   return Math.max(0, Math.min(1, value));
@@ -167,13 +166,6 @@ export function Terrain() {
     if (!heightmap) return null;
     const { grid, elevations } = heightmap;
     const classes = landcover?.grid === grid ? landcover.classes : null;
-
-    if (process.env.NODE_ENV !== "production") {
-      const rebuildId = ++terrainRebuildSequence;
-      console.info(
-        `[Terrain] rebuild#${rebuildId} | grid=${grid} | landcoverMatch=${classes ? "yes" : "no"} | mode=${terrainExperimentMode}`,
-      );
-    }
 
     const planeDepth = computePlaneDepth(); // 與 coords 共用的南北長寬比校正
     const segments = grid - 1; // 頂點數 = grid，與 heightmap 一對一對齊

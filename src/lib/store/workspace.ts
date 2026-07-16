@@ -9,7 +9,6 @@ import type { LightingPresetId, Region, TerrainExperimentMode } from "@/src/type
 
 export type PlaybackState = "playing" | "paused";
 export type PlaybackSpeed = 0.5 | 1 | 2;
-export type TerrainDetailLevel = "far" | "near";
 
 /**
  * Workspace 意圖狀態（client state）。
@@ -36,10 +35,6 @@ export type WorkspaceState = {
   playbackSpeed: PlaybackSpeed;
   /** 被點選的測站 id（Phase 2-2 啟用，先定型別）。 */
   selectedStationId: string | null;
-  /** 相機到 OrbitControls target 的距離（監測用）。 */
-  cameraDistance: number;
-  /** 兩層 DEM 細節層級：far=768，near=2560。 */
-  terrainDetailLevel: TerrainDetailLevel;
 
   setRegion: (region: Region) => void;
   setLightingPresetId: (lightingPresetId: LightingPresetId) => void;
@@ -49,8 +44,6 @@ export type WorkspaceState = {
   pause: () => void;
   setSpeed: (playbackSpeed: PlaybackSpeed) => void;
   selectStation: (id: string | null) => void;
-  setCameraDistance: (cameraDistance: number) => void;
-  setTerrainDetailLevel: (terrainDetailLevel: TerrainDetailLevel) => void;
 };
 
 export const useWorkspaceStore = create<WorkspaceState>((set) => ({
@@ -61,8 +54,6 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   playbackState: "paused",
   playbackSpeed: 1,
   selectedStationId: null,
-  cameraDistance: Math.sqrt(12 * 12 + 12 * 12 + 12 * 12),
-  terrainDetailLevel: "near",
 
   setRegion: (region) => set({ region }),
   setLightingPresetId: (lightingPresetId) => set({ lightingPresetId }),
@@ -72,6 +63,4 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   pause: () => set({ playbackState: "paused" }),
   setSpeed: (playbackSpeed) => set({ playbackSpeed }),
   selectStation: (selectedStationId) => set({ selectedStationId }),
-  setCameraDistance: (cameraDistance) => set({ cameraDistance }),
-  setTerrainDetailLevel: (terrainDetailLevel) => set({ terrainDetailLevel }),
 }));

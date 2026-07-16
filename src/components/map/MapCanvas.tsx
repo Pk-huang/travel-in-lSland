@@ -27,7 +27,6 @@ export function MapCanvas() {
   const region = useWorkspaceStore((s) => s.region);
   const selectedTime = useWorkspaceStore((s) => s.time);
   const selectedLightingPresetId = useWorkspaceStore((s) => s.lightingPresetId);
-  const cameraDistance = useWorkspaceStore((s) => s.cameraDistance);
   const { data, loading } = useWorkspaceData();
   const stationCount = data?.weather.length ?? 0;
   const activePresetId =
@@ -51,8 +50,6 @@ export function MapCanvas() {
       {/* 角落資訊：驗證資料連動仍在 */}
       <div className="pointer-events-none absolute top-4 right-4 text-right text-[11px] text-white/65">
         光照 debug · {lightingDebug.hour.toFixed(1)}h · day {lightingDebug.daylight.toFixed(2)} · sun {lightingDebug.sunIntensity.toFixed(2)}
-        <br />
-        相機距離 · {cameraDistance.toFixed(2)}
       </div>
 
       {/* 角落資訊：驗證資料連動仍在 */}
