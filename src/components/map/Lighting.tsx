@@ -39,6 +39,9 @@ function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
 }
 
+const VISUAL_LONG_DAY_THRESHOLD_SECONDS = 18 * 60 * 60;
+const VISUAL_LONG_DAY_MIN_DAYLIGHT = 0.8;
+
 function hexToRgb(hex: string): [number, number, number] {
   const normalized = hex.replace("#", "");
   if (normalized.length !== 6) {
@@ -306,6 +309,12 @@ export function computeLighting(
     daylight = clamp(daylight, 0.6, 1);
   } else if (effectiveModel.dayType === "polar_night") {
     daylight = clamp(daylight, 0.02, 0.18);
+  } else if (effectiveModel.boundary !== null) {
+    const daytimeSeconds =
+      (effectiveModel.boundary.sunsetTs - effectiveModel.boundary.sunriseTs) / 1000;
+    if (daytimeSeconds >= VISUAL_LONG_DAY_THRESHOLD_SECONDS) {
+      daylight = clamp(daylight, VISUAL_LONG_DAY_MIN_DAYLIGHT, 1);
+    }
   }
 
   return composeLighting(validDate, preset, daylight, sunAngle, {

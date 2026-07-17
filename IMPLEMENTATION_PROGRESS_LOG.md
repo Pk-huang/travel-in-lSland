@@ -506,3 +506,10 @@
 - 驗收：快取 miss→hit（真實 43 站）；壞上游無快取 → snapshot fallback（`fallback=true`）
 - 決策：MVP 先用記憶體快取（不需 Upstash 金鑰），介面已抽象、可無痛換 Redis
 - 下一步（擇一）：補站點經緯度、Phase 1-3（Sentry 觀測/告警），或接 Upstash Redis
+
+### 2026-07-17（夏季長日視覺模式調整）
+- 今日完成：在 [src/components/map/Lighting.tsx](src/components/map/Lighting.tsx) 新增長日視覺規則（僅 `dayType=normal` 生效）。
+- 今日完成：當日照長度 `>= 18h` 時，提升 `daylight` 最低值，避免夏季晚間進入深夜視覺。
+- 今日調整：`VISUAL_LONG_DAY_MIN_DAYLIGHT` 目前為 `0.8`（以可見亮度優先）。
+- 驗收結果：`get_errors` / `corepack pnpm lint` / `home:200` / `corepack pnpm build` 全數通過。
+- 備註：`polar_day` / `polar_night` 既有 clamp 規則維持不變，避免覆寫極晝/極夜判斷語意。
