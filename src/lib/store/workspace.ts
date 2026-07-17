@@ -3,8 +3,9 @@ import { create } from "zustand";
 import {
   DEFAULT_LIGHTING_PRESET_ID,
   DEFAULT_REGION,
+  DEFAULT_TERRAIN_DETAIL_LEVEL,
 } from "@/src/lib/config/app";
-import type { LightingPresetId, Region } from "@/src/types";
+import type { LightingPresetId, Region, TerrainDetailLevel } from "@/src/types";
 
 export type PlaybackState = "playing" | "paused";
 export type PlaybackSpeed = 0.5 | 1 | 2;
@@ -24,6 +25,8 @@ export type WorkspaceState = {
   region: Region;
   /** 目前選擇的光影樣式。 */
   lightingPresetId: LightingPresetId;
+  /** 地形細節等級（256/512/1080），DEM 與 landcover 採同解析度綁定。 */
+  terrainDetailLevel: TerrainDetailLevel;
   /** 時間軸選擇的時刻（epoch ms；null 代表「現在」）。 */
   time: number | null;
   /** 時間軸播放狀態（Phase 2-3 播放器）。 */
@@ -39,6 +42,7 @@ export type WorkspaceState = {
 
   setRegion: (region: Region) => void;
   setLightingPresetId: (lightingPresetId: LightingPresetId) => void;
+  setTerrainDetailLevel: (terrainDetailLevel: TerrainDetailLevel) => void;
   setTime: (time: number | null) => void;
   play: () => void;
   pause: () => void;
@@ -52,6 +56,7 @@ export type WorkspaceState = {
 export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   region: DEFAULT_REGION,
   lightingPresetId: DEFAULT_LIGHTING_PRESET_ID,
+  terrainDetailLevel: DEFAULT_TERRAIN_DETAIL_LEVEL,
   time: null,
   playbackState: "paused",
   playbackSpeed: 1,
@@ -61,6 +66,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
 
   setRegion: (region) => set({ region }),
   setLightingPresetId: (lightingPresetId) => set({ lightingPresetId }),
+  setTerrainDetailLevel: (terrainDetailLevel) => set({ terrainDetailLevel }),
   setTime: (time) => set({ time }),
   play: () => set({ playbackState: "playing" }),
   pause: () => set({ playbackState: "paused" }),

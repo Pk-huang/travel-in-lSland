@@ -15,6 +15,8 @@ import {
 } from "@/src/lib/map/coords";
 import { useLandcover } from "@/src/lib/map/use-landcover";
 import { useHeightmap } from "@/src/lib/map/use-heightmap";
+import { useWorkspaceStore } from "@/src/lib/store/workspace";
+import type { TerrainDetailLevel } from "@/src/types";
 
 /**
  * Terrain：地形地塊。
@@ -39,8 +41,10 @@ const COLOR_VEGETATION = new Color("#7f9a5f");
 const COLOR_BARE_GROUND = new Color("#7a6f56");
 const COLOR_BARE_STEEP = new Color("#665c49");
 const COLOR_SNOW = new Color("#d8d8d2");
-const BASE_DEM_URL = "/dem/iceland-mapzen-512.json";
-const MAIN_LANDCOVER_GRID = 512;
+
+function getDemUrlByLevel(level: TerrainDetailLevel): string {
+  return `/dem/iceland-mapzen-${level}.json`;
+}
 
 function clamp01(value: number) {
   return Math.max(0, Math.min(1, value));
@@ -140,15 +144,17 @@ function worldCoverBaseColor(
 }
 
 export function Terrain() {
-  const baseHeightmap = useHeightmap(BASE_DEM_URL);
-  const landcover512 = useLandcover(MAIN_LANDCOVER_GRID);
+  const terrainDetailLevel = useWorkspaceStore((s) => s.terrainDetailLevel);
+  const demUrl = getDemUrlByLevel(terrainDetailLevel);
+  const baseHeightmap = useHeightmap(demUrl);
+  const landcover = useLandcover(terrainDetailLevel);
 
   const geometry = useMemo(() => {
     if (!baseHeightmap) return null;
 
     const { grid, elevations } = baseHeightmap;
     const landcoverClasses =
-      landcover512?.grid === MAIN_LANDCOVER_GRID ? landcover512.classes : null;
+      landcover?.grid === terrainDetailLevel ? landcover.classes : null;
 
     const planeDepth = computePlaneDepth();
     const segments = grid - 1;
@@ -169,9 +175,9 @@ export function Terrain() {
       if (!landcoverClasses) return undefined;
       const clampedX = Math.max(0, Math.min(1, normalizedX));
       const clampedY = Math.max(0, Math.min(1, normalizedY));
-      const ix = Math.round(clampedX * (MAIN_LANDCOVER_GRID - 1));
-      const iy = Math.round(clampedY * (MAIN_LANDCOVER_GRID - 1));
-      return landcoverClasses[iy * MAIN_LANDCOVER_GRID + ix];
+      const ix = Math.round(clampedX * (terrainDetailLevel - 1));
+      const iy = Math.round(clampedY * (terrainDetailLevel - 1));
+      return landcoverClasses[iy * terrainDetailLevel + ix];
     };
 
     const sampleSnowMask = (normalizedX: number, normalizedY: number) => {
@@ -254,14 +260,14 @@ export function Terrain() {
       }
 
       console.info(
-        `[Terrain] stable baseline active: dem=${BASE_DEM_URL} landcover=${MAIN_LANDCOVER_GRID} grid=${grid}`,
+        `[Terrain] detail level active: dem=${demUrl} landcover=${terrainDetailLevel} grid=${grid}`,
       );
     }
 
     geo.setAttribute("color", new Float32BufferAttribute(colors, 3));
     geo.computeVertexNormals();
     return geo as unknown as BufferGeometry;
-  }, [baseHeightmap, landcover512]);
+  }, [baseHeightmap, demUrl, landcover, terrainDetailLevel]);
 
   // heightmap 尚未載入 → 先不畫（loading fallback 由 MapCanvasLoader 提供）
   if (!geometry) return null;

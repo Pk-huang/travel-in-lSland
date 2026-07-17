@@ -2,6 +2,7 @@ import type {
   LightingPreset,
   LightingPresetId,
   Region,
+  TerrainDetailLevel,
 } from "@/src/types";
 
 /**
@@ -19,6 +20,8 @@ export const REGION_LABELS: Record<Region, string> = {
 };
 
 export const DEFAULT_LIGHTING_PRESET_ID: LightingPresetId = "realistic";
+export const DEFAULT_TERRAIN_DETAIL_LEVEL: TerrainDetailLevel = 512;
+export const TERRAIN_DETAIL_LEVEL_OPTIONS: TerrainDetailLevel[] = [256, 512, 1080];
 
 /**
  * 內部驗證用切換入口：

@@ -2,6 +2,8 @@ export type Region = "south" | "west" | "north" | "east" | "all";
 
 export type LightingPresetId = "realistic" | "cinematic" | "seasonal";
 
+export type TerrainDetailLevel = 256 | 512 | 1080;
+
 export type LightingPreset = {
   id: LightingPresetId;
   label: string;

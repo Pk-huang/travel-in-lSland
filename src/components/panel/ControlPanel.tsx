@@ -10,10 +10,11 @@ import {
   DEFAULT_LIGHTING_PRESET_ID,
   INTERNAL_LIGHTING_PRESET_OVERRIDE,
   LIGHTING_PRESETS,
+  TERRAIN_DETAIL_LEVEL_OPTIONS,
 } from "@/src/lib/config/app";
 import { POINTS_OF_INTEREST } from "@/src/lib/config/poi";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
-import type { LightingPresetId } from "@/src/types";
+import type { LightingPresetId, TerrainDetailLevel } from "@/src/types";
 
 function isLightingPresetId(value: string | null): value is LightingPresetId {
   if (value === null) {
@@ -36,6 +37,8 @@ export function ControlPanel() {
   const setRegion = useWorkspaceStore((s) => s.setRegion);
   const lightingPresetId = useWorkspaceStore((s) => s.lightingPresetId);
   const setLightingPresetId = useWorkspaceStore((s) => s.setLightingPresetId);
+  const terrainDetailLevel = useWorkspaceStore((s) => s.terrainDetailLevel);
+  const setTerrainDetailLevel = useWorkspaceStore((s) => s.setTerrainDetailLevel);
   const activePoiId = useWorkspaceStore((s) => s.activePoiId);
   const poiFocusEnabled = useWorkspaceStore((s) => s.poiFocusEnabled);
   const setActivePoi = useWorkspaceStore((s) => s.setActivePoi);
@@ -84,6 +87,30 @@ export function ControlPanel() {
   return (
     <div className="space-y-4">
       <RegionSelector value={region} onChange={setRegion} disabled={loading} />
+      <section className="space-y-2 rounded-lg border border-white/10 bg-black/10 p-3">
+        <p className="text-xs font-semibold tracking-wide text-white/80 uppercase">細節程度</p>
+        <div className="grid grid-cols-3 gap-2">
+          {TERRAIN_DETAIL_LEVEL_OPTIONS.map((level) => {
+            const isActive = terrainDetailLevel === level;
+            return (
+              <button
+                key={level}
+                type="button"
+                onClick={() => setTerrainDetailLevel(level as TerrainDetailLevel)}
+                className={
+                  isActive
+                    ? "rounded-md border border-sky-300/70 bg-sky-400/20 px-2 py-2 text-xs font-medium text-white"
+                    : "rounded-md border border-white/20 bg-black/20 px-2 py-2 text-xs text-white/85 transition hover:bg-black/30"
+                }
+              >
+                {level}
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-[11px] text-white/55">DEM 與 landcover 會綁定相同解析度。</p>
+      </section>
+
       <section className="space-y-2 rounded-lg border border-white/10 bg-black/10 p-3">
         <p className="text-xs font-semibold tracking-wide text-white/80 uppercase">景點檢視</p>
         <div className="grid gap-2">
