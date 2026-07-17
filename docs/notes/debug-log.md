@@ -330,3 +330,60 @@ type SunLightingModel = {
 ### 一句結論
 
 這次 build 失敗是首頁缺少 Suspense 邊界，不是資料或型別問題；補上邊界後，lint 與 build 全部恢復綠燈。
+
+---
+
+## 2026-07-16 LOD 策略轉向（完整 LOD -> Spot LOD）
+
+### 問題現象
+
+- 進入 tile mesh 階段後，出現過 tile 缺塊、區塊順序顛倒、邊界光照不連續等問題。
+- 可視清單（frustum）在臨界時可能讓可見 tile 數量過少，造成畫面看起來像被切掉。
+- 若持續往完整自由漫遊 LOD 前進，工程複雜度與除錯成本快速上升。
+
+### 根因
+
+- 目標過大：同時追求全域自由漫遊、多層細化、接縫穩定、快取治理。
+- tile 化後的座標映射與接縫法線必須高度一致，任何符號或法線策略不一致都會放大為可見瑕疵。
+- 可視剔除若沒有保底策略，容易在相機臨界姿態產生閃斷感。
+
+### 修正策略（決策轉向）
+
+- 從「完整自由漫遊 LOD」轉為「Spot LOD（景點焦點式）」。
+- 核心規則改為：
+  - `No focus, no LOD.`
+  - `Only active POI gets detail.`
+- 目標由「全域任意縮放都細化」改為「點擊景點 -> 固定鏡位檢視 -> 焦點區域細化」。
+- 與壓力測試並行，先拿固定腳本基線再決定是否加重局部 DEM 細化。
+
+### 實作過程（本輪）
+
+1. 先把單一地形改為 tile mesh 集合（單一解析度），建立切塊骨架。
+2. 發現拚裝問題後，先回到「拚裝基線」：
+   - 暫停可視剔除（全 tile 渲染）
+   - 法線改為全域高度場 central difference，降低邊界不連續
+3. 修正 tile 南北方向映射，解決第一塊與第三塊顛倒。
+4. 重新接回可視清單，加入保底策略：最少保留中心附近 tile，避免清單歸零。
+
+### 實作位置
+
+- [src/components/map/Terrain.tsx](src/components/map/Terrain.tsx)
+- [src/lib/map/terrain-tiles.ts](src/lib/map/terrain-tiles.ts)
+- [docs/notes/lod-terrain-design.md](docs/notes/lod-terrain-design.md)
+
+### 驗證結果（本輪反覆）
+
+- `get_errors`：通過
+- `corepack pnpm lint`：通過
+- `curl -s -o /dev/null -w "home:%{http_code}\\n" http://localhost:3000/`：`home:200`
+
+### 後續計畫
+
+1. 先做景點模式狀態骨架（焦點景點、固定鏡位參數）。
+2. 接景點 UI 點擊與 CameraRig 固定轉場。
+3. 焦點觸發局部細化，未焦點一律維持基底。
+4. 以景點切換流程建立壓測腳本與比較報告。
+
+### 一句結論
+
+這次不是單一 bug 修復，而是把技術方向從「完整 LOD」收斂成「可交付、可觀測、可壓測」的 Spot LOD 路線，保留 LOD 核心思想，同時把風險壓在可控範圍。
