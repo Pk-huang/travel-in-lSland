@@ -97,6 +97,9 @@ export const sunLightingModelSchema = z.object({
   source: z.enum(["sun", "fallback"]),
   tzid: z.string(),
   boundary: sunLightingBoundarySchema.nullable(),
+  dayType: z.enum(["normal", "polar_day", "polar_night"]),
+  dayTypeConfidence: z.enum(["low", "medium", "high"]).optional(),
+  dayTypeReason: z.string().optional(),
   fallbackReason: z.string().optional(),
 });
 

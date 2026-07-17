@@ -128,10 +128,16 @@ export type SunLightingBoundary = {
   civilEndTs: number | null;
 };
 
+export type SunDayType = "normal" | "polar_day" | "polar_night";
+export type SunDayTypeConfidence = "low" | "medium" | "high";
+
 export type SunLightingModel = {
   source: "sun" | "fallback";
   tzid: string;
   boundary: SunLightingBoundary | null;
+  dayType: SunDayType;
+  dayTypeConfidence?: SunDayTypeConfidence;
+  dayTypeReason?: string;
   fallbackReason?: string;
 };
 

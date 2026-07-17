@@ -21,6 +21,8 @@ import type {
   IcelandStatusResponse,
   Region,
   RoadSegment,
+  SunDayType,
+  SunDayTypeConfidence,
   SunLightingModel,
   SunTimesBoundary,
   SunTimes,
@@ -121,18 +123,106 @@ function parseValidSunTimestamp(iso: string | undefined): number | null {
   return timestamp;
 }
 
+type SunDayTypeAssessment = {
+  dayType: SunDayType;
+  confidence: SunDayTypeConfidence;
+  reason: string;
+};
+
+const POLAR_DAY_LENGTH_MIN_SECONDS = 23.5 * 60 * 60;
+const POLAR_NIGHT_LENGTH_MAX_SECONDS = 0.5 * 60 * 60;
+
+function assessSunDayType(
+  currentSun: SunTimes | null | undefined,
+  sunriseTs: number | null,
+  sunsetTs: number | null,
+): SunDayTypeAssessment {
+  if (!currentSun) {
+    return {
+      dayType: "normal",
+      confidence: "low",
+      reason: "missing-current-sun",
+    };
+  }
+
+  if (currentSun.dayLengthSeconds >= POLAR_DAY_LENGTH_MIN_SECONDS) {
+    return {
+      dayType: "polar_day",
+      confidence: "high",
+      reason: "long-day-length",
+    };
+  }
+
+  if (currentSun.dayLengthSeconds <= POLAR_NIGHT_LENGTH_MAX_SECONDS) {
+    return {
+      dayType: "polar_night",
+      confidence: "high",
+      reason: "short-day-length",
+    };
+  }
+
+  const missingOrInvalidBoundary =
+    sunriseTs === null || sunsetTs === null || sunsetTs <= sunriseTs;
+  if (missingOrInvalidBoundary) {
+    return currentSun.dayLengthSeconds >= 12 * 60 * 60
+      ? {
+          dayType: "polar_day",
+          confidence: "medium",
+          reason: "missing-events-with-long-day-length",
+        }
+      : {
+          dayType: "polar_night",
+          confidence: "medium",
+          reason: "missing-events-with-short-day-length",
+        };
+  }
+
+  return {
+    dayType: "normal",
+    confidence: "medium",
+    reason: "regular-cycle",
+  };
+}
+
 function buildSunLightingModel(
   sunBoundary: SunTimesBoundary | null | undefined,
 ): SunLightingModel {
   const currentSun = sunBoundary?.current;
   const sunriseTs = parseValidSunTimestamp(currentSun?.sunrise);
   const sunsetTs = parseValidSunTimestamp(currentSun?.sunset);
+  const assessment = assessSunDayType(currentSun, sunriseTs, sunsetTs);
+
+  if (!currentSun) {
+    return {
+      source: "fallback",
+      tzid: "Atlantic/Reykjavik",
+      boundary: null,
+      dayType: assessment.dayType,
+      dayTypeConfidence: assessment.confidence,
+      dayTypeReason: assessment.reason,
+      fallbackReason: "missing-current-sun",
+    };
+  }
+
+  if (assessment.dayType !== "normal") {
+    return {
+      source: "sun",
+      tzid: currentSun.tzid,
+      boundary: null,
+      dayType: assessment.dayType,
+      dayTypeConfidence: assessment.confidence,
+      dayTypeReason: assessment.reason,
+    };
+  }
 
   if (!currentSun || sunriseTs === null || sunsetTs === null || sunsetTs <= sunriseTs) {
     return {
       source: "fallback",
       tzid: currentSun?.tzid ?? "Atlantic/Reykjavik",
       boundary: null,
+      dayType: assessment.dayType,
+      dayTypeConfidence: assessment.confidence,
+      dayTypeReason: assessment.reason,
       fallbackReason: "missing-valid-sun-boundary",
     };
   }
@@ -140,6 +230,9 @@ function buildSunLightingModel(
   return {
     source: "sun",
     tzid: currentSun.tzid,
+    dayType: assessment.dayType,
+    dayTypeConfidence: assessment.confidence,
+    dayTypeReason: assessment.reason,
     boundary: {
       previousSunsetTs: parseValidSunTimestamp(sunBoundary?.previous?.sunset),
       sunriseTs,

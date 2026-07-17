@@ -35,6 +35,10 @@ function clamp01(value: number): number {
   return Math.min(1, Math.max(0, value));
 }
 
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
 function hexToRgb(hex: string): [number, number, number] {
   const normalized = hex.replace("#", "");
   if (normalized.length !== 6) {
@@ -280,6 +284,7 @@ export function computeLighting(
     source: "fallback",
     tzid: "Atlantic/Reykjavik",
     boundary: null,
+    dayType: "normal",
   };
   const useSunPath =
     effectiveModel.source === "sun" &&
@@ -295,6 +300,12 @@ export function computeLighting(
     sunAngle =
       computeSunAngleFromBoundary(validDate, effectiveModel.boundary) ??
       legacySunAngle;
+  }
+
+  if (effectiveModel.dayType === "polar_day") {
+    daylight = clamp(daylight, 0.6, 1);
+  } else if (effectiveModel.dayType === "polar_night") {
+    daylight = clamp(daylight, 0.02, 0.18);
   }
 
   return composeLighting(validDate, preset, daylight, sunAngle, {
