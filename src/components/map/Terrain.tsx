@@ -13,6 +13,10 @@ import {
   computePlaneDepth,
   elevationToSceneY,
 } from "@/src/lib/map/coords";
+import {
+  computeSpotLodInfluence,
+  type SpotLodFocusZone,
+} from "@/src/lib/map/spot-lod";
 import { useLandcover } from "@/src/lib/map/use-landcover";
 import { useHeightmap } from "@/src/lib/map/use-heightmap";
 
@@ -137,8 +141,15 @@ function worldCoverBaseColor(
   return targetColor;
 }
 
-export function Terrain() {
-  const heightmap = useHeightmap();
+type TerrainProps = {
+  spotLodFocusZone?: SpotLodFocusZone | null;
+};
+
+export function Terrain({ spotLodFocusZone = null }: TerrainProps) {
+  const preferredHeightmapUrl = spotLodFocusZone
+    ? "/dem/iceland-mapzen-1080.json"
+    : "/dem/iceland-mapzen-768.json";
+  const heightmap = useHeightmap(preferredHeightmapUrl);
   const landcover = useLandcover(heightmap?.grid ?? null);
 
   const geometry = useMemo(() => {
@@ -153,6 +164,7 @@ export function Terrain() {
     const colors = new Float32Array(positions.count * 3);
     const vertexColor = new Color();
     let brightVertexCount = 0;
+    let maxSpotLodInfluence = 0;
 
     const cellWidthKm = PLANE_WIDTH / (grid - 1);
     const cellDepthKm = planeDepth / (grid - 1);
@@ -224,6 +236,17 @@ export function Terrain() {
       );
       const luma = vertexColor.r * 0.2126 + vertexColor.g * 0.7152 + vertexColor.b * 0.0722;
       if (luma > 0.86) brightVertexCount += 1;
+
+      if (spotLodFocusZone) {
+        const dx = positions.getX(i) - spotLodFocusZone.centerX;
+        const dz = positions.getY(i) - spotLodFocusZone.centerZ;
+        const distanceKm = Math.hypot(dx, dz);
+        const influence = computeSpotLodInfluence(distanceKm, spotLodFocusZone);
+        if (influence > maxSpotLodInfluence) {
+          maxSpotLodInfluence = influence;
+        }
+      }
+
       colors[i * 3] = vertexColor.r;
       colors[i * 3 + 1] = vertexColor.g;
       colors[i * 3 + 2] = vertexColor.b;
@@ -236,12 +259,18 @@ export function Terrain() {
           `[Terrain] bright vertex ratio high: ${(brightRatio * 100).toFixed(1)}% (check landcover/snow blend)`,
         );
       }
+
+      if (spotLodFocusZone) {
+        console.info(
+          `[Terrain] Spot LOD source active: ${spotLodFocusZone.poiId} dem=${preferredHeightmapUrl} radius=${spotLodFocusZone.radiusKm.toFixed(2)}km falloff=${spotLodFocusZone.falloffKm.toFixed(2)}km maxInfluence=${maxSpotLodInfluence.toFixed(2)}`,
+        );
+      }
     }
 
     geo.setAttribute("color", new Float32BufferAttribute(colors, 3));
     geo.computeVertexNormals();
     return geo as unknown as BufferGeometry;
-  }, [heightmap, landcover]);
+  }, [heightmap, landcover, preferredHeightmapUrl, spotLodFocusZone]);
 
   // heightmap 尚未載入 → 先不畫（loading fallback 由 MapCanvasLoader 提供）
   if (!geometry) return null;
