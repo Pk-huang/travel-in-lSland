@@ -11,9 +11,9 @@ export const POINTS_OF_INTEREST: PointOfInterest[] = [
     lat: 64.2786082,
     lon: -21.0819412,
     cameraView: {
-      distance: 4.4,
-      polarAngle: 0.98,
-      azimuthAngle: -0.26,
+      distance: 3.9,
+      polarAngle: 1.04,
+      azimuthAngle: -0.18,
     },
   },
   {
@@ -22,9 +22,9 @@ export const POINTS_OF_INTEREST: PointOfInterest[] = [
     lat: 64.0783208,
     lon: -16.2274213,
     cameraView: {
-      distance: 4.9,
-      polarAngle: 0.88,
-      azimuthAngle: 0.48,
+      distance: 4.3,
+      polarAngle: 0.94,
+      azimuthAngle: 0.36,
     },
   },
 ];
