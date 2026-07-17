@@ -1,7 +1,6 @@
 "use client";
 
 import { Canvas } from "@react-three/fiber";
-import { useMemo } from "react";
 
 import { Terrain } from "@/src/components/map/Terrain";
 import { SeaLevel } from "@/src/components/map/SeaLevel";
@@ -14,7 +13,6 @@ import {
   LIGHTING_PRESETS,
   REGION_LABELS,
 } from "@/src/lib/config/app";
-import { buildSpotLodFocusZone } from "@/src/lib/map/spot-lod";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
 
 /**
@@ -28,8 +26,6 @@ export function MapCanvas() {
   const region = useWorkspaceStore((s) => s.region);
   const selectedTime = useWorkspaceStore((s) => s.time);
   const selectedLightingPresetId = useWorkspaceStore((s) => s.lightingPresetId);
-  const activePoiId = useWorkspaceStore((s) => s.activePoiId);
-  const poiFocusEnabled = useWorkspaceStore((s) => s.poiFocusEnabled);
   const { data, loading } = useWorkspaceData();
   const stationCount = data?.weather.length ?? 0;
   const activePresetId =
@@ -39,16 +35,12 @@ export function MapCanvas() {
     LIGHTING_PRESETS[activePresetId],
     data?.sunModel,
   );
-  const spotLodFocusZone = useMemo(
-    () => buildSpotLodFocusZone({ activePoiId, poiFocusEnabled }),
-    [activePoiId, poiFocusEnabled],
-  );
 
   return (
     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_oklch(0.22_0.03_250)_0%,_oklch(0.13_0.02_250)_100%)]">
       <Canvas camera={{ position: [12, 12, 12], fov: 50 }} dpr={[1, 2]}>
         <Lighting />
-        <Terrain spotLodFocusZone={spotLodFocusZone} />
+        <Terrain />
         <SeaLevel />
         <CameraRig />
       </Canvas>

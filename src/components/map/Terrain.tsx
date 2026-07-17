@@ -13,10 +13,6 @@ import {
   computePlaneDepth,
   elevationToSceneY,
 } from "@/src/lib/map/coords";
-import {
-  computeSpotLodInfluence,
-  type SpotLodFocusZone,
-} from "@/src/lib/map/spot-lod";
 import { useLandcover } from "@/src/lib/map/use-landcover";
 import { useHeightmap } from "@/src/lib/map/use-heightmap";
 
@@ -43,6 +39,8 @@ const COLOR_VEGETATION = new Color("#7f9a5f");
 const COLOR_BARE_GROUND = new Color("#7a6f56");
 const COLOR_BARE_STEEP = new Color("#665c49");
 const COLOR_SNOW = new Color("#d8d8d2");
+const BASE_DEM_URL = "/dem/iceland-mapzen-512.json";
+const MAIN_LANDCOVER_GRID = 512;
 
 function clamp01(value: number) {
   return Math.max(0, Math.min(1, value));
@@ -141,30 +139,24 @@ function worldCoverBaseColor(
   return targetColor;
 }
 
-type TerrainProps = {
-  spotLodFocusZone?: SpotLodFocusZone | null;
-};
-
-export function Terrain({ spotLodFocusZone = null }: TerrainProps) {
-  const preferredHeightmapUrl = spotLodFocusZone
-    ? "/dem/iceland-mapzen-1080.json"
-    : "/dem/iceland-mapzen-768.json";
-  const heightmap = useHeightmap(preferredHeightmapUrl);
-  const landcover = useLandcover(heightmap?.grid ?? null);
+export function Terrain() {
+  const baseHeightmap = useHeightmap(BASE_DEM_URL);
+  const landcover512 = useLandcover(MAIN_LANDCOVER_GRID);
 
   const geometry = useMemo(() => {
-    if (!heightmap) return null;
-    const { grid, elevations } = heightmap;
-    const classes = landcover?.grid === grid ? landcover.classes : null;
+    if (!baseHeightmap) return null;
 
-    const planeDepth = computePlaneDepth(); // 與 coords 共用的南北長寬比校正
-    const segments = grid - 1; // 頂點數 = grid，與 heightmap 一對一對齊
+    const { grid, elevations } = baseHeightmap;
+    const landcoverClasses =
+      landcover512?.grid === MAIN_LANDCOVER_GRID ? landcover512.classes : null;
+
+    const planeDepth = computePlaneDepth();
+    const segments = grid - 1;
     const geo = new PlaneGeometry(PLANE_WIDTH, planeDepth, segments, segments);
     const positions = geo.attributes.position;
     const colors = new Float32Array(positions.count * 3);
     const vertexColor = new Color();
     let brightVertexCount = 0;
-    let maxSpotLodInfluence = 0;
 
     const cellWidthKm = PLANE_WIDTH / (grid - 1);
     const cellDepthKm = planeDepth / (grid - 1);
@@ -173,16 +165,17 @@ export function Terrain({ spotLodFocusZone = null }: TerrainProps) {
     const getElevation = (x: number, y: number) =>
       elevations[Math.max(0, Math.min(grid - 1, y)) * grid + Math.max(0, Math.min(grid - 1, x))];
 
-    const getClass = (x: number, y: number) => {
-      if (!classes) return undefined;
-      const clampedX = Math.max(0, Math.min(grid - 1, x));
-      const clampedY = Math.max(0, Math.min(grid - 1, y));
-      return classes[clampedY * grid + clampedX];
+    const sampleLandcoverClass = (normalizedX: number, normalizedY: number): number | undefined => {
+      if (!landcoverClasses) return undefined;
+      const clampedX = Math.max(0, Math.min(1, normalizedX));
+      const clampedY = Math.max(0, Math.min(1, normalizedY));
+      const ix = Math.round(clampedX * (MAIN_LANDCOVER_GRID - 1));
+      const iy = Math.round(clampedY * (MAIN_LANDCOVER_GRID - 1));
+      return landcoverClasses[iy * MAIN_LANDCOVER_GRID + ix];
     };
 
-    // 5x5 高斯近似雪遮罩，進一步平滑雪區邊界與顆粒感。
-    const sampleSnowMask = (x: number, y: number) => {
-      if (!classes) return 0;
+    const sampleSnowMask = (normalizedX: number, normalizedY: number) => {
+      if (!landcoverClasses) return 0;
       const kernel = [
         [1, 4, 7, 4, 1],
         [4, 16, 26, 16, 4],
@@ -190,26 +183,36 @@ export function Terrain({ spotLodFocusZone = null }: TerrainProps) {
         [4, 16, 26, 16, 4],
         [1, 4, 7, 4, 1],
       ];
+      const step = 1 / Math.max(grid - 1, 1);
       let weightedSnow = 0;
       let totalWeight = 0;
+
       for (let ky = -2; ky <= 2; ky++) {
         for (let kx = -2; kx <= 2; kx++) {
           const weight = kernel[ky + 2][kx + 2];
-          const neighborClass = getClass(x + kx, y + ky);
+          const neighborClass = sampleLandcoverClass(
+            normalizedX + kx * step,
+            normalizedY + ky * step,
+          );
           if (neighborClass === 70) weightedSnow += weight;
           totalWeight += weight;
         }
       }
+
       return totalWeight > 0 ? weightedSnow / totalWeight : 0;
     };
 
-    const verts = segments + 1; // = grid
+    const verts = segments + 1;
     for (let i = 0; i < positions.count; i++) {
-      const ix = i % verts; // 東西格點索引（0..grid-1）
-      const iy = Math.floor(i / verts); // 南北格點索引
+      const ix = i % verts;
+      const iy = Math.floor(i / verts);
+      const normalizedX = ix / (grid - 1);
+      const normalizedY = iy / (grid - 1);
+
       const meters = elevations[iy * grid + ix];
-      const classId = classes ? classes[iy * grid + ix] : undefined;
-      const classSnowMask = sampleSnowMask(ix, iy);
+
+      const classId = sampleLandcoverClass(normalizedX, normalizedY);
+      const classSnowMask = sampleSnowMask(normalizedX, normalizedY);
 
       const east = getElevation(ix + 1, iy);
       const west = getElevation(ix - 1, iy);
@@ -219,9 +222,8 @@ export function Terrain({ spotLodFocusZone = null }: TerrainProps) {
       const gradientY = (north - south) / (2 * cellMeters);
       const slopeMetersPerCell = Math.hypot(gradientX, gradientY) * cellMeters;
 
-      // 海拔 → 場景高度：與測站共用同一條公式（含 <0 海床夾平、海岸線裁切）
       const height = elevationToSceneY(meters);
-      positions.setZ(i, height); // 旋轉前的 Z → 旋轉後的高度(世界 Y)
+      positions.setZ(i, height);
 
       const noise = hashNoise(ix, iy);
       const noiseFine = hashNoise(ix * 5 + 11, iy * 5 + 7);
@@ -234,18 +236,9 @@ export function Terrain({ spotLodFocusZone = null }: TerrainProps) {
         classSnowMask,
         vertexColor,
       );
+
       const luma = vertexColor.r * 0.2126 + vertexColor.g * 0.7152 + vertexColor.b * 0.0722;
       if (luma > 0.86) brightVertexCount += 1;
-
-      if (spotLodFocusZone) {
-        const dx = positions.getX(i) - spotLodFocusZone.centerX;
-        const dz = positions.getY(i) - spotLodFocusZone.centerZ;
-        const distanceKm = Math.hypot(dx, dz);
-        const influence = computeSpotLodInfluence(distanceKm, spotLodFocusZone);
-        if (influence > maxSpotLodInfluence) {
-          maxSpotLodInfluence = influence;
-        }
-      }
 
       colors[i * 3] = vertexColor.r;
       colors[i * 3 + 1] = vertexColor.g;
@@ -260,17 +253,15 @@ export function Terrain({ spotLodFocusZone = null }: TerrainProps) {
         );
       }
 
-      if (spotLodFocusZone) {
-        console.info(
-          `[Terrain] Spot LOD source active: ${spotLodFocusZone.poiId} dem=${preferredHeightmapUrl} radius=${spotLodFocusZone.radiusKm.toFixed(2)}km falloff=${spotLodFocusZone.falloffKm.toFixed(2)}km maxInfluence=${maxSpotLodInfluence.toFixed(2)}`,
-        );
-      }
+      console.info(
+        `[Terrain] stable baseline active: dem=${BASE_DEM_URL} landcover=${MAIN_LANDCOVER_GRID} grid=${grid}`,
+      );
     }
 
     geo.setAttribute("color", new Float32BufferAttribute(colors, 3));
     geo.computeVertexNormals();
     return geo as unknown as BufferGeometry;
-  }, [heightmap, landcover, preferredHeightmapUrl, spotLodFocusZone]);
+  }, [baseHeightmap, landcover512]);
 
   // heightmap 尚未載入 → 先不畫（loading fallback 由 MapCanvasLoader 提供）
   if (!geometry) return null;

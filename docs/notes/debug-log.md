@@ -387,3 +387,41 @@ type SunLightingModel = {
 ### 一句結論
 
 這次不是單一 bug 修復，而是把技術方向從「完整 LOD」收斂成「可交付、可觀測、可壓測」的 Spot LOD 路線，保留 LOD 核心思想，同時把風險壓在可控範圍。
+
+---
+
+## 2026-07-17 Spot LOD 實驗收斂（回到穩定基線）
+
+### 問題現象
+
+- 局部 detail 切換在多解析度資料源下，視覺提升不穩定且容易出現區域錯位。
+- 即使 detail DEM/landcover 載入成功，景點放大後仍常感受不到預期細節提升。
+
+### 根因
+
+1. DEM 與 landcover 未嚴格一對一綁定時，會產生語意與幾何錯位。
+2. 跨解析度切換出現高點位置偏移（例如 512 在 1-1、1080 在 1-2），代表取樣網格不一致；非單純調參可穩定修復。
+3. 僅切換 landcover 而未同步解決幾何密度/鏡位條件，體感提升有限。
+
+### 決策
+
+1. 停止 Spot LOD 幾何重建實驗，先回到穩定版。
+2. 主畫面固定為 `512 DEM + 512 landcover`。
+3. 景點模式保留相機轉場與展示敘事，不再負責地形重建。
+4. 景點檢視 UI 為保留功能，不隨 LOD 收斂移除。
+
+### 實作位置
+
+- [src/components/map/Terrain.tsx](src/components/map/Terrain.tsx)
+- [src/components/map/MapCanvas.tsx](src/components/map/MapCanvas.tsx)
+- [docs/notes/lod-terrain-design.md](docs/notes/lod-terrain-design.md)
+
+### 驗證結果
+
+- `get_errors`（本步改動檔）：通過
+- `corepack pnpm lint`：通過
+- `home:200`：通過
+
+### 一句結論
+
+這次收斂的核心不是「LOD 做不到」，而是目前資料對位與工程成本不適合繼續在線重建；先用單一解析度穩定交付，後續若重啟 LOD 需先補齊離線對齊流程。

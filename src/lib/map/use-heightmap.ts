@@ -31,10 +31,16 @@ function fetchHeightmap(url: string): Promise<HeightmapGrid> {
  * 技術債 #5 收斂：heightmap 讀取原本內嵌在 Terrain，現測站也需共用 → 抽成 hook。
  * 當來源 URL 切換時採 ready-swap：新資料載入完成前保留舊資料，避免畫面閃斷。
  */
-export function useHeightmap(heightmapUrl: string = DEFAULT_HEIGHTMAP_URL): HeightmapGrid | null {
+export function useHeightmap(
+  heightmapUrl: string | null = DEFAULT_HEIGHTMAP_URL,
+): HeightmapGrid | null {
   const [heightmap, setHeightmap] = useState<HeightmapGrid | null>(null);
 
   useEffect(() => {
+    if (!heightmapUrl) {
+      return;
+    }
+
     let alive = true;
     fetchHeightmap(heightmapUrl)
       .then((data: HeightmapGrid) => {
