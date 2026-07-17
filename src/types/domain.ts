@@ -1,7 +1,6 @@
 export type Region = "south" | "west" | "north" | "east" | "all";
 
 export type LightingPresetId = "realistic" | "cinematic" | "seasonal";
-export type TerrainExperimentMode = "baseline" | "experimental-procedural";
 
 export type LightingPreset = {
   id: LightingPresetId;
@@ -32,6 +31,20 @@ export type GeoPoint = {
   lon: number;
   elevationM?: number;
   kind: "poi" | "weather-station" | "road-segment";
+};
+
+export type PoiCameraView = {
+  distance: number;
+  polarAngle: number;
+  azimuthAngle: number;
+};
+
+export type PointOfInterest = {
+  id: string;
+  label: string;
+  lat: number;
+  lon: number;
+  cameraView: PoiCameraView;
 };
 
 export type WeatherConditions = {

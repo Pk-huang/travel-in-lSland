@@ -8,13 +8,12 @@ import { StatusPanel } from "@/src/components/panel/StatusPanel";
 import { useWorkspaceData } from "@/src/components/providers/WorkspaceProvider";
 import {
   DEFAULT_LIGHTING_PRESET_ID,
-  DEFAULT_TERRAIN_EXPERIMENT_MODE,
   INTERNAL_LIGHTING_PRESET_OVERRIDE,
-  INTERNAL_TERRAIN_EXPERIMENT_MODE_OVERRIDE,
   LIGHTING_PRESETS,
 } from "@/src/lib/config/app";
+import { POINTS_OF_INTEREST } from "@/src/lib/config/poi";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
-import type { LightingPresetId, TerrainExperimentMode } from "@/src/types";
+import type { LightingPresetId } from "@/src/types";
 
 function isLightingPresetId(value: string | null): value is LightingPresetId {
   if (value === null) {
@@ -37,14 +36,15 @@ export function ControlPanel() {
   const setRegion = useWorkspaceStore((s) => s.setRegion);
   const lightingPresetId = useWorkspaceStore((s) => s.lightingPresetId);
   const setLightingPresetId = useWorkspaceStore((s) => s.setLightingPresetId);
-  const terrainExperimentMode = useWorkspaceStore((s) => s.terrainExperimentMode);
-  const setTerrainExperimentMode = useWorkspaceStore((s) => s.setTerrainExperimentMode);
+  const activePoiId = useWorkspaceStore((s) => s.activePoiId);
+  const poiFocusEnabled = useWorkspaceStore((s) => s.poiFocusEnabled);
+  const setActivePoi = useWorkspaceStore((s) => s.setActivePoi);
+  const setPoiFocusEnabled = useWorkspaceStore((s) => s.setPoiFocusEnabled);
+  const clearPoiFocus = useWorkspaceStore((s) => s.clearPoiFocus);
   const { data, loading, error, refetch } = useWorkspaceData();
   const isLightingPresetLocked = INTERNAL_LIGHTING_PRESET_OVERRIDE != null;
-  const isTerrainExperimentModeLocked = INTERNAL_TERRAIN_EXPERIMENT_MODE_OVERRIDE != null;
   const isAlreadyDefaultPreset = lightingPresetId === DEFAULT_LIGHTING_PRESET_ID;
-  const isAlreadyDefaultTerrainMode =
-    terrainExperimentMode === DEFAULT_TERRAIN_EXPERIMENT_MODE;
+  const isPoiModeActive = poiFocusEnabled && activePoiId !== null;
 
   useEffect(() => {
     if (isLightingPresetLocked) {
@@ -84,7 +84,43 @@ export function ControlPanel() {
   return (
     <div className="space-y-4">
       <RegionSelector value={region} onChange={setRegion} disabled={loading} />
-      <section className="space-y-2 rounded-lg border border-white/10 bg-black/10 p-3" >
+      <section className="space-y-2 rounded-lg border border-white/10 bg-black/10 p-3">
+        <p className="text-xs font-semibold tracking-wide text-white/80 uppercase">景點檢視</p>
+        <div className="grid gap-2">
+          {POINTS_OF_INTEREST.map((poi) => {
+            const isActive = poiFocusEnabled && activePoiId === poi.id;
+            return (
+              <button
+                key={poi.id}
+                type="button"
+                onClick={() => {
+                  setActivePoi(poi.id);
+                  setPoiFocusEnabled(true);
+                }}
+                className={
+                  isActive
+                    ? "w-full rounded-md border border-sky-300/70 bg-sky-400/20 px-3 py-2 text-left text-sm text-white transition"
+                    : "w-full rounded-md border border-white/20 bg-black/20 px-3 py-2 text-left text-sm text-white/85 transition hover:bg-black/30"
+                }
+              >
+                {poi.label}
+              </button>
+            );
+          })}
+        </div>
+        <button
+          type="button"
+          onClick={() => clearPoiFocus()}
+          disabled={!isPoiModeActive}
+          className="w-full rounded-md border border-white/20 bg-black/20 px-3 py-2 text-xs font-medium tracking-wide text-white/85 transition hover:bg-black/30 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          回到全島視角
+        </button>
+        <p className="text-[11px] text-white/55">
+          目前先接 2 個固定景點，點擊後相機會飛到預設鏡位。
+        </p>
+      </section>
+      <section className="space-y-2 rounded-lg border border-white/10 bg-black/10 p-3">
         <p className="text-xs font-semibold tracking-wide text-white/80 uppercase">光影風格</p>
         <select
           id="lighting-preset"
@@ -112,38 +148,6 @@ export function ControlPanel() {
         {isLightingPresetLocked ? (
           <p className="text-[11px] text-amber-200/80">
             目前使用內部 override，若要啟用下拉切換，請先把 INTERNAL_LIGHTING_PRESET_OVERRIDE 設為 null。
-          </p>
-        ) : null}
-      </section>
-      <section className="space-y-2 rounded-lg border border-white/10 bg-black/10 p-3" >
-        <p className="text-xs font-semibold tracking-wide text-white/80 uppercase">地形實驗模式</p>
-        <select
-          id="terrain-experiment-mode"
-          name="terrain-experiment-mode"
-          value={terrainExperimentMode}
-          onChange={(event) =>
-            setTerrainExperimentMode(event.target.value as TerrainExperimentMode)
-          }
-          disabled={isTerrainExperimentModeLocked}
-          className="w-full rounded-md border border-white/20 bg-black/30 px-3 py-2 text-sm text-white outline-none transition focus:border-white/40 disabled:cursor-not-allowed disabled:opacity-60"
-          aria-label="地形實驗模式"
-        >
-          <option value="baseline" className="bg-zinc-900 text-white">Baseline Terrain</option>
-          <option value="experimental-procedural" className="bg-zinc-900 text-white">
-            Scheme 6 Experimental
-          </option>
-        </select>
-        <button
-          type="button"
-          onClick={() => setTerrainExperimentMode(DEFAULT_TERRAIN_EXPERIMENT_MODE)}
-          disabled={isTerrainExperimentModeLocked || isAlreadyDefaultTerrainMode}
-          className="w-full rounded-md border border-white/20 bg-black/20 px-3 py-2 text-xs font-medium tracking-wide text-white/85 transition hover:bg-black/30 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          Reset to baseline
-        </button>
-        {isTerrainExperimentModeLocked ? (
-          <p className="text-[11px] text-amber-200/80">
-            目前使用內部 override，若要啟用下拉切換，請先把 INTERNAL_TERRAIN_EXPERIMENT_MODE_OVERRIDE 設為 null。
           </p>
         ) : null}
       </section>

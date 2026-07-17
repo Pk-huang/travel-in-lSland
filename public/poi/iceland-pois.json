@@ -1,0 +1,36 @@
+{
+  "generatedAt": "2026-07-17T03:21:13.244Z",
+  "source": "nominatim-openstreetmap",
+  "pois": [
+    {
+      "id": "thingvellir-rift",
+      "label": "Thingvellir Rift",
+      "lat": 64.2786082,
+      "lon": -21.0819412
+    },
+    {
+      "id": "jokulsarlon-glacier",
+      "label": "Jokulsarlon Glacier Lagoon",
+      "lat": 64.0783208,
+      "lon": -16.2274213
+    },
+    {
+      "id": "reynisfjara-beach",
+      "label": "Reynisfjara Black Sand Beach",
+      "lat": 63.4044262,
+      "lon": -19.0587987
+    },
+    {
+      "id": "kirkjufell-mountain",
+      "label": "Kirkjufell Mountain",
+      "lat": 64.9399465,
+      "lon": -23.3074783
+    },
+    {
+      "id": "dettifoss-falls",
+      "label": "Dettifoss, Iceland",
+      "lat": 65.8143509,
+      "lon": -16.3844911
+    }
+  ]
+}

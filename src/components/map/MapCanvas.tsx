@@ -4,7 +4,6 @@ import { Canvas } from "@react-three/fiber";
 
 import { Terrain } from "@/src/components/map/Terrain";
 import { SeaLevel } from "@/src/components/map/SeaLevel";
-import { StationLayer } from "@/src/components/map/StationLayer";
 import { CameraRig } from "@/src/components/map/CameraRig";
 import { Lighting, computeLighting } from "@/src/components/map/Lighting";
 import { useWorkspaceData } from "@/src/components/providers/WorkspaceProvider";
@@ -43,7 +42,6 @@ export function MapCanvas() {
         <Lighting />
         <Terrain />
         <SeaLevel />
-        <StationLayer stations={data?.weather ?? []} />
         <CameraRig />
       </Canvas>
 

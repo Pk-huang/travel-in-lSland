@@ -74,16 +74,5 @@ export function StationLayer({ stations }: { stations: WeatherConditions[] }) {
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
   }, [positions, stations]);
 
-  if (stations.length === 0) return null;
-
-  return (
-    <instancedMesh
-      ref={meshRef}
-      args={[undefined, undefined, stations.length]}
-    >
-      <sphereGeometry args={[STATION_RADIUS, 12, 12]} />
-      {/* 底色白，實際顏色來自逐 instance 的 instanceColor（風險等級）。 */}
-      <meshStandardMaterial color="#ffffff" />
-    </instancedMesh>
-  );
+  return null;
 }

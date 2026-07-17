@@ -1,0 +1,27 @@
+[
+  {
+    "id": "thingvellir-rift",
+    "label": "Thingvellir Rift",
+    "query": "Thingvellir National Park, Iceland"
+  },
+  {
+    "id": "jokulsarlon-glacier",
+    "label": "Jokulsarlon Glacier Lagoon",
+    "query": "Jokulsarlon Glacier Lagoon, Iceland"
+  },
+  {
+    "id": "reynisfjara-beach",
+    "label": "Reynisfjara Black Sand Beach",
+    "query": "Reynisfjara Beach, Iceland"
+  },
+  {
+    "id": "kirkjufell-mountain",
+    "label": "Kirkjufell Mountain",
+    "query": "Kirkjufell, Iceland"
+  },
+  {
+    "id": "dettifoss-falls",
+    "label": "Dettifoss, Iceland",
+    "query": "Dettifoss, Iceland"
+  }
+]

@@ -14,9 +14,7 @@ import {
   elevationToSceneY,
 } from "@/src/lib/map/coords";
 import { useLandcover } from "@/src/lib/map/use-landcover";
-import { useWorkspaceStore } from "@/src/lib/store/workspace";
 import { useHeightmap } from "@/src/lib/map/use-heightmap";
-import type { TerrainExperimentMode } from "@/src/types";
 
 /**
  * Terrain：地形地塊。
@@ -139,28 +137,9 @@ function worldCoverBaseColor(
   return targetColor;
 }
 
-function computeExperimentalTerrainOffsetMeters(
-  meters: number,
-  ix: number,
-  iy: number,
-  mode: TerrainExperimentMode,
-) {
-  if (mode !== "experimental-procedural") {
-    return 0;
-  }
-
-  // 方案六實驗分支（先做可觀測骨架）：
-  // 以高海拔區為主加入小幅程序位移，模擬 GPU 程序重建前的近景細節增益。
-  const highAltitudeFactor = smoothstep(700, 2000, meters);
-  const macroNoise = hashNoise(ix * 13 + 5, iy * 13 + 17);
-  const microNoise = hashNoise(ix * 47 + 19, iy * 47 + 29);
-  return (macroNoise * 24 + microNoise * 8) * highAltitudeFactor;
-}
-
 export function Terrain() {
   const heightmap = useHeightmap();
   const landcover = useLandcover(heightmap?.grid ?? null);
-  const terrainExperimentMode = useWorkspaceStore((s) => s.terrainExperimentMode);
 
   const geometry = useMemo(() => {
     if (!heightmap) return null;
@@ -228,15 +207,8 @@ export function Terrain() {
       const gradientY = (north - south) / (2 * cellMeters);
       const slopeMetersPerCell = Math.hypot(gradientX, gradientY) * cellMeters;
 
-      const proceduralOffsetMeters = computeExperimentalTerrainOffsetMeters(
-        meters,
-        ix,
-        iy,
-        terrainExperimentMode,
-      );
-
       // 海拔 → 場景高度：與測站共用同一條公式（含 <0 海床夾平、海岸線裁切）
-      const height = elevationToSceneY(meters + proceduralOffsetMeters);
+      const height = elevationToSceneY(meters);
       positions.setZ(i, height); // 旋轉前的 Z → 旋轉後的高度(世界 Y)
 
       const noise = hashNoise(ix, iy);
@@ -269,7 +241,7 @@ export function Terrain() {
     geo.setAttribute("color", new Float32BufferAttribute(colors, 3));
     geo.computeVertexNormals();
     return geo as unknown as BufferGeometry;
-  }, [heightmap, landcover, terrainExperimentMode]);
+  }, [heightmap, landcover]);
 
   // heightmap 尚未載入 → 先不畫（loading fallback 由 MapCanvasLoader 提供）
   if (!geometry) return null;
