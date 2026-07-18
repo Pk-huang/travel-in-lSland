@@ -32,7 +32,7 @@ export function FloatingPanel() {
         <header className="border-border flex items-center justify-between border-b px-4 py-3">
           <div>
             <h1 className="text-lg leading-tight font-bold">Iceland Insight</h1>
-            <p className="text-muted-foreground text-xs">即時冰島天氣與路況</p>
+            <p className="text-muted-foreground text-xs">天氣概況與詳細資訊</p>
           </div>
           <Button
             variant="ghost"
