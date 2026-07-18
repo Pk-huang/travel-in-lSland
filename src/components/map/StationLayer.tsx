@@ -1,7 +1,7 @@
 "use client";
 
 import { useLayoutEffect, useMemo, useRef } from "react";
-import { InstancedMesh, Object3D, Color } from "three";
+import { InstancedMesh, Object3D } from "three";
 
 import type { WeatherConditions, AlertLevel } from "@/src/types";
 import {
@@ -38,7 +38,6 @@ const STATION_RADIUS = 0.35;
 const STATION_SURFACE_OFFSET = 0.15;
 
 export function StationLayer({ stations }: { stations: WeatherConditions[] }) {
-  const meshRef = useRef<InstancedMesh>(null);
   const heightmap = useHeightmap();
 
   // 預算每個測站的世界座標（水平來自映射，高度來自 heightmap 取樣）
@@ -57,22 +56,62 @@ export function StationLayer({ stations }: { stations: WeatherConditions[] }) {
     [stations, heightmap],
   );
 
-  // 把座標與風險色寫進 InstancedMesh 的每個 instance
+  const groupedPositions = useMemo(
+    () => ({
+      low: positions.filter((_, i) => stations[i].alertLevel === "low"),
+      medium: positions.filter((_, i) => stations[i].alertLevel === "medium"),
+      high: positions.filter((_, i) => stations[i].alertLevel === "high"),
+    }),
+    [positions, stations],
+  );
+
+  return (
+    <group>
+      <AlertStationInstances
+        positions={groupedPositions.low}
+        color={ALERT_COLOR.low}
+      />
+      <AlertStationInstances
+        positions={groupedPositions.medium}
+        color={ALERT_COLOR.medium}
+      />
+      <AlertStationInstances
+        positions={groupedPositions.high}
+        color={ALERT_COLOR.high}
+      />
+    </group>
+  );
+}
+
+function AlertStationInstances({
+  positions,
+  color,
+}: {
+  positions: Array<{ x: number; y: number; z: number }>;
+  color: string;
+}) {
+  const meshRef = useRef<InstancedMesh>(null);
+
   useLayoutEffect(() => {
     const mesh = meshRef.current;
     if (!mesh) return;
     const dummy = new Object3D();
-    const color = new Color();
     positions.forEach((pos, i) => {
       dummy.position.set(pos.x, pos.y, pos.z);
       dummy.updateMatrix();
       mesh.setMatrixAt(i, dummy.matrix);
-      color.set(ALERT_COLOR[stations[i].alertLevel]);
-      mesh.setColorAt(i, color);
     });
     mesh.instanceMatrix.needsUpdate = true;
-    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-  }, [positions, stations]);
+  }, [positions]);
 
-  return null;
+  if (positions.length === 0) {
+    return null;
+  }
+
+  return (
+    <instancedMesh ref={meshRef} args={[undefined, undefined, positions.length]}>
+      <sphereGeometry args={[STATION_RADIUS, 8, 8]} />
+      <meshBasicMaterial color={color} toneMapped={false} />
+    </instancedMesh>
+  );
 }

@@ -11,6 +11,7 @@ import {
   INTERNAL_LIGHTING_PRESET_OVERRIDE,
   LIGHTING_PRESETS,
 } from "@/src/lib/config/app";
+import { POINTS_OF_INTEREST } from "@/src/lib/config/poi";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
 import type { LightingPresetId } from "@/src/types";
 
@@ -35,8 +36,17 @@ export function ControlPanel() {
   const setRegion = useWorkspaceStore((s) => s.setRegion);
   const lightingPresetId = useWorkspaceStore((s) => s.lightingPresetId);
   const setLightingPresetId = useWorkspaceStore((s) => s.setLightingPresetId);
+  const activePoiId = useWorkspaceStore((s) => s.activePoiId);
+  const poiFocusEnabled = useWorkspaceStore((s) => s.poiFocusEnabled);
+  const setActivePoi = useWorkspaceStore((s) => s.setActivePoi);
+  const setPoiFocusEnabled = useWorkspaceStore((s) => s.setPoiFocusEnabled);
+  const clearPoiFocus = useWorkspaceStore((s) => s.clearPoiFocus);
+  const activeSection = useWorkspaceStore((s) => s.activeInfoPanelSection);
+  const setActiveSection = useWorkspaceStore((s) => s.setActiveInfoPanelSection);
   const { data, loading, error, refetch } = useWorkspaceData();
   const isLightingPresetLocked = INTERNAL_LIGHTING_PRESET_OVERRIDE != null;
+  const isWeatherOpen = activeSection === "weather";
+  const isPoiOpen = activeSection === "poi";
 
   useEffect(() => {
     if (isLightingPresetLocked) {
@@ -76,21 +86,92 @@ export function ControlPanel() {
   return (
     <div className="space-y-4">
       <section className="space-y-3 rounded-lg border border-white/10 bg-black/10 p-3">
-        <div className="space-y-1">
-          <p className="text-xs font-semibold tracking-wide text-white/80 uppercase">天氣概況</p>
-          <p className="text-[11px] text-white/55">
-            切換區域後查看觀測站、風險分數與路況摘要；左側面板暫時專注資訊顯示，不承擔場景控制。
-          </p>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveSection((current) => (current === "weather" ? null : "weather"))}
+            aria-expanded={isWeatherOpen}
+            className={
+              isWeatherOpen
+                ? "w-full rounded-lg border border-sky-300/70 bg-sky-400/15 px-4 py-3 text-left text-base font-semibold text-white transition"
+                : "w-full rounded-lg border border-white/15 bg-white/5 px-4 py-3 text-left text-base font-semibold text-white/90 transition hover:bg-white/10"
+            }
+          >
+            天氣
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveSection((current) => (current === "poi" ? null : "poi"))}
+            aria-expanded={isPoiOpen}
+            className={
+              isPoiOpen
+                ? "w-full rounded-lg border border-sky-300/70 bg-sky-400/15 px-4 py-3 text-left text-base font-semibold text-white transition"
+                : "w-full rounded-lg border border-white/15 bg-white/5 px-4 py-3 text-left text-base font-semibold text-white/90 transition hover:bg-white/10"
+            }
+          >
+            景點
+          </button>
         </div>
-        <RegionSelector value={region} onChange={setRegion} disabled={loading} />
+
+        {isWeatherOpen ? (
+          <div className="space-y-3">
+            <p className="text-[11px] text-white/55">
+              切換區域後查看觀測站、風險分數與路況摘要；左側面板暫時專注資訊顯示，不承擔場景控制。
+            </p>
+            <RegionSelector value={region} onChange={setRegion} disabled={loading} />
+          </div>
+        ) : null}
+
+        {isPoiOpen ? (
+          <div className="space-y-3">
+            <p className="text-[11px] text-white/55">
+              點擊固定景點後，相機會飛到預設鏡位；這一層先作為景點導覽入口，不承擔地形重建職責。
+            </p>
+
+            <div className="grid gap-2">
+              {POINTS_OF_INTEREST.map((poi) => {
+                const isActive = poiFocusEnabled && activePoiId === poi.id;
+                return (
+                  <button
+                    key={poi.id}
+                    type="button"
+                    onClick={() => {
+                      setActivePoi(poi.id);
+                      setPoiFocusEnabled(true);
+                    }}
+                    className={
+                      isActive
+                        ? "w-full rounded-md border border-sky-300/70 bg-sky-400/20 px-3 py-2 text-left text-sm text-white transition"
+                        : "w-full rounded-md border border-white/20 bg-black/20 px-3 py-2 text-left text-sm text-white/85 transition hover:bg-black/30"
+                    }
+                  >
+                    {poi.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => clearPoiFocus()}
+              disabled={!poiFocusEnabled || activePoiId === null}
+              className="w-full rounded-md border border-white/20 bg-black/20 px-3 py-2 text-xs font-medium tracking-wide text-white/85 transition hover:bg-black/30 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              回到全島視角
+            </button>
+          </div>
+        ) : null}
       </section>
 
-      <StatusPanel
-        data={data}
-        loading={loading}
-        error={error}
-        onRetry={refetch}
-      />
+      {isWeatherOpen ? (
+        <StatusPanel
+          data={data}
+          loading={loading}
+          error={error}
+          onRetry={refetch}
+        />
+      ) : null}
     </div>
   );
 }

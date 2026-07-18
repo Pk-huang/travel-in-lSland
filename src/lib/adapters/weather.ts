@@ -8,12 +8,13 @@ import type { StationCoordsMap } from "@/src/lib/adapters/stations";
  */
 export function deriveAlertLevel(obs: RawVedurObservation): AlertLevel {
   const gust = obs.fg ?? obs.f ?? 0;
+  const wind = obs.f ?? 0;
   const snow = obs.snd ?? 0;
   const temp = obs.t ?? 0;
   const rain = obs.r ?? 0;
 
   if (gust > 25 || snow > 30 || temp < -15) return "high";
-  if (gust > 15 || snow > 10 || rain > 5 || temp < -5) return "medium";
+  if (gust > 15 || wind >= 8 || snow > 10 || rain > 5 || temp < -5) return "medium";
   return "low";
 }
 

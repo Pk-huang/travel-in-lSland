@@ -5,6 +5,7 @@ import { Canvas } from "@react-three/fiber";
 import { Terrain } from "@/src/components/map/Terrain";
 import { SeaLevel } from "@/src/components/map/SeaLevel";
 import { CameraRig } from "@/src/components/map/CameraRig";
+import { StationLayer } from "@/src/components/map/StationLayer";
 import { Lighting, computeLighting } from "@/src/components/map/Lighting";
 import { useWorkspaceData } from "@/src/components/providers/WorkspaceProvider";
 import {
@@ -26,8 +27,10 @@ export function MapCanvas() {
   const region = useWorkspaceStore((s) => s.region);
   const selectedTime = useWorkspaceStore((s) => s.time);
   const selectedLightingPresetId = useWorkspaceStore((s) => s.lightingPresetId);
+  const activeInfoPanelSection = useWorkspaceStore((s) => s.activeInfoPanelSection);
   const { data, loading } = useWorkspaceData();
   const stationCount = data?.weather.length ?? 0;
+  const shouldShowStations = activeInfoPanelSection === "weather";
   const activePresetId =
     INTERNAL_LIGHTING_PRESET_OVERRIDE ?? selectedLightingPresetId ?? DEFAULT_LIGHTING_PRESET_ID;
   const lightingDebug = computeLighting(
@@ -42,6 +45,7 @@ export function MapCanvas() {
         <Lighting />
         <Terrain />
         <SeaLevel />
+        {shouldShowStations && data ? <StationLayer stations={data.weather} /> : null}
         <CameraRig />
       </Canvas>
 

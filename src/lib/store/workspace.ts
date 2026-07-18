@@ -9,6 +9,7 @@ import type { LightingPresetId, Region, TerrainDetailLevel } from "@/src/types";
 
 export type PlaybackState = "playing" | "paused";
 export type PlaybackSpeed = 0.5 | 1 | 2;
+export type InfoPanelSection = "weather" | "poi" | null;
 
 /**
  * Workspace 意圖狀態（client state）。
@@ -39,6 +40,8 @@ export type WorkspaceState = {
   activePoiId: string | null;
   /** 景點模式啟用旗標；先與焦點 id 分離，後續方便加 loading/transition 條件。 */
   poiFocusEnabled: boolean;
+  /** 左側資訊面板目前展開的區塊。 */
+  activeInfoPanelSection: InfoPanelSection;
 
   setRegion: (region: Region) => void;
   setLightingPresetId: (lightingPresetId: LightingPresetId) => void;
@@ -51,6 +54,7 @@ export type WorkspaceState = {
   setActivePoi: (id: string | null) => void;
   setPoiFocusEnabled: (enabled: boolean) => void;
   clearPoiFocus: () => void;
+  setActiveInfoPanelSection: (section: InfoPanelSection) => void;
 };
 
 export const useWorkspaceStore = create<WorkspaceState>((set) => ({
@@ -63,6 +67,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   selectedStationId: null,
   activePoiId: null,
   poiFocusEnabled: false,
+  activeInfoPanelSection: "weather",
 
   setRegion: (region) => set({ region }),
   setLightingPresetId: (lightingPresetId) => set({ lightingPresetId }),
@@ -75,4 +80,5 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   setActivePoi: (activePoiId) => set({ activePoiId }),
   setPoiFocusEnabled: (poiFocusEnabled) => set({ poiFocusEnabled }),
   clearPoiFocus: () => set({ activePoiId: null, poiFocusEnabled: false }),
+  setActiveInfoPanelSection: (activeInfoPanelSection) => set({ activeInfoPanelSection }),
 }));
