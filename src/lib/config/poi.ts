@@ -8,6 +8,8 @@ export const POINTS_OF_INTEREST: PointOfInterest[] = [
   {
     id: "thingvellir-rift",
     label: "Thingvellir Rift",
+    imageUrl: "/poi/thingvellir-rift.svg",
+    description: "冰島最具代表性的裂谷地景，適合用來展示地貌切換與景點定位。",
     lat: 64.2786082,
     lon: -21.0819412,
     cameraView: {
@@ -19,6 +21,8 @@ export const POINTS_OF_INTEREST: PointOfInterest[] = [
   {
     id: "jokulsarlon-glacier",
     label: "Jokulsarlon Glacier Lagoon",
+    imageUrl: "/poi/jokulsarlon-glacier.svg",
+    description: "冰河潟湖與漂浮冰塊的高辨識度場景，適合做 hover 預覽與卡片展示。",
     lat: 64.0783208,
     lon: -16.2274213,
     cameraView: {

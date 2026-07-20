@@ -17,6 +17,8 @@ import { useWorkspaceStore } from "@/src/lib/store/workspace";
 const DEFAULT_CAMERA_POSITION = new Vector3(12, 12, 12);
 const DEFAULT_CAMERA_TARGET = new Vector3(0, 0, 0);
 const CAMERA_TRANSITION_MS = 900;
+const POI_FOCUS_DISTANCE_MULTIPLIER = 2;
+const FREE_VIEW_MIN_DISTANCE = DEFAULT_CAMERA_POSITION.distanceTo(DEFAULT_CAMERA_TARGET);
 
 function easeInOutCubic(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -53,6 +55,7 @@ export function CameraRig() {
 
     const nextTarget = DEFAULT_CAMERA_TARGET.clone();
     const nextPosition = DEFAULT_CAMERA_POSITION.clone();
+    let minZoomDistance = FREE_VIEW_MIN_DISTANCE;
 
     if (poiFocusEnabled && activePoi) {
       const { x, z } = lonLatToSceneXZ(activePoi.lon, activePoi.lat);
@@ -61,14 +64,19 @@ export function CameraRig() {
         : 0;
       nextTarget.set(x, surfaceY, z);
 
+      minZoomDistance = activePoi.cameraView.distance * POI_FOCUS_DISTANCE_MULTIPLIER;
+
       const spherical = new Spherical(
-        activePoi.cameraView.distance,
+        minZoomDistance,
         activePoi.cameraView.polarAngle,
         activePoi.cameraView.azimuthAngle,
       );
       const offset = new Vector3().setFromSpherical(spherical);
       nextPosition.copy(nextTarget).add(offset);
     }
+
+    // 鎖定為只能 zoom out：禁止鏡頭比目前模式的最小距離更靠近目標。
+    controls.minDistance = minZoomDistance;
 
     transitionRef.current = {
       startAt: performance.now(),

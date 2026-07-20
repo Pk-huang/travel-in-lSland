@@ -1,0 +1,19 @@
+<svg width="960" height="540" viewBox="0 0 960 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="960" y2="540" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5C7FA5"/>
+      <stop offset="1" stop-color="#10263E"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0" y1="280" x2="960" y2="540" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2B6B8E"/>
+      <stop offset="1" stop-color="#12334A"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="540" rx="32" fill="url(#sky)"/>
+  <path d="M0 300C108 272 214 258 312 268C430 280 518 324 612 330C726 338 824 314 960 280V540H0V300Z" fill="url(#water)"/>
+  <path d="M0 274L98 250L160 264L240 232L332 250L418 226L526 246L620 220L728 238L832 210L960 226V540H0V274Z" fill="#DCE9F4" fill-opacity="0.95"/>
+  <path d="M128 350L180 310L244 338L282 298L336 320L394 288L462 316L514 284L572 306L632 268L688 290L742 260L806 282L860 252" stroke="#EFF6FB" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+  <circle cx="762" cy="128" r="46" fill="#FFF5D6" fill-opacity="0.95"/>
+  <text x="52" y="92" fill="#F8FAFC" font-size="40" font-family="Arial, Helvetica, sans-serif" font-weight="700">Jokulsarlon Glacier Lagoon</text>
+  <text x="52" y="138" fill="#D6E2F0" font-size="22" font-family="Arial, Helvetica, sans-serif">Blue ice, lagoon water and drifting icebergs</text>
+</svg>

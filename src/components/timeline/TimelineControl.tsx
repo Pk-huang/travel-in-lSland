@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Clock, Pause, Play, RotateCcw } from "lucide-react";
+import { ChevronDown, ChevronUp, Clock, Pause, Play, RotateCcw } from "lucide-react";
 
 import { Button } from "@/src/components/ui/button";
 import {
@@ -54,6 +54,7 @@ function formatOffsetLabel(offset: number): string {
 
 export function TimelineControl() {
   const [activeTab, setActiveTab] = useState<SceneControlTab>("timeline");
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const selectedTime = useWorkspaceStore((s) => s.time);
   const playbackState = useWorkspaceStore((s) => s.playbackState);
   const playbackSpeed = useWorkspaceStore((s) => s.playbackSpeed);
@@ -127,187 +128,208 @@ export function TimelineControl() {
   return (
     <section className="pointer-events-auto absolute bottom-4 left-1/2 z-20 w-[min(825px,calc(100vw-2rem))] -translate-x-1/2 rounded-xl border border-white/10 bg-black/55 px-4 py-4 shadow-2xl backdrop-blur-md">
       <div className="space-y-3">
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          <ControlTabButton
-            label="光影風格"
-            active={activeTab === "lighting"}
-            onClick={() => setActiveTab("lighting")}
-          />
-          <ControlTabButton
-            label="細節程度"
-            active={activeTab === "detail"}
-            onClick={() => setActiveTab("detail")}
-          />
-          <ControlTabButton
-            label="時間軸"
-            active={activeTab === "timeline"}
-            onClick={() => setActiveTab("timeline")}
-          />
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <ControlTabButton
+              label="光影風格"
+              active={activeTab === "lighting"}
+              onClick={() => setActiveTab("lighting")}
+            />
+            <ControlTabButton
+              label="細節程度"
+              active={activeTab === "detail"}
+              onClick={() => setActiveTab("detail")}
+            />
+            <ControlTabButton
+              label="時間軸"
+              active={activeTab === "timeline"}
+              onClick={() => setActiveTab("timeline")}
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsCollapsed((current) => !current)}
+            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/10"
+            aria-expanded={!isCollapsed}
+            aria-label={isCollapsed ? "展開場景控制" : "收合場景控制"}
+          >
+            {isCollapsed ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
+            {isCollapsed ? "展開" : "收合"}
+          </button>
         </div>
 
-        {activeTab === "lighting" ? (
-          <section
-            className="mx-auto w-full space-y-2 rounded-lg border border-white/10 bg-black/15 p-3"
-            style={{ maxWidth: SCENE_CONTROL_CONTENT_MAX_WIDTH }}
-          >
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold tracking-wide text-white/80 uppercase">場景光影</p>
-                <p className="text-[11px] text-white/55">控制地圖整體視覺語氣與基準亮度。</p>
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setLightingPresetId(DEFAULT_LIGHTING_PRESET_ID)}
-                disabled={isLightingPresetLocked || isAlreadyDefaultPreset}
-                className="h-8 px-2 text-xs text-white hover:bg-white/10 hover:text-white disabled:text-white/45"
+        {!isCollapsed ? (
+          <div className="space-y-3">
+            {activeTab === "lighting" ? (
+              <section
+                className="mx-auto w-full space-y-2 rounded-lg border border-white/10 bg-black/15 p-3"
+                style={{ maxWidth: SCENE_CONTROL_CONTENT_MAX_WIDTH }}
               >
-                Reset
-              </Button>
-            </div>
-
-            <select
-              id="lighting-preset"
-              name="lighting-preset"
-              value={lightingPresetId}
-              onChange={(event) => setLightingPresetId(event.target.value as LightingPresetId)}
-              disabled={isLightingPresetLocked}
-              className="w-full rounded-md border border-white/20 bg-black/30 px-3 py-2 text-sm text-white outline-none transition focus:border-white/40 disabled:cursor-not-allowed disabled:opacity-60"
-              aria-label="光影風格"
-            >
-              {Object.values(LIGHTING_PRESETS).map((preset) => (
-                <option key={preset.id} value={preset.id} className="bg-zinc-900 text-white">
-                  {preset.label}
-                </option>
-              ))}
-            </select>
-
-            {isLightingPresetLocked ? (
-              <p className="text-[11px] text-amber-200/80">
-                目前使用內部 override，若要啟用下拉切換，請先把 INTERNAL_LIGHTING_PRESET_OVERRIDE 設為 null。
-              </p>
-            ) : null}
-          </section>
-        ) : null}
-
-        {activeTab === "detail" ? (
-          <section
-            className="mx-auto w-full space-y-2 rounded-lg border border-white/10 bg-black/15 p-3"
-            style={{ maxWidth: SCENE_CONTROL_CONTENT_MAX_WIDTH }}
-          >
-            <div>
-              <p className="text-xs font-semibold tracking-wide text-white/80 uppercase">地形細節</p>
-              <p className="text-[11px] text-white/55">DEM 與 landcover 維持相同解析度，避免場景錯位。</p>
-            </div>
-
-            <div className="grid grid-cols-3 gap-2">
-              {TERRAIN_DETAIL_LEVEL_OPTIONS.map((level) => {
-                const isActive = terrainDetailLevel === level;
-                return (
-                  <button
-                    key={level}
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold tracking-wide text-white/80 uppercase">場景光影</p>
+                    <p className="text-[11px] text-white/55">控制地圖整體視覺語氣與基準亮度。</p>
+                  </div>
+                  <Button
                     type="button"
-                    onClick={() => setTerrainDetailLevel(level as TerrainDetailLevel)}
-                    className={
-                      isActive
-                        ? "rounded-md border border-sky-300/70 bg-sky-400/20 px-2 py-2 text-xs font-medium text-white"
-                        : "rounded-md border border-white/20 bg-black/20 px-2 py-2 text-xs text-white/85 transition hover:bg-black/30"
-                    }
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setLightingPresetId(DEFAULT_LIGHTING_PRESET_ID)}
+                    disabled={isLightingPresetLocked || isAlreadyDefaultPreset}
+                    className="h-8 px-2 text-xs text-white hover:bg-white/10 hover:text-white disabled:text-white/45"
                   >
-                    {level}
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-        ) : null}
+                    Reset
+                  </Button>
+                </div>
 
-        {activeTab === "timeline" ? (
-          <section
-            className="mx-auto w-full space-y-3 rounded-lg border border-white/10 bg-black/15 p-3"
-            style={{ maxWidth: SCENE_CONTROL_CONTENT_MAX_WIDTH }}
-          >
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2 text-sm font-medium text-white">
-                <Clock className="size-4" />
-                <span>時間軸</span>
-                <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/75">
-                  {formatTimeLabel(selectedTime)}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => (playbackState === "playing" ? pause() : play())}
-                  aria-label={playbackState === "playing" ? "暫停播放" : "開始播放"}
-                  className="size-8 text-white hover:bg-white/10 hover:text-white"
-                >
-                  {playbackState === "playing" ? (
-                    <Pause className="size-4" />
-                  ) : (
-                    <Play className="size-4" />
-                  )}
-                </Button>
-
-                <label htmlFor="timeline-speed" className="sr-only">
-                  播放速度
-                </label>
                 <select
-                  id="timeline-speed"
-                  name="timeline-speed"
-                  value={String(playbackSpeed)}
-                  onChange={(event) =>
-                    setSpeed(Number(event.currentTarget.value) as PlaybackSpeed)
-                  }
-                  className="h-8 rounded-md border border-white/20 bg-black/30 px-2 text-xs text-white outline-none transition focus:border-white/40"
-                  aria-label="播放速度"
+                  id="lighting-preset"
+                  name="lighting-preset"
+                  value={lightingPresetId}
+                  onChange={(event) => setLightingPresetId(event.target.value as LightingPresetId)}
+                  disabled={isLightingPresetLocked}
+                  className="w-full rounded-md border border-white/20 bg-black/30 px-3 py-2 text-sm text-white outline-none transition focus:border-white/40 disabled:cursor-not-allowed disabled:opacity-60"
+                  aria-label="光影風格"
                 >
-                  {PLAYBACK_SPEEDS.map((speed) => (
-                    <option key={speed} value={speed} className="bg-zinc-900 text-white">
-                      {speed}x
+                  {Object.values(LIGHTING_PRESETS).map((preset) => (
+                    <option key={preset.id} value={preset.id} className="bg-zinc-900 text-white">
+                      {preset.label}
                     </option>
                   ))}
                 </select>
 
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setTime(null)}
-                  aria-label="重設為現在"
-                  className="size-8 text-white hover:bg-white/10 hover:text-white"
-                >
-                  <RotateCcw className="size-4" />
-                </Button>
-              </div>
-            </div>
+                {isLightingPresetLocked ? (
+                  <p className="text-[11px] text-amber-200/80">
+                    目前使用內部 override，若要啟用下拉切換，請先把 INTERNAL_LIGHTING_PRESET_OVERRIDE 設為 null。
+                  </p>
+                ) : null}
+              </section>
+            ) : null}
 
-            <input
-              type="range"
-              min={0}
-              max={totalMinutes}
-              step={1}
-              value={selectedMinuteOffset}
-              onChange={(event) =>
-                setTime(windowStartMs + Number(event.currentTarget.value) * MINUTE_MS)
-              }
-              aria-label="選擇時間"
-              className={cn(
-                "h-2 w-full cursor-pointer appearance-none rounded-full bg-white/20 accent-sky-300",
-                "[&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sky-200",
-              )}
-            />
+            {activeTab === "detail" ? (
+              <section
+                className="mx-auto w-full space-y-2 rounded-lg border border-white/10 bg-black/15 p-3"
+                style={{ maxWidth: SCENE_CONTROL_CONTENT_MAX_WIDTH }}
+              >
+                <div>
+                  <p className="text-xs font-semibold tracking-wide text-white/80 uppercase">地形細節</p>
+                  <p className="text-[11px] text-white/55">DEM 與 landcover 維持相同解析度，避免場景錯位。</p>
+                </div>
 
-            <div className="grid grid-cols-9 text-center text-[11px] text-white/60">
-              {HOUR_OFFSETS.map((offset) => (
-                <span key={offset}>{formatOffsetLabel(offset)}</span>
-              ))}
-            </div>
-          </section>
-        ) : null}
+                <div className="grid grid-cols-3 gap-2">
+                  {TERRAIN_DETAIL_LEVEL_OPTIONS.map((level) => {
+                    const isActive = terrainDetailLevel === level;
+                    return (
+                      <button
+                        key={level}
+                        type="button"
+                        onClick={() => setTerrainDetailLevel(level as TerrainDetailLevel)}
+                        className={
+                          isActive
+                            ? "rounded-md border border-sky-300/70 bg-sky-400/20 px-2 py-2 text-xs font-medium text-white"
+                            : "rounded-md border border-white/20 bg-black/20 px-2 py-2 text-xs text-white/85 transition hover:bg-black/30"
+                        }
+                      >
+                        {level}
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+            ) : null}
+
+            {activeTab === "timeline" ? (
+              <section
+                className="mx-auto w-full space-y-3 rounded-lg border border-white/10 bg-black/15 p-3"
+                style={{ maxWidth: SCENE_CONTROL_CONTENT_MAX_WIDTH }}
+              >
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 text-sm font-medium text-white">
+                    <Clock className="size-4" />
+                    <span>時間軸</span>
+                    <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/75">
+                      {formatTimeLabel(selectedTime)}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => (playbackState === "playing" ? pause() : play())}
+                      aria-label={playbackState === "playing" ? "暫停播放" : "開始播放"}
+                      className="size-8 text-white hover:bg-white/10 hover:text-white"
+                    >
+                      {playbackState === "playing" ? (
+                        <Pause className="size-4" />
+                      ) : (
+                        <Play className="size-4" />
+                      )}
+                    </Button>
+
+                    <label htmlFor="timeline-speed" className="sr-only">
+                      播放速度
+                    </label>
+                    <select
+                      id="timeline-speed"
+                      name="timeline-speed"
+                      value={String(playbackSpeed)}
+                      onChange={(event) =>
+                        setSpeed(Number(event.currentTarget.value) as PlaybackSpeed)
+                      }
+                      className="h-8 rounded-md border border-white/20 bg-black/30 px-2 text-xs text-white outline-none transition focus:border-white/40"
+                      aria-label="播放速度"
+                    >
+                      {PLAYBACK_SPEEDS.map((speed) => (
+                        <option key={speed} value={speed} className="bg-zinc-900 text-white">
+                          {speed}x
+                        </option>
+                      ))}
+                    </select>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setTime(null)}
+                      aria-label="重設為現在"
+                      className="size-8 text-white hover:bg-white/10 hover:text-white"
+                    >
+                      <RotateCcw className="size-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <input
+                  type="range"
+                  min={0}
+                  max={totalMinutes}
+                  step={1}
+                  value={selectedMinuteOffset}
+                  onChange={(event) =>
+                    setTime(windowStartMs + Number(event.currentTarget.value) * MINUTE_MS)
+                  }
+                  aria-label="選擇時間"
+                  className={cn(
+                    "h-2 w-full cursor-pointer appearance-none rounded-full bg-white/20 accent-sky-300",
+                    "[&::-webkit-slider-thumb]:size-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sky-200",
+                  )}
+                />
+
+                <div className="grid grid-cols-9 text-center text-[11px] text-white/60">
+                  {HOUR_OFFSETS.map((offset) => (
+                    <span key={offset}>{formatOffsetLabel(offset)}</span>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+          </div>
+        ) : (
+          <div className="rounded-lg border border-white/10 bg-black/15 px-3 py-2 text-xs text-white/65">
+            已收合場景控制，點右上角可展開光影 / 細節 / 時間軸。
+          </div>
+        )}
       </div>
     </section>
   );

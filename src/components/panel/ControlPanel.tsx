@@ -1,7 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
+import { Badge } from "@/src/components/ui/badge";
 
 import { RegionSelector } from "@/src/components/panel/RegionSelector";
 import { StatusPanel } from "@/src/components/panel/StatusPanel";
@@ -14,6 +16,9 @@ import {
 import { POINTS_OF_INTEREST } from "@/src/lib/config/poi";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
 import type { LightingPresetId } from "@/src/types";
+
+const activePoiFromStore = (activePoiId: string | null) =>
+  POINTS_OF_INTEREST.find((poi) => poi.id === activePoiId) ?? null;
 
 function isLightingPresetId(value: string | null): value is LightingPresetId {
   if (value === null) {
@@ -38,8 +43,6 @@ export function ControlPanel() {
   const setLightingPresetId = useWorkspaceStore((s) => s.setLightingPresetId);
   const activePoiId = useWorkspaceStore((s) => s.activePoiId);
   const poiFocusEnabled = useWorkspaceStore((s) => s.poiFocusEnabled);
-  const setActivePoi = useWorkspaceStore((s) => s.setActivePoi);
-  const setPoiFocusEnabled = useWorkspaceStore((s) => s.setPoiFocusEnabled);
   const clearPoiFocus = useWorkspaceStore((s) => s.clearPoiFocus);
   const activeSection = useWorkspaceStore((s) => s.activeInfoPanelSection);
   const setActiveSection = useWorkspaceStore((s) => s.setActiveInfoPanelSection);
@@ -47,6 +50,7 @@ export function ControlPanel() {
   const isLightingPresetLocked = INTERNAL_LIGHTING_PRESET_OVERRIDE != null;
   const isWeatherOpen = activeSection === "weather";
   const isPoiOpen = activeSection === "poi";
+  const activePoi = activePoiFromStore(activePoiId);
 
   useEffect(() => {
     if (isLightingPresetLocked) {
@@ -89,7 +93,7 @@ export function ControlPanel() {
         <div className="grid grid-cols-2 gap-2">
           <button
             type="button"
-            onClick={() => setActiveSection((current) => (current === "weather" ? null : "weather"))}
+            onClick={() => setActiveSection(isWeatherOpen ? null : "weather")}
             aria-expanded={isWeatherOpen}
             className={
               isWeatherOpen
@@ -102,7 +106,7 @@ export function ControlPanel() {
 
           <button
             type="button"
-            onClick={() => setActiveSection((current) => (current === "poi" ? null : "poi"))}
+            onClick={() => setActiveSection(isPoiOpen ? null : "poi")}
             aria-expanded={isPoiOpen}
             className={
               isPoiOpen
@@ -126,31 +130,36 @@ export function ControlPanel() {
         {isPoiOpen ? (
           <div className="space-y-3">
             <p className="text-[11px] text-white/55">
-              點擊固定景點後，相機會飛到預設鏡位；這一層先作為景點導覽入口，不承擔地形重建職責。
+              點擊地圖圖釘後，相機會飛到預設鏡位，右側會同步顯示景點詳情。
             </p>
 
-            <div className="grid gap-2">
-              {POINTS_OF_INTEREST.map((poi) => {
-                const isActive = poiFocusEnabled && activePoiId === poi.id;
-                return (
-                  <button
-                    key={poi.id}
-                    type="button"
-                    onClick={() => {
-                      setActivePoi(poi.id);
-                      setPoiFocusEnabled(true);
-                    }}
-                    className={
-                      isActive
-                        ? "w-full rounded-md border border-sky-300/70 bg-sky-400/20 px-3 py-2 text-left text-sm text-white transition"
-                        : "w-full rounded-md border border-white/20 bg-black/20 px-3 py-2 text-left text-sm text-white/85 transition hover:bg-black/30"
-                    }
-                  >
-                    {poi.label}
-                  </button>
-                );
-              })}
-            </div>
+            {activePoi ? (
+              <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/20">
+                <Image
+                  src={activePoi.imageUrl}
+                  alt={activePoi.label}
+                  width={960}
+                  height={540}
+                  className="h-40 w-full object-cover"
+                />
+                <div className="space-y-2 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-base font-semibold text-white">{activePoi.label}</p>
+                      <p className="text-xs text-white/55">
+                        {activePoi.lat.toFixed(4)}, {activePoi.lon.toFixed(4)}
+                      </p>
+                    </div>
+                    <Badge variant="secondary">已選擇</Badge>
+                  </div>
+                  <p className="text-sm leading-6 text-white/75">{activePoi.description}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-dashed border-white/15 bg-black/15 p-4 text-sm text-white/70">
+                先從地圖點選一個圖釘，這裡會顯示相關內容與代表圖片。
+              </div>
+            )}
 
             <button
               type="button"

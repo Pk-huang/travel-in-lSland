@@ -44,6 +44,8 @@ export type PoiCameraView = {
 export type PointOfInterest = {
   id: string;
   label: string;
+  imageUrl: string;
+  description: string;
   lat: number;
   lon: number;
   cameraView: PoiCameraView;

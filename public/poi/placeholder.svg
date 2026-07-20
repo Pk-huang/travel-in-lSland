@@ -1,0 +1,14 @@
+<svg width="960" height="540" viewBox="0 0 960 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="960" y2="540" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1F2937"/>
+      <stop offset="1" stop-color="#0B1020"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="540" rx="32" fill="url(#g)"/>
+  <circle cx="708" cy="122" r="58" fill="#FBBF24" fill-opacity="0.92"/>
+  <path d="M0 420L132 350L248 388L388 308L520 355L644 286L792 320L960 250V540H0V420Z" fill="#334155"/>
+  <path d="M0 444L162 382L268 426L408 352L556 398L700 336L838 374L960 316V540H0V444Z" fill="#1E293B"/>
+  <text x="52" y="92" fill="#E2E8F0" font-size="42" font-family="Arial, Helvetica, sans-serif" font-weight="700">Iceland Insight</text>
+  <text x="52" y="138" fill="#CBD5E1" font-size="22" font-family="Arial, Helvetica, sans-serif">Preview image unavailable</text>
+</svg>

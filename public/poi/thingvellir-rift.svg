@@ -1,0 +1,19 @@
+<svg width="960" height="540" viewBox="0 0 960 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="960" y2="540" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#27445D"/>
+      <stop offset="1" stop-color="#0F172A"/>
+    </linearGradient>
+    <linearGradient id="ground" x1="0" y1="280" x2="960" y2="540" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3B4A3F"/>
+      <stop offset="1" stop-color="#111827"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="540" rx="32" fill="url(#sky)"/>
+  <circle cx="784" cy="112" r="54" fill="#FFF3C4" fill-opacity="0.95"/>
+  <path d="M0 332C145 304 190 276 282 240C380 202 474 222 560 236C647 250 741 236 960 188V540H0V332Z" fill="url(#ground)"/>
+  <path d="M314 242C338 220 378 216 409 228C446 242 468 268 500 286C535 306 587 308 640 292C612 328 568 350 512 354C450 358 390 334 354 306C330 286 318 266 314 242Z" fill="#0B1220"/>
+  <path d="M312 248C350 218 387 218 422 236C459 256 490 286 535 296C580 306 628 298 680 282" stroke="#B6C2D1" stroke-opacity="0.35" stroke-width="12" stroke-linecap="round"/>
+  <text x="52" y="92" fill="#F8FAFC" font-size="40" font-family="Arial, Helvetica, sans-serif" font-weight="700">Thingvellir Rift</text>
+  <text x="52" y="138" fill="#D6E2F0" font-size="22" font-family="Arial, Helvetica, sans-serif">Cracked lava plains and tectonic rift</text>
+</svg>
