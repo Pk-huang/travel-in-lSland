@@ -51,6 +51,56 @@ export type PointOfInterest = {
   cameraView: PoiCameraView;
 };
 
+export type PoiSeedSyncStatus = "fresh" | "stale" | "failed";
+
+export type PoiSeedRecord = {
+  poiId: string;
+  slug: string;
+  featured: boolean;
+  name: {
+    zhHant: string;
+    en: string;
+  };
+  location: {
+    lat: number;
+    lon: number;
+  };
+  category: string;
+  description: {
+    short: string;
+    medium: string;
+    long: string;
+  };
+  media: {
+    heroImageUrl: string;
+    sourcePageUrl: string;
+    author: string;
+    licenseName: string;
+    licenseUrl: string;
+    attributionText: string;
+  };
+  sources: {
+    wikidataId: string;
+    wikidataUrl: string;
+    wikipediaUrl: string;
+    commonsCategory: string;
+    osmReference: string;
+  };
+  sync: {
+    sourcePriority: string[];
+    lastSyncedAt: string;
+    staleAfter: string;
+    syncStatus: PoiSeedSyncStatus;
+    syncError: string | null;
+  };
+  tags?: string[];
+  visit?: {
+    region: Region;
+    bestSeason: string[];
+  };
+  cameraView?: PoiCameraView;
+};
+
 export type WeatherConditions = {
   source: "vedur";
   timestamp: string;

@@ -5,7 +5,8 @@ import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, type ElementRef } from "react";
 import { Spherical, Vector3 } from "three";
 
-import { getPointOfInterestById } from "@/src/lib/config/poi";
+import { findPointOfInterestById } from "@/src/lib/config/poi";
+import { useWorkspacePois } from "@/src/components/providers/WorkspaceProvider";
 import {
   elevationToSceneY,
   lonLatToSceneXZ,
@@ -38,9 +39,13 @@ function easeInOutCubic(t: number) {
 export function CameraRig() {
   const controlsRef = useRef<ElementRef<typeof OrbitControls> | null>(null);
   const heightmap = useHeightmap();
+  const { points: pointsOfInterest } = useWorkspacePois();
   const activePoiId = useWorkspaceStore((s) => s.activePoiId);
   const poiFocusEnabled = useWorkspaceStore((s) => s.poiFocusEnabled);
-  const activePoi = useMemo(() => getPointOfInterestById(activePoiId), [activePoiId]);
+  const activePoi = useMemo(
+    () => findPointOfInterestById(pointsOfInterest, activePoiId),
+    [activePoiId, pointsOfInterest],
+  );
   const transitionRef = useRef<null | {
     startAt: number;
     fromPosition: Vector3;

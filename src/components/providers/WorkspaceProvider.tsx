@@ -6,6 +6,10 @@ import {
   useIcelandStatus,
   type IcelandStatusState,
 } from "@/src/lib/client/use-iceland-status";
+import {
+  useFeaturedPois,
+  type FeaturedPoisState,
+} from "@/src/lib/client/use-featured-pois";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
 
 /**
@@ -19,14 +23,20 @@ import { useWorkspaceStore } from "@/src/lib/store/workspace";
  *
  * 資料單向流：store.region → 這裡 useIcelandStatus(region) → data → 各島讀取。
  */
-const WorkspaceDataContext = createContext<IcelandStatusState | null>(null);
+type WorkspaceContextValue = {
+  status: IcelandStatusState;
+  pois: FeaturedPoisState;
+};
+
+const WorkspaceDataContext = createContext<WorkspaceContextValue | null>(null);
 
 export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   const region = useWorkspaceStore((s) => s.region);
   const status = useIcelandStatus(region);
+  const pois = useFeaturedPois();
 
   return (
-    <WorkspaceDataContext.Provider value={status}>
+    <WorkspaceDataContext.Provider value={{ status, pois }}>
       {children}
     </WorkspaceDataContext.Provider>
   );
@@ -38,5 +48,14 @@ export function useWorkspaceData(): IcelandStatusState {
   if (!ctx) {
     throw new Error("useWorkspaceData 必須在 <WorkspaceProvider> 內使用");
   }
-  return ctx;
+  return ctx.status;
+}
+
+/** 取得前台景點資料來源（API 優先，失敗回退本地 seeds）。 */
+export function useWorkspacePois(): FeaturedPoisState {
+  const ctx = useContext(WorkspaceDataContext);
+  if (!ctx) {
+    throw new Error("useWorkspacePois 必須在 <WorkspaceProvider> 內使用");
+  }
+  return ctx.pois;
 }

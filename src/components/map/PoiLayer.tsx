@@ -4,7 +4,8 @@ import { Html } from "@react-three/drei";
 import Image from "next/image";
 import { useMemo, useState } from "react";
 
-import { getPointOfInterestById, POINTS_OF_INTEREST } from "@/src/lib/config/poi";
+import { findPointOfInterestById } from "@/src/lib/config/poi";
+import { useWorkspacePois } from "@/src/components/providers/WorkspaceProvider";
 import {
   elevationToSceneY,
   lonLatToSceneXZ,
@@ -118,17 +119,21 @@ function PoiPin({
  */
 export function PoiLayer() {
   const heightmap = useHeightmap();
+  const { points: pointsOfInterest } = useWorkspacePois();
   const activePoiId = useWorkspaceStore((s) => s.activePoiId);
   const poiFocusEnabled = useWorkspaceStore((s) => s.poiFocusEnabled);
   const setActivePoi = useWorkspaceStore((s) => s.setActivePoi);
   const setPoiFocusEnabled = useWorkspaceStore((s) => s.setPoiFocusEnabled);
   const setActiveInfoPanelSection = useWorkspaceStore((s) => s.setActiveInfoPanelSection);
-  const activePoi = useMemo(() => getPointOfInterestById(activePoiId), [activePoiId]);
+  const activePoi = useMemo(
+    () => findPointOfInterestById(pointsOfInterest, activePoiId),
+    [activePoiId, pointsOfInterest],
+  );
   const [hoveredPoiId, setHoveredPoiId] = useState<string | null>(null);
 
   return (
     <>
-      {POINTS_OF_INTEREST.map((poi) => {
+      {pointsOfInterest.map((poi) => {
         const { x, z } = lonLatToSceneXZ(poi.lon, poi.lat);
         const surfaceY = heightmap
           ? elevationToSceneY(sampleElevationMeters(heightmap, poi.lon, poi.lat))

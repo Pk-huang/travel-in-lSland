@@ -7,18 +7,23 @@ import { Badge } from "@/src/components/ui/badge";
 
 import { RegionSelector } from "@/src/components/panel/RegionSelector";
 import { StatusPanel } from "@/src/components/panel/StatusPanel";
-import { useWorkspaceData } from "@/src/components/providers/WorkspaceProvider";
+import {
+  useWorkspaceData,
+  useWorkspacePois,
+} from "@/src/components/providers/WorkspaceProvider";
 import {
   DEFAULT_LIGHTING_PRESET_ID,
   INTERNAL_LIGHTING_PRESET_OVERRIDE,
   LIGHTING_PRESETS,
 } from "@/src/lib/config/app";
-import { POINTS_OF_INTEREST } from "@/src/lib/config/poi";
+import { findPointOfInterestById } from "@/src/lib/config/poi";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
-import type { LightingPresetId } from "@/src/types";
+import type { LightingPresetId, PointOfInterest } from "@/src/types";
 
-const activePoiFromStore = (activePoiId: string | null) =>
-  POINTS_OF_INTEREST.find((poi) => poi.id === activePoiId) ?? null;
+const activePoiFromStore = (
+  points: PointOfInterest[],
+  activePoiId: string | null,
+) => findPointOfInterestById(points, activePoiId);
 
 function isLightingPresetId(value: string | null): value is LightingPresetId {
   if (value === null) {
@@ -47,10 +52,11 @@ export function ControlPanel() {
   const activeSection = useWorkspaceStore((s) => s.activeInfoPanelSection);
   const setActiveSection = useWorkspaceStore((s) => s.setActiveInfoPanelSection);
   const { data, loading, error, refetch } = useWorkspaceData();
+  const { points: pointsOfInterest } = useWorkspacePois();
   const isLightingPresetLocked = INTERNAL_LIGHTING_PRESET_OVERRIDE != null;
   const isWeatherOpen = activeSection === "weather";
   const isPoiOpen = activeSection === "poi";
-  const activePoi = activePoiFromStore(activePoiId);
+  const activePoi = activePoiFromStore(pointsOfInterest, activePoiId);
 
   useEffect(() => {
     if (isLightingPresetLocked) {

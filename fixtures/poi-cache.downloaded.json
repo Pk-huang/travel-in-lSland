@@ -1,0 +1,1319 @@
+{
+  "generatedAt": "2026-07-20T10:41:15.285Z",
+  "total": 30,
+  "items": [
+    {
+      "poiId": "thingvellir-national-park",
+      "name": {
+        "zhHant": "辛格韋德利國家公園",
+        "en": "Thingvellir National Park"
+      },
+      "location": {
+        "lat": 64.2581,
+        "lon": -21.125
+      },
+      "category": "national_park",
+      "sources": {
+        "wikidataId": "Q107370",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q107370",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Thingvellir_National_Park",
+        "commonsCategory": "Thingvellir National Park",
+        "osmReference": "search:Thingvellir National Park,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:39:37.025Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": "辛格韋德利",
+        "labelEn": "Thingvellir National Park",
+        "descriptionZhHant": null,
+        "descriptionEn": "national park in Iceland",
+        "lat": 64.258055555556,
+        "lon": -21.125
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "gullfoss",
+      "name": {
+        "zhHant": "黃金瀑布",
+        "en": "Gullfoss"
+      },
+      "location": {
+        "lat": 64.3271,
+        "lon": -20.1218
+      },
+      "category": "waterfall",
+      "sources": {
+        "wikidataId": "Q165167",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q165167",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Gullfoss",
+        "commonsCategory": "Gullfoss",
+        "osmReference": "search:Gullfoss,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:39:38.579Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": null,
+        "labelEn": "Ostritz",
+        "descriptionZhHant": null,
+        "descriptionEn": "municipality of Germany",
+        "lat": 51.014722222222,
+        "lon": 14.932222222222
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "geysir-geothermal-area",
+      "name": {
+        "zhHant": "蓋歇爾地熱區",
+        "en": "Geysir Geothermal Area"
+      },
+      "location": {
+        "lat": 64.3104,
+        "lon": -20.3024
+      },
+      "category": "geothermal",
+      "sources": {
+        "wikidataId": "Q211983",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q211983",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Geysir_Geothermal_Area",
+        "commonsCategory": "Geysir Geothermal Area",
+        "osmReference": "search:Geysir Geothermal Area,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:39:39.897Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": null,
+        "labelEn": null,
+        "descriptionZhHant": null,
+        "descriptionEn": null,
+        "lat": null,
+        "lon": null
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "seljalandsfoss",
+      "name": {
+        "zhHant": "塞里雅蘭瀑布",
+        "en": "Seljalandsfoss"
+      },
+      "location": {
+        "lat": 63.6156,
+        "lon": -19.991
+      },
+      "category": "waterfall",
+      "sources": {
+        "wikidataId": "Q1136324",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q1136324",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Seljalandsfoss",
+        "commonsCategory": "Seljalandsfoss",
+        "osmReference": "search:Seljalandsfoss,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:39:41.273Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": null,
+        "labelEn": "Costa Azul",
+        "descriptionZhHant": "維基媒體消歧義頁",
+        "descriptionEn": "Wikimedia disambiguation page",
+        "lat": null,
+        "lon": null
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "skogafoss",
+      "name": {
+        "zhHant": "斯科加瀑布",
+        "en": "Skogafoss"
+      },
+      "location": {
+        "lat": 63.5321,
+        "lon": -19.5114
+      },
+      "category": "waterfall",
+      "sources": {
+        "wikidataId": "Q828676",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q828676",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Skogafoss",
+        "commonsCategory": "Skogafoss",
+        "osmReference": "search:Skogafoss,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:39:43.026Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": "聖豐",
+        "labelEn": "Saint-Fons",
+        "descriptionZhHant": "法國市鎮",
+        "descriptionEn": "commune in the metropolis of Lyon, France",
+        "lat": 45.708611111111,
+        "lon": 4.8533333333333
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "reynisfjara-black-sand-beach",
+      "name": {
+        "zhHant": "雷尼斯黑沙灘",
+        "en": "Reynisfjara Black Sand Beach"
+      },
+      "location": {
+        "lat": 63.4042,
+        "lon": -19.0452
+      },
+      "category": "beach",
+      "sources": {
+        "wikidataId": "Q7318086",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q7318086",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Reynisfjara_Black_Sand_Beach",
+        "commonsCategory": "Reynisfjara Black Sand Beach",
+        "osmReference": "search:Reynisfjara Black Sand Beach,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:39:44.361Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": null,
+        "labelEn": "Category:Music of Madagascar",
+        "descriptionZhHant": "維基媒體專案分類",
+        "descriptionEn": "Wikimedia category",
+        "lat": null,
+        "lon": null
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "jokulsarlon-glacier-lagoon",
+      "name": {
+        "zhHant": "傑古沙龍冰河湖",
+        "en": "Jokulsarlon Glacier Lagoon"
+      },
+      "location": {
+        "lat": 64.0485,
+        "lon": -16.1794
+      },
+      "category": "glacier_lagoon",
+      "sources": {
+        "wikidataId": "Q936783",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q936783",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Jokulsarlon_Glacier_Lagoon",
+        "commonsCategory": "Jokulsarlon Glacier Lagoon",
+        "osmReference": "search:Jokulsarlon Glacier Lagoon,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:39:46.112Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": null,
+        "labelEn": "Jon Bing",
+        "descriptionZhHant": null,
+        "descriptionEn": "Norwegian writer and professor of law (1944-2014)",
+        "lat": null,
+        "lon": null
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "diamond-beach",
+      "name": {
+        "zhHant": "鑽石沙灘",
+        "en": "Diamond Beach"
+      },
+      "location": {
+        "lat": 64.0377,
+        "lon": -16.1775
+      },
+      "category": "beach",
+      "sources": {
+        "wikidataId": "Q116702514",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q116702514",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Diamond_Beach",
+        "commonsCategory": "Diamond Beach",
+        "osmReference": "search:Diamond Beach,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:39:47.449Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": null,
+        "labelEn": null,
+        "descriptionZhHant": null,
+        "descriptionEn": null,
+        "lat": 50.209167523097,
+        "lon": 9.1026951107201
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "kirkjufell",
+      "name": {
+        "zhHant": "教會山",
+        "en": "Kirkjufell"
+      },
+      "location": {
+        "lat": 64.9419,
+        "lon": -23.3065
+      },
+      "category": "mountain",
+      "sources": {
+        "wikidataId": "Q803421",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q803421",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Kirkjufell",
+        "commonsCategory": "Kirkjufell",
+        "osmReference": "search:Kirkjufell,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:39:48.790Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": null,
+        "labelEn": "Bahnstrecke Walburg–Großalmerode West",
+        "descriptionZhHant": null,
+        "descriptionEn": "railway line",
+        "lat": null,
+        "lon": null
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "blue-lagoon",
+      "name": {
+        "zhHant": "藍湖",
+        "en": "Blue Lagoon"
+      },
+      "location": {
+        "lat": 63.8792,
+        "lon": -22.4458
+      },
+      "category": "geothermal_spa",
+      "sources": {
+        "wikidataId": "Q910679",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q910679",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Blue_Lagoon",
+        "commonsCategory": "Blue Lagoon",
+        "osmReference": "search:Blue Lagoon,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:40:01.761Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": null,
+        "labelEn": null,
+        "descriptionZhHant": null,
+        "descriptionEn": null,
+        "lat": null,
+        "lon": null
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "hallgrimskirkja",
+      "name": {
+        "zhHant": "哈爾格林姆教堂",
+        "en": "Hallgrimskirkja"
+      },
+      "location": {
+        "lat": 64.1417,
+        "lon": -21.9266
+      },
+      "category": "landmark",
+      "sources": {
+        "wikidataId": "Q309340",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q309340",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Hallgrimskirkja",
+        "commonsCategory": "Hallgrimskirkja",
+        "osmReference": "search:Hallgrimskirkja,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:40:03.710Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": null,
+        "labelEn": "Gray Akodont",
+        "descriptionZhHant": null,
+        "descriptionEn": "species of mammal",
+        "lat": null,
+        "lon": null
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "harpa-concert-hall",
+      "name": {
+        "zhHant": "哈帕音樂廳",
+        "en": "Harpa Concert Hall"
+      },
+      "location": {
+        "lat": 64.1501,
+        "lon": -21.9323
+      },
+      "category": "landmark",
+      "sources": {
+        "wikidataId": "Q567000",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q567000",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Harpa_Concert_Hall",
+        "commonsCategory": "Harpa Concert Hall",
+        "osmReference": "search:Harpa Concert Hall,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:40:05.042Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": "奇爾特恩鐵路",
+        "labelEn": "Chiltern Railways",
+        "descriptionZhHant": null,
+        "descriptionEn": "transport company",
+        "lat": null,
+        "lon": null
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "sun-voyager",
+      "name": {
+        "zhHant": "太陽航海者",
+        "en": "Sun Voyager"
+      },
+      "location": {
+        "lat": 64.1475,
+        "lon": -21.9226
+      },
+      "category": "sculpture",
+      "sources": {
+        "wikidataId": "Q765647",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q765647",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Sun_Voyager",
+        "commonsCategory": "Sun Voyager",
+        "osmReference": "search:Sun Voyager,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:40:06.597Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": null,
+        "labelEn": "Kálmáncsa",
+        "descriptionZhHant": null,
+        "descriptionEn": "village in Hungary",
+        "lat": 46.067588888889,
+        "lon": 17.611338888889
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "perlan",
+      "name": {
+        "zhHant": "珍珠樓",
+        "en": "Perlan"
+      },
+      "location": {
+        "lat": 64.129,
+        "lon": -21.9185
+      },
+      "category": "museum",
+      "sources": {
+        "wikidataId": "Q1434299",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q1434299",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Perlan",
+        "commonsCategory": "Perlan",
+        "osmReference": "search:Perlan,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:40:07.918Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": "ISAPI",
+        "labelEn": "Internet Server Application Programming Interface",
+        "descriptionZhHant": null,
+        "descriptionEn": "API of Microsoft Internet Information Services server services",
+        "lat": null,
+        "lon": null
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "dettifoss",
+      "name": {
+        "zhHant": "黛提瀑布",
+        "en": "Dettifoss"
+      },
+      "location": {
+        "lat": 65.8145,
+        "lon": -16.3846
+      },
+      "category": "waterfall",
+      "sources": {
+        "wikidataId": "Q1193018",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q1193018",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Dettifoss",
+        "commonsCategory": "Dettifoss",
+        "osmReference": "search:Dettifoss,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:40:09.249Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": "丹尼絲",
+        "labelEn": "Denise",
+        "descriptionZhHant": "女性人名 (Denise)",
+        "descriptionEn": "female given name",
+        "lat": null,
+        "lon": null
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "godafoss",
+      "name": {
+        "zhHant": "眾神瀑布",
+        "en": "Godafoss"
+      },
+      "location": {
+        "lat": 65.6828,
+        "lon": -17.5502
+      },
+      "category": "waterfall",
+      "sources": {
+        "wikidataId": "Q849636",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q849636",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Godafoss",
+        "commonsCategory": "Godafoss",
+        "osmReference": "search:Godafoss,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:40:10.571Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": null,
+        "labelEn": "Brian Sullivan",
+        "descriptionZhHant": null,
+        "descriptionEn": "ice hockey player (1980-)",
+        "lat": null,
+        "lon": null
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "hraunfossar",
+      "name": {
+        "zhHant": "熔岩瀑布",
+        "en": "Hraunfossar"
+      },
+      "location": {
+        "lat": 64.7004,
+        "lon": -20.9738
+      },
+      "category": "waterfall",
+      "sources": {
+        "wikidataId": "Q1232478",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q1232478",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Hraunfossar",
+        "commonsCategory": "Hraunfossar",
+        "osmReference": "search:Hraunfossar,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:40:12.039Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": null,
+        "labelEn": "George C. Thomas Jr.",
+        "descriptionZhHant": null,
+        "descriptionEn": "American golf course architect, botanist, and author (1873–1932)",
+        "lat": null,
+        "lon": null
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "dynjandi",
+      "name": {
+        "zhHant": "丁堅地瀑布",
+        "en": "Dynjandi"
+      },
+      "location": {
+        "lat": 65.732,
+        "lon": -23.1991
+      },
+      "category": "waterfall",
+      "sources": {
+        "wikidataId": "Q1187459",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q1187459",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Dynjandi",
+        "commonsCategory": "Dynjandi",
+        "osmReference": "search:Dynjandi,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:40:13.351Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": null,
+        "labelEn": "Ajon",
+        "descriptionZhHant": null,
+        "descriptionEn": "crater on Mars",
+        "lat": 16.49,
+        "lon": 103.14
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "svartifoss",
+      "name": {
+        "zhHant": "黑瀑布",
+        "en": "Svartifoss"
+      },
+      "location": {
+        "lat": 64.0266,
+        "lon": -16.9752
+      },
+      "category": "waterfall",
+      "sources": {
+        "wikidataId": "Q1549465",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q1549465",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Svartifoss",
+        "commonsCategory": "Svartifoss",
+        "osmReference": "search:Svartifoss,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:40:14.669Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": "紅手突擊隊",
+        "labelEn": "Red Hand Commando",
+        "descriptionZhHant": null,
+        "descriptionEn": "Ulster loyalist paramilitary group",
+        "lat": null,
+        "lon": null
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "fjadrargljufur-canyon",
+      "name": {
+        "zhHant": "費德拉格尤富爾峽谷",
+        "en": "Fjadrargljufur Canyon"
+      },
+      "location": {
+        "lat": 63.7713,
+        "lon": -18.1717
+      },
+      "category": "canyon",
+      "sources": {
+        "wikidataId": "Q5449952",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q5449952",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Fjadrargljufur_Canyon",
+        "commonsCategory": "Fjadrargljufur Canyon",
+        "osmReference": "search:Fjadrargljufur Canyon,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:40:37.985Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": "Request failed: 429 https://www.wikidata.org/w/api.php?action=wbgetentities&ids=Q5449952&props=labels%7Cdescriptions%7Cclaims&languages=zh-hant%7Cen&format=json"
+      },
+      "wikidata": null,
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "snaefellsjokull-national-park",
+      "name": {
+        "zhHant": "斯奈山半島國家公園",
+        "en": "Snaefellsjokull National Park"
+      },
+      "location": {
+        "lat": 64.8,
+        "lon": -23.78
+      },
+      "category": "national_park",
+      "sources": {
+        "wikidataId": "Q907269",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q907269",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Snaefellsjokull_National_Park",
+        "commonsCategory": "Snaefellsjokull National Park",
+        "osmReference": "search:Snaefellsjokull National Park,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:41:01.258Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": null,
+        "labelEn": "Bremecke",
+        "descriptionZhHant": "維基媒體消歧義頁",
+        "descriptionEn": "Wikimedia disambiguation page",
+        "lat": null,
+        "lon": null
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "vatnajokull-national-park",
+      "name": {
+        "zhHant": "瓦特納冰川國家公園",
+        "en": "Vatnajokull National Park"
+      },
+      "location": {
+        "lat": 64.422,
+        "lon": -16.79
+      },
+      "category": "national_park",
+      "sources": {
+        "wikidataId": "Q1287611",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q1287611",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Vatnajokull_National_Park",
+        "commonsCategory": "Vatnajokull National Park",
+        "osmReference": "search:Vatnajokull National Park,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:41:02.573Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": null,
+        "labelEn": null,
+        "descriptionZhHant": null,
+        "descriptionEn": null,
+        "lat": null,
+        "lon": null
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "landmannalaugar",
+      "name": {
+        "zhHant": "蘭德曼納勞卡",
+        "en": "Landmannalaugar"
+      },
+      "location": {
+        "lat": 63.9847,
+        "lon": -19.067
+      },
+      "category": "highland",
+      "sources": {
+        "wikidataId": "Q1798784",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q1798784",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Landmannalaugar",
+        "commonsCategory": "Landmannalaugar",
+        "osmReference": "search:Landmannalaugar,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:41:04.097Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": null,
+        "labelEn": "Farinera del Sindicat Agrícola de Cervera",
+        "descriptionZhHant": null,
+        "descriptionEn": "cultural property in Cervera, Spain",
+        "lat": 41.6752778,
+        "lon": 1.2761111
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "dyrholaey",
+      "name": {
+        "zhHant": "迪霍拉里",
+        "en": "Dyrholaey"
+      },
+      "location": {
+        "lat": 63.3993,
+        "lon": -19.1262
+      },
+      "category": "cliff",
+      "sources": {
+        "wikidataId": "Q1262286",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q1262286",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Dyrholaey",
+        "commonsCategory": "Dyrholaey",
+        "osmReference": "search:Dyrholaey,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:41:05.671Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": null,
+        "labelEn": "East Point",
+        "descriptionZhHant": null,
+        "descriptionEn": "census designated place in Cullman County, Alabama, United States",
+        "lat": 34.1831,
+        "lon": -86.7936
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "vestrahorn",
+      "name": {
+        "zhHant": "維斯特拉霍恩山",
+        "en": "Vestrahorn"
+      },
+      "location": {
+        "lat": 64.2549,
+        "lon": -14.9756
+      },
+      "category": "mountain",
+      "sources": {
+        "wikidataId": "Q3556967",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q3556967",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Vestrahorn",
+        "commonsCategory": "Vestrahorn",
+        "osmReference": "search:Vestrahorn,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:41:07.200Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": null,
+        "labelEn": "Hélio Roque",
+        "descriptionZhHant": null,
+        "descriptionEn": "Portuguese footballer",
+        "lat": null,
+        "lon": null
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "hvitserkur",
+      "name": {
+        "zhHant": "白袍怪石",
+        "en": "Hvitserkur"
+      },
+      "location": {
+        "lat": 65.6062,
+        "lon": -20.6353
+      },
+      "category": "sea_stack",
+      "sources": {
+        "wikidataId": "Q852885",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q852885",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Hvitserkur",
+        "commonsCategory": "Hvitserkur",
+        "osmReference": "search:Hvitserkur,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:41:08.523Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": null,
+        "labelEn": "Bamyan",
+        "descriptionZhHant": "維基媒體消歧義頁",
+        "descriptionEn": "Wikimedia disambiguation page",
+        "lat": null,
+        "lon": null
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "myvatn",
+      "name": {
+        "zhHant": "米湖",
+        "en": "Myvatn"
+      },
+      "location": {
+        "lat": 65.6056,
+        "lon": -16.9969
+      },
+      "category": "lake",
+      "sources": {
+        "wikidataId": "Q211886",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q211886",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Myvatn",
+        "commonsCategory": "Myvatn",
+        "osmReference": "search:Myvatn,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:41:10.086Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": null,
+        "labelEn": "(367789) 2011 AG5",
+        "descriptionZhHant": "小行星",
+        "descriptionEn": "asteroid",
+        "lat": null,
+        "lon": null
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "namafjall-hverir",
+      "name": {
+        "zhHant": "納馬山地熱區",
+        "en": "Namafjall Hverir"
+      },
+      "location": {
+        "lat": 65.6412,
+        "lon": -16.8095
+      },
+      "category": "geothermal",
+      "sources": {
+        "wikidataId": "Q6962800",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q6962800",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Namafjall_Hverir",
+        "commonsCategory": "Namafjall Hverir",
+        "osmReference": "search:Namafjall Hverir,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:41:11.409Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": null,
+        "labelEn": "Nancy Lee",
+        "descriptionZhHant": "維基媒體消歧義頁",
+        "descriptionEn": "Wikimedia disambiguation page",
+        "lat": null,
+        "lon": null
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "krafla",
+      "name": {
+        "zhHant": "克拉夫拉火山",
+        "en": "Krafla"
+      },
+      "location": {
+        "lat": 65.715,
+        "lon": -16.728
+      },
+      "category": "volcano",
+      "sources": {
+        "wikidataId": "Q841596",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q841596",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Krafla",
+        "commonsCategory": "Krafla",
+        "osmReference": "search:Krafla,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:41:12.945Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": "仙台機場車站",
+        "labelEn": "Sendai Airport Station",
+        "descriptionZhHant": null,
+        "descriptionEn": "railway station in Natori, Miyagi prefecture, Japan",
+        "lat": 38.13725,
+        "lon": 140.92980556
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    },
+    {
+      "poiId": "askja",
+      "name": {
+        "zhHant": "阿斯恰火山",
+        "en": "Askja"
+      },
+      "location": {
+        "lat": 65.05,
+        "lon": -16.75
+      },
+      "category": "volcano",
+      "sources": {
+        "wikidataId": "Q217013",
+        "wikidataUrl": "https://www.wikidata.org/wiki/Q217013",
+        "wikipediaUrl": "https://en.wikipedia.org/wiki/Askja",
+        "commonsCategory": "Askja",
+        "osmReference": "search:Askja,Iceland"
+      },
+      "sync": {
+        "fetchedAt": "2026-07-20T10:41:14.284Z",
+        "sourcePriority": [
+          "wikidata",
+          "commons",
+          "osm"
+        ],
+        "syncError": null
+      },
+      "wikidata": {
+        "labelZhHant": null,
+        "labelEn": null,
+        "descriptionZhHant": null,
+        "descriptionEn": null,
+        "lat": null,
+        "lon": null
+      },
+      "commons": {
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Thingvellir.jpg",
+        "descriptionUrl": "https://commons.wikimedia.org/wiki/File:Thingvellir.jpg",
+        "author": "Andreas Tille",
+        "licenseName": "CC BY-SA 4.0",
+        "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+        "usageTerms": "Creative Commons Attribution-Share Alike 4.0"
+      }
+    }
+  ]
+}
