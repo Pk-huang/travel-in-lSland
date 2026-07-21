@@ -42,7 +42,12 @@ export function ControlPanel() {
   const activePoiId = useWorkspaceStore((s) => s.activePoiId);
   const poiFocusEnabled = useWorkspaceStore((s) => s.poiFocusEnabled);
   const clearPoiFocus = useWorkspaceStore((s) => s.clearPoiFocus);
+  const selectStation = useWorkspaceStore((s) => s.selectStation);
+  const selectRoadSegment = useWorkspaceStore((s) => s.selectRoadSegment);
+  const setMapFocusTarget = useWorkspaceStore((s) => s.setMapFocusTarget);
+  const setPoiFocusEnabled = useWorkspaceStore((s) => s.setPoiFocusEnabled);
   const activeSection = useWorkspaceStore((s) => s.activeInfoPanelSection);
+  const setActiveInfoPanelSection = useWorkspaceStore((s) => s.setActiveInfoPanelSection);
   const { data, loading, error, refetch } = useWorkspaceData();
   const { points: pointsOfInterest } = useWorkspacePois();
   const isLightingPresetLocked = INTERNAL_LIGHTING_PRESET_OVERRIDE != null;
@@ -151,13 +156,28 @@ export function ControlPanel() {
         ) : null}
       </section>
 
-      {isWeatherOpen ? (
+      {isWeatherOpen || isRoadOpen ? (
         <StatusPanel
           data={data}
           loading={loading}
           error={error}
           onRetry={refetch}
-          showRoadList={false}
+          showWeatherList={isWeatherOpen}
+          showRoadList={isRoadOpen}
+          onSelectWeather={({ index, lat, lon }) => {
+            setPoiFocusEnabled(false);
+            selectRoadSegment(null);
+            selectStation(`station-${index}`);
+            setMapFocusTarget({ lon, lat });
+            setActiveInfoPanelSection("weather");
+          }}
+          onSelectRoad={({ segmentId, lon, lat }) => {
+            setPoiFocusEnabled(false);
+            selectStation(null);
+            selectRoadSegment(segmentId);
+            setMapFocusTarget({ lon, lat });
+            setActiveInfoPanelSection("road");
+          }}
         />
       ) : null}
     </div>

@@ -42,6 +42,8 @@ export type WorkspaceState = {
   playbackSpeed: PlaybackSpeed;
   /** 被點選的測站 id（Phase 2-2 啟用，先定型別）。 */
   selectedStationId: string | null;
+  /** 被點選的路段 id（左側 dashboard 與地圖圖釘聯動）。 */
+  selectedRoadSegmentId: string | null;
   /** 目前焦點景點 id；null 代表未進入景點模式。 */
   activePoiId: string | null;
   /** 景點模式啟用旗標；先與焦點 id 分離，後續方便加 loading/transition 條件。 */
@@ -63,6 +65,7 @@ export type WorkspaceState = {
   pause: () => void;
   setSpeed: (playbackSpeed: PlaybackSpeed) => void;
   selectStation: (id: string | null) => void;
+  selectRoadSegment: (id: string | null) => void;
   setActivePoi: (id: string | null) => void;
   setPoiFocusEnabled: (enabled: boolean) => void;
   setMapFocusTarget: (target: MapFocusTarget) => void;
@@ -80,6 +83,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   playbackState: "paused",
   playbackSpeed: 1,
   selectedStationId: null,
+  selectedRoadSegmentId: null,
   activePoiId: null,
   poiFocusEnabled: false,
   mapFocusTarget: null,
@@ -95,6 +99,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   pause: () => set({ playbackState: "paused" }),
   setSpeed: (playbackSpeed) => set({ playbackSpeed }),
   selectStation: (selectedStationId) => set({ selectedStationId }),
+  selectRoadSegment: (selectedRoadSegmentId) => set({ selectedRoadSegmentId }),
   setActivePoi: (activePoiId) => set({ activePoiId }),
   setPoiFocusEnabled: (poiFocusEnabled) => set({ poiFocusEnabled }),
   setMapFocusTarget: (mapFocusTarget) => set({ mapFocusTarget }),

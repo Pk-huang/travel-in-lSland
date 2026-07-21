@@ -9,6 +9,7 @@ const REGIONS: Region[] = ["south", "west", "north", "east", "all"];
 export type RegionSelectorProps = {
   value: Region;
   onChange: (region: Region) => void;
+  onSelect?: (region: Region) => void;
   disabled?: boolean;
 };
 
@@ -18,6 +19,7 @@ export type RegionSelectorProps = {
 export function RegionSelector({
   value,
   onChange,
+  onSelect,
   disabled = false,
 }: RegionSelectorProps) {
   return (
@@ -30,7 +32,10 @@ export function RegionSelector({
             type="button"
             size="sm"
             variant={active ? "default" : "secondary"}
-            onClick={() => onChange(region)}
+            onClick={() => {
+              onChange(region);
+              onSelect?.(region);
+            }}
             disabled={disabled}
             aria-pressed={active}
           >

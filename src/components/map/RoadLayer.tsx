@@ -3,75 +3,31 @@
 import { Route } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { MapMarkerTag } from "@/src/components/map/MapMarkerTag";
-import {
-  POI_CARD_WIDTH_CLASS,
-  POI_DESCRIPTION_TEXT_CLASS,
-  POI_TITLE_TEXT_CLASS,
-} from "@/src/lib/config/poi-display";
+import { MapMarkerTag } from "@/src/components/ui/map-marker-tag";
 import {
   elevationToSceneY,
   lonLatToSceneXZ,
   sampleElevationMeters,
 } from "@/src/lib/map/coords";
+import { selectVisibleMarkerIds } from "@/src/lib/map/marker-visibility";
 import { useHeightmap } from "@/src/lib/map/use-heightmap";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
-import type { RoadStatus, RoadSegment } from "@/src/types";
-
-const ROAD_STYLE: Record<
-  RoadStatus,
-  {
-    dotColorClass: string;
-    dotHoverColorClass: string;
-    dotActiveColorClass: string;
-    dotActiveGlowShadowClass: string;
-    activeAccentClass: string;
-    activeShadowClass: string;
-    hoverBorderClass: string;
-    expandedLineColorClass: string;
-    expandedLineGlowShadowClass: string;
-  }
-> = {
-  open: {
-    dotColorClass: "text-emerald-400",
-    dotHoverColorClass: "group-hover:text-emerald-300",
-    dotActiveColorClass: "text-emerald-300",
-    dotActiveGlowShadowClass: "drop-shadow-[0_0_8px_rgba(52,211,153,0.9)]",
-    activeAccentClass: "border-emerald-300/80",
-    activeShadowClass: "shadow-emerald-400/20",
-    hoverBorderClass: "hover:border-emerald-300/70",
-    expandedLineColorClass: "bg-emerald-300/90",
-    expandedLineGlowShadowClass: "shadow-[0_0_12px_rgba(52,211,153,0.45)]",
-  },
-  caution: {
-    dotColorClass: "text-amber-300",
-    dotHoverColorClass: "group-hover:text-amber-200",
-    dotActiveColorClass: "text-amber-200",
-    dotActiveGlowShadowClass: "drop-shadow-[0_0_8px_rgba(251,191,36,0.9)]",
-    activeAccentClass: "border-amber-300/80",
-    activeShadowClass: "shadow-amber-400/20",
-    hoverBorderClass: "hover:border-amber-300/70",
-    expandedLineColorClass: "bg-amber-200/90",
-    expandedLineGlowShadowClass: "shadow-[0_0_12px_rgba(251,191,36,0.45)]",
-  },
-  closed: {
-    dotColorClass: "text-rose-400",
-    dotHoverColorClass: "group-hover:text-rose-300",
-    dotActiveColorClass: "text-rose-300",
-    dotActiveGlowShadowClass: "drop-shadow-[0_0_8px_rgba(251,113,133,0.9)]",
-    activeAccentClass: "border-rose-300/80",
-    activeShadowClass: "shadow-rose-400/20",
-    hoverBorderClass: "hover:border-rose-300/70",
-    expandedLineColorClass: "bg-rose-300/90",
-    expandedLineGlowShadowClass: "shadow-[0_0_12px_rgba(251,113,133,0.45)]",
-  },
-};
+import type { RoadSegment } from "@/src/types";
 
 const ROAD_SURFACE_OFFSET = 0.35;
+const ROAD_DEFAULT_VISIBLE_MARKER_COUNT = 5;
+
+function getRoadPriority(status: RoadSegment["status"]) {
+  if (status === "closed") return 3;
+  if (status === "caution") return 2;
+  return 1;
+}
 
 export function RoadLayer({ roads }: { roads: RoadSegment[] }) {
   const heightmap = useHeightmap();
   const [hoveredRoadId, setHoveredRoadId] = useState<string | null>(null);
+  const selectedRoadSegmentId = useWorkspaceStore((s) => s.selectedRoadSegmentId);
+  const selectRoadSegment = useWorkspaceStore((s) => s.selectRoadSegment);
   const setMapFocusTarget = useWorkspaceStore((s) => s.setMapFocusTarget);
   const setPoiFocusEnabled = useWorkspaceStore((s) => s.setPoiFocusEnabled);
   const setActiveInfoPanelSection = useWorkspaceStore((s) => s.setActiveInfoPanelSection);
@@ -95,11 +51,27 @@ export function RoadLayer({ roads }: { roads: RoadSegment[] }) {
     [roads, heightmap],
   );
 
+  const visibleRoadMarkerIds = useMemo(() => {
+    return selectVisibleMarkerIds(
+      markerItems.map((marker) => ({
+        markerId: marker.markerId,
+        priority: getRoadPriority(marker.road.status),
+        alwaysVisible:
+          marker.road.status !== "open" ||
+          selectedRoadSegmentId === marker.markerId,
+        isHovered: hoveredRoadId === marker.markerId,
+      })),
+      ROAD_DEFAULT_VISIBLE_MARKER_COUNT,
+    );
+  }, [markerItems, hoveredRoadId, selectedRoadSegmentId]);
+
   return (
     <>
-      {markerItems.map(({ markerId, x, y, z, road }) => {
-        const style = ROAD_STYLE[road.status];
+      {markerItems
+        .filter(({ markerId }) => visibleRoadMarkerIds.has(markerId))
+        .map(({ markerId, x, y, z, road }) => {
         const isHovered = hoveredRoadId === markerId;
+        const isSelected = selectedRoadSegmentId === markerId;
         const description = road.reason ?? `status: ${road.status}`;
 
         return (
@@ -111,28 +83,16 @@ export function RoadLayer({ roads }: { roads: RoadSegment[] }) {
             x={x}
             y={y}
             z={z}
-            isActive={isHovered}
+            isActive={isHovered || isSelected}
             isHovered={isHovered}
-            dotColorClass={style.dotColorClass}
-            dotHoverColorClass={style.dotHoverColorClass}
-            dotActiveColorClass={style.dotActiveColorClass}
-            dotActiveGlowShadowClass={style.dotActiveGlowShadowClass}
-            markerIcon={<Route className="size-[1.04vw] min-h-4 min-w-4" strokeWidth={2.5} />}
-            activeAccentClass={style.activeAccentClass}
-            activeShadowClass={style.activeShadowClass}
-            hoverBorderClass={style.hoverBorderClass}
-            widthClass={POI_CARD_WIDTH_CLASS}
-            titleTextClass={POI_TITLE_TEXT_CLASS}
-            descriptionTextClass={POI_DESCRIPTION_TEXT_CLASS}
-            expandedDescriptionHeightClass="max-h-[7.5rem]"
-            collapsedLineHeightClass="h-24"
-            expandedLineHeightClass="h-48"
-            expandedLineColorClass={style.expandedLineColorClass}
-            expandedLineGlowShadowClass={style.expandedLineGlowShadowClass}
+            icon={Route}
+            tone="road"
+            toneLevel={road.status}
             onHoverChange={setHoveredRoadId}
             onSelect={() => {
               const [lon = 0, lat = 0] = road.geometry[0] ?? [0, 0];
               setPoiFocusEnabled(false);
+              selectRoadSegment(markerId);
               setMapFocusTarget({ lon, lat });
               setActiveInfoPanelSection("road");
             }}

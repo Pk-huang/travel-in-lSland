@@ -19,12 +19,21 @@ const DEFAULT_CAMERA_POSITION = new Vector3(12, 12, 12);
 const DEFAULT_CAMERA_TARGET = new Vector3(0, 0, 0);
 const CAMERA_TRANSITION_MS = 900;
 const POI_FOCUS_DISTANCE_MULTIPLIER = 2;
-const FREE_VIEW_MIN_DISTANCE = DEFAULT_CAMERA_POSITION.distanceTo(DEFAULT_CAMERA_TARGET);
+const CAMERA_HEIGHT_SCALE = 3;
+const CAMERA_DISTANCE_SCALE = 3;
 const MARKER_FOCUS_VIEW = {
   distance: 4,
   polarAngle: 1.05,
   azimuthAngle: 0.2,
 };
+
+const DEFAULT_CAMERA_POSITION_SCALED = new Vector3(
+  DEFAULT_CAMERA_POSITION.x,
+  DEFAULT_CAMERA_POSITION.y * CAMERA_HEIGHT_SCALE,
+  DEFAULT_CAMERA_POSITION.z,
+);
+
+const FREE_VIEW_MIN_DISTANCE = DEFAULT_CAMERA_POSITION_SCALED.distanceTo(DEFAULT_CAMERA_TARGET);
 
 function easeInOutCubic(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -65,7 +74,7 @@ export function CameraRig() {
     if (!controls) return;
 
     const nextTarget = DEFAULT_CAMERA_TARGET.clone();
-    const nextPosition = DEFAULT_CAMERA_POSITION.clone();
+    const nextPosition = DEFAULT_CAMERA_POSITION_SCALED.clone();
     let minZoomDistance = FREE_VIEW_MIN_DISTANCE;
 
     if (poiFocusEnabled && activePoi) {
@@ -75,7 +84,8 @@ export function CameraRig() {
         : 0;
       nextTarget.set(x, surfaceY, z);
 
-      minZoomDistance = activePoi.cameraView.distance * POI_FOCUS_DISTANCE_MULTIPLIER;
+      minZoomDistance =
+        activePoi.cameraView.distance * POI_FOCUS_DISTANCE_MULTIPLIER * CAMERA_DISTANCE_SCALE;
 
       const spherical = new Spherical(
         minZoomDistance,
@@ -91,7 +101,8 @@ export function CameraRig() {
         : 0;
       nextTarget.set(x, surfaceY, z);
 
-      minZoomDistance = MARKER_FOCUS_VIEW.distance * POI_FOCUS_DISTANCE_MULTIPLIER;
+      minZoomDistance =
+        MARKER_FOCUS_VIEW.distance * POI_FOCUS_DISTANCE_MULTIPLIER * CAMERA_DISTANCE_SCALE;
 
       const spherical = new Spherical(
         minZoomDistance,

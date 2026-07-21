@@ -12,6 +12,7 @@ import {
   INTERNAL_LIGHTING_PRESET_OVERRIDE,
   LIGHTING_PRESETS,
   REGION_LABELS,
+  REGION_FOCUS_TARGETS,
   TERRAIN_DETAIL_LEVEL_OPTIONS,
 } from "@/src/lib/config/app";
 import {
@@ -69,6 +70,7 @@ export function TimelineControl() {
   const setLightingPresetId = useWorkspaceStore((s) => s.setLightingPresetId);
   const setTerrainDetailLevel = useWorkspaceStore((s) => s.setTerrainDetailLevel);
   const setRegion = useWorkspaceStore((s) => s.setRegion);
+  const setMapFocusTarget = useWorkspaceStore((s) => s.setMapFocusTarget);
   const activeUtilityPanel = useWorkspaceStore((s) => s.activeUtilityPanel);
   const activeUtilityTab = useWorkspaceStore((s) => s.activeUtilityTab);
   const setActiveUtilityPanel = useWorkspaceStore((s) => s.setActiveUtilityPanel);
@@ -224,7 +226,14 @@ export function TimelineControl() {
                   <p className="text-[11px] text-white/55">區域切換已從左側移入這裡，左側面板現在只負責資訊顯示。</p>
                 </div>
 
-                <RegionSelector value={region} onChange={setRegion} disabled={loading} />
+                <RegionSelector
+                  value={region}
+                  onChange={setRegion}
+                  onSelect={(nextRegion) => {
+                    setMapFocusTarget(REGION_FOCUS_TARGETS[nextRegion]);
+                  }}
+                  disabled={loading}
+                />
 
                 <p className="text-[11px] text-white/55">
                   目前區域：{REGION_LABELS[region]}，切換後會更新左側摘要與地圖資料。

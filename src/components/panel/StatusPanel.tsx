@@ -19,7 +19,10 @@ export type StatusPanelProps = {
   loading: boolean;
   error: string | null;
   onRetry: () => void;
+  showWeatherList?: boolean;
   showRoadList?: boolean;
+  onSelectWeather?: (payload: { index: number; lat: number; lon: number }) => void;
+  onSelectRoad?: (payload: { segmentId: string; lon: number; lat: number }) => void;
 };
 
 /** 警示等級 → 圓點顏色（語意色，非主題色，故用固定 Tailwind 色階）。 */
@@ -43,7 +46,10 @@ export function StatusPanel({
   loading,
   error,
   onRetry,
+  showWeatherList = true,
   showRoadList = true,
+  onSelectWeather,
+  onSelectRoad,
 }: StatusPanelProps) {
   if (loading && !data) {
     return <p className="text-muted-foreground text-sm">載入中…</p>;
@@ -84,40 +90,44 @@ export function StatusPanel({
       </Card>
 
       <div className="grid gap-4">
-        {/* 天氣 */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">天氣（{weather.length}）</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="divide-border divide-y">
-              {weather.slice(0, 20).map((w, i) => (
-                <li
-                  key={`${w.lat}-${w.lon}-${i}`}
-                  className="flex items-center gap-2.5 py-1.5 text-sm"
-                >
-                  <span
-                    className={`size-2 shrink-0 rounded-full ${ALERT_DOT[w.alertLevel]}`}
-                  />
-                  <span className="text-muted-foreground min-w-[110px] tabular-nums">
-                    {w.lat.toFixed(2)}, {w.lon.toFixed(2)}
-                  </span>
-                  <span className="font-semibold">
-                    {w.temperatureC.toFixed(1)}°C
-                  </span>
-                  <span className="text-muted-foreground">
-                    風 {w.windSpeedMs.toFixed(1)} m/s
-                  </span>
-                </li>
-              ))}
-            </ul>
-            {weather.length > 20 && (
-              <p className="text-muted-foreground mt-2 text-xs">
-                …另有 {weather.length - 20} 站
-              </p>
-            )}
-          </CardContent>
-        </Card>
+        {showWeatherList ? (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">天氣（{weather.length}）</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="max-h-[22rem] overflow-y-auto pr-1">
+                <ul className="divide-border divide-y">
+                  {weather.map((w, i) => (
+                    <li
+                      key={`${w.lat}-${w.lon}-${i}`}
+                      className="py-1"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => onSelectWeather?.({ index: i, lat: w.lat, lon: w.lon })}
+                        className="hover:bg-accent/40 flex w-full items-center gap-2.5 rounded-md px-2 py-1 text-left text-sm transition"
+                      >
+                        <span
+                          className={`size-2 shrink-0 rounded-full ${ALERT_DOT[w.alertLevel]}`}
+                        />
+                        <span className="text-muted-foreground min-w-[110px] tabular-nums">
+                          {w.lat.toFixed(2)}, {w.lon.toFixed(2)}
+                        </span>
+                        <span className="font-semibold">
+                          {w.temperatureC.toFixed(1)}°C
+                        </span>
+                        <span className="text-muted-foreground">
+                          風 {w.windSpeedMs.toFixed(1)} m/s
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
+        ) : null}
 
         {showRoadList ? (
           <Card>
@@ -125,28 +135,34 @@ export function StatusPanel({
               <CardTitle className="text-base">路況（{roads.length}）</CardTitle>
             </CardHeader>
             <CardContent>
-              <ul className="divide-border divide-y">
-                {roads.slice(0, 20).map((r) => (
-                  <li
-                    key={r.segmentId}
-                    className="flex items-center gap-2.5 py-1.5 text-sm"
-                  >
-                    <span
-                      className={`size-2 shrink-0 rounded-full ${ROAD_DOT[r.status]}`}
-                    />
-                    <span className="flex-1 truncate">{r.name}</span>
-                    <span className="font-semibold">{r.status}</span>
-                    {r.reason && (
-                      <span className="text-muted-foreground">{r.reason}</span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-              {roads.length > 20 && (
-                <p className="text-muted-foreground mt-2 text-xs">
-                  …另有 {roads.length - 20} 段
-                </p>
-              )}
+              <div className="max-h-[22rem] overflow-y-auto pr-1">
+                <ul className="divide-border divide-y">
+                  {roads.map((r) => (
+                    <li
+                      key={r.segmentId}
+                      className="py-1"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const [lon = 0, lat = 0] = r.geometry[0] ?? [0, 0];
+                          onSelectRoad?.({ segmentId: r.segmentId, lon, lat });
+                        }}
+                        className="hover:bg-accent/40 flex w-full items-center gap-2.5 rounded-md px-2 py-1 text-left text-sm transition"
+                      >
+                        <span
+                          className={`size-2 shrink-0 rounded-full ${ROAD_DOT[r.status]}`}
+                        />
+                        <span className="flex-1 truncate">{r.name}</span>
+                        <span className="font-semibold">{r.status}</span>
+                        {r.reason && (
+                          <span className="text-muted-foreground">{r.reason}</span>
+                        )}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </CardContent>
           </Card>
         ) : null}

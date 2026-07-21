@@ -19,6 +19,18 @@ export const REGION_LABELS: Record<Region, string> = {
   all: "All Iceland",
 };
 
+/**
+ * 區域預設鏡位中心：點選區域時，鏡頭會飛到該區的大致核心位置。
+ * 這裡先用產品 demo 友善的固定點，之後若要更精細可改成依資料算 centroid。
+ */
+export const REGION_FOCUS_TARGETS: Record<Region, { lat: number; lon: number }> = {
+  south: { lat: 64.2, lon: -21.2 },
+  west: { lat: 64.85, lon: -22.7 },
+  north: { lat: 65.7, lon: -18.2 },
+  east: { lat: 65.25, lon: -14.4 },
+  all: { lat: 64.9, lon: -19.0 },
+};
+
 export const DEFAULT_LIGHTING_PRESET_ID: LightingPresetId = "realistic";
 export const DEFAULT_TERRAIN_DETAIL_LEVEL: TerrainDetailLevel = 512;
 export const TERRAIN_DETAIL_LEVEL_OPTIONS: TerrainDetailLevel[] = [256, 512, 1080];
