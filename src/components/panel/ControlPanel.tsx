@@ -5,17 +5,12 @@ import { useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Badge } from "@/src/components/ui/badge";
 
-import { RegionSelector } from "@/src/components/panel/RegionSelector";
 import { StatusPanel } from "@/src/components/panel/StatusPanel";
 import {
   useWorkspaceData,
   useWorkspacePois,
 } from "@/src/components/providers/WorkspaceProvider";
-import {
-  DEFAULT_LIGHTING_PRESET_ID,
-  INTERNAL_LIGHTING_PRESET_OVERRIDE,
-  LIGHTING_PRESETS,
-} from "@/src/lib/config/app";
+import { DEFAULT_LIGHTING_PRESET_ID, INTERNAL_LIGHTING_PRESET_OVERRIDE, LIGHTING_PRESETS } from "@/src/lib/config/app";
 import { findPointOfInterestById } from "@/src/lib/config/poi";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
 import type { LightingPresetId, PointOfInterest } from "@/src/types";
@@ -42,20 +37,18 @@ function isLightingPresetId(value: string | null): value is LightingPresetId {
 export function ControlPanel() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const region = useWorkspaceStore((s) => s.region);
-  const setRegion = useWorkspaceStore((s) => s.setRegion);
   const lightingPresetId = useWorkspaceStore((s) => s.lightingPresetId);
   const setLightingPresetId = useWorkspaceStore((s) => s.setLightingPresetId);
   const activePoiId = useWorkspaceStore((s) => s.activePoiId);
   const poiFocusEnabled = useWorkspaceStore((s) => s.poiFocusEnabled);
   const clearPoiFocus = useWorkspaceStore((s) => s.clearPoiFocus);
   const activeSection = useWorkspaceStore((s) => s.activeInfoPanelSection);
-  const setActiveSection = useWorkspaceStore((s) => s.setActiveInfoPanelSection);
   const { data, loading, error, refetch } = useWorkspaceData();
   const { points: pointsOfInterest } = useWorkspacePois();
   const isLightingPresetLocked = INTERNAL_LIGHTING_PRESET_OVERRIDE != null;
   const isWeatherOpen = activeSection === "weather";
   const isPoiOpen = activeSection === "poi";
+  const isRoadOpen = activeSection === "road";
   const activePoi = activePoiFromStore(pointsOfInterest, activePoiId);
 
   useEffect(() => {
@@ -96,40 +89,11 @@ export function ControlPanel() {
   return (
     <div className="space-y-4">
       <section className="space-y-3 rounded-lg border border-white/10 bg-black/10 p-3">
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={() => setActiveSection(isWeatherOpen ? null : "weather")}
-            aria-expanded={isWeatherOpen}
-            className={
-              isWeatherOpen
-                ? "w-full rounded-lg border border-sky-300/70 bg-sky-400/15 px-4 py-3 text-left text-base font-semibold text-white transition"
-                : "w-full rounded-lg border border-white/15 bg-white/5 px-4 py-3 text-left text-base font-semibold text-white/90 transition hover:bg-white/10"
-            }
-          >
-            天氣
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveSection(isPoiOpen ? null : "poi")}
-            aria-expanded={isPoiOpen}
-            className={
-              isPoiOpen
-                ? "w-full rounded-lg border border-sky-300/70 bg-sky-400/15 px-4 py-3 text-left text-base font-semibold text-white transition"
-                : "w-full rounded-lg border border-white/15 bg-white/5 px-4 py-3 text-left text-base font-semibold text-white/90 transition hover:bg-white/10"
-            }
-          >
-            景點
-          </button>
-        </div>
-
         {isWeatherOpen ? (
           <div className="space-y-3">
             <p className="text-[11px] text-white/55">
-              切換區域後查看觀測站、風險分數與路況摘要；左側面板暫時專注資訊顯示，不承擔場景控制。
+              區域切換已移到右上 Settings；左側現在只顯示觀測站、風險分數與路況摘要。
             </p>
-            <RegionSelector value={region} onChange={setRegion} disabled={loading} />
           </div>
         ) : null}
 
@@ -177,6 +141,14 @@ export function ControlPanel() {
             </button>
           </div>
         ) : null}
+
+        {isRoadOpen ? (
+          <div className="space-y-3">
+            <p className="text-[11px] text-white/55">
+              路況已改為地圖圖標模式，左側清單已關閉；請直接在地圖上 hover 圖標查看路段狀態。
+            </p>
+          </div>
+        ) : null}
       </section>
 
       {isWeatherOpen ? (
@@ -185,6 +157,7 @@ export function ControlPanel() {
           loading={loading}
           error={error}
           onRetry={refetch}
+          showRoadList={false}
         />
       ) : null}
     </div>

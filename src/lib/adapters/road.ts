@@ -1,4 +1,5 @@
 import type { RoadSegment, RoadStatus } from "@/src/types";
+import type { StationCoordsMap } from "@/src/lib/adapters/stations";
 import { type RawVedurObservation, normalizeVedurTime } from "@/src/lib/api/vedur";
 
 /**
@@ -31,11 +32,20 @@ function buildReason(obs: RawVedurObservation): string {
 
 /**
  * 把同一份 Vedur 原始觀測推算成 RoadSegment[]。
- * 純函式：只吃 raw、不 import vedur 解析、不碰網路。
+ * 純函式：只吃 raw + station coords map，不碰網路。
+ *
+ * 觀測端點多數情況不帶 lat/lon，因此與天氣解析同樣採用 station id 回填座標。
  */
-export function deriveRoads(raw: RawVedurObservation[]): RoadSegment[] {
+export function deriveRoads(
+  raw: RawVedurObservation[],
+  coords: StationCoordsMap = {},
+): RoadSegment[] {
   return raw.map((obs) => {
     const status = deriveRoadStatus(obs);
+    const station = coords[obs.station];
+    const lat = station?.lat ?? obs.lat ?? 0;
+    const lon = station?.lon ?? obs.lon ?? 0;
+
     return {
       source: "road",
       segmentId: `station-${obs.station}`,
@@ -43,7 +53,7 @@ export function deriveRoads(raw: RawVedurObservation[]): RoadSegment[] {
       status,
       reason: status === "open" ? undefined : buildReason(obs),
       updatedAt: normalizeVedurTime(obs.time),
-      geometry: [[obs.lon ?? 0, obs.lat ?? 0]],
+      geometry: [[lon, lat]],
     };
   });
 }

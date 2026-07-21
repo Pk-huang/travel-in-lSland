@@ -1,13 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { ChevronDown, ChevronUp, Clock, Pause, Play, RotateCcw } from "lucide-react";
+import { useEffect, useMemo } from "react";
+import { Clock, Pause, Play, RotateCcw, Settings, X } from "lucide-react";
 
 import { Button } from "@/src/components/ui/button";
+import { useWorkspaceData } from "@/src/components/providers/WorkspaceProvider";
+import { computeLighting } from "@/src/components/map/Lighting";
+import { RegionSelector } from "@/src/components/panel/RegionSelector";
 import {
   DEFAULT_LIGHTING_PRESET_ID,
   INTERNAL_LIGHTING_PRESET_OVERRIDE,
   LIGHTING_PRESETS,
+  REGION_LABELS,
   TERRAIN_DETAIL_LEVEL_OPTIONS,
 } from "@/src/lib/config/app";
 import {
@@ -16,8 +20,6 @@ import {
 } from "@/src/lib/store/workspace";
 import { cn } from "@/src/lib/utils";
 import type { LightingPresetId, TerrainDetailLevel } from "@/src/types";
-
-type SceneControlTab = "lighting" | "detail" | "timeline";
 
 /**
  * TimelineControl：底部時間軸控制器。
@@ -33,7 +35,7 @@ const PLAYBACK_SPEEDS: readonly PlaybackSpeed[] = [0.5, 1, 2] as const;
 const MINUTE_MS = 60_000;
 const TICK_MS = 200;
 const BASE_ADVANCE_MINUTES_PER_SECOND = 24;
-const SCENE_CONTROL_CONTENT_MAX_WIDTH = "min(825px,100%)";
+const SCENE_CONTROL_CONTENT_MAX_WIDTH = "100%";
 
 function formatTimeLabel(value: number | null): string {
   if (!value) return "現在";
@@ -53,21 +55,39 @@ function formatOffsetLabel(offset: number): string {
 }
 
 export function TimelineControl() {
-  const [activeTab, setActiveTab] = useState<SceneControlTab>("timeline");
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const selectedTime = useWorkspaceStore((s) => s.time);
   const playbackState = useWorkspaceStore((s) => s.playbackState);
   const playbackSpeed = useWorkspaceStore((s) => s.playbackSpeed);
   const lightingPresetId = useWorkspaceStore((s) => s.lightingPresetId);
   const terrainDetailLevel = useWorkspaceStore((s) => s.terrainDetailLevel);
+  const region = useWorkspaceStore((s) => s.region);
+  const activeInfoPanelSection = useWorkspaceStore((s) => s.activeInfoPanelSection);
   const setTime = useWorkspaceStore((s) => s.setTime);
   const play = useWorkspaceStore((s) => s.play);
   const pause = useWorkspaceStore((s) => s.pause);
   const setSpeed = useWorkspaceStore((s) => s.setSpeed);
   const setLightingPresetId = useWorkspaceStore((s) => s.setLightingPresetId);
   const setTerrainDetailLevel = useWorkspaceStore((s) => s.setTerrainDetailLevel);
+  const setRegion = useWorkspaceStore((s) => s.setRegion);
+  const activeUtilityPanel = useWorkspaceStore((s) => s.activeUtilityPanel);
+  const activeUtilityTab = useWorkspaceStore((s) => s.activeUtilityTab);
+  const setActiveUtilityPanel = useWorkspaceStore((s) => s.setActiveUtilityPanel);
+  const setActiveUtilityTab = useWorkspaceStore((s) => s.setActiveUtilityTab);
+  const { data, loading } = useWorkspaceData();
   const isLightingPresetLocked = INTERNAL_LIGHTING_PRESET_OVERRIDE != null;
   const isAlreadyDefaultPreset = lightingPresetId === DEFAULT_LIGHTING_PRESET_ID;
+  const stationCount = data?.weather.length ?? 0;
+  const roadCount = data?.roads.length ?? 0;
+  const shouldShowPoiPins = activeInfoPanelSection === "poi";
+  const shouldShowStations = activeInfoPanelSection === "weather";
+  const shouldShowRoads = activeInfoPanelSection === "road";
+  const activePresetId =
+    INTERNAL_LIGHTING_PRESET_OVERRIDE ?? lightingPresetId ?? DEFAULT_LIGHTING_PRESET_ID;
+  const lightingDebug = computeLighting(
+    selectedTime ? new Date(selectedTime) : new Date(),
+    LIGHTING_PRESETS[activePresetId],
+    data?.sunModel,
+  );
 
   const slots = useMemo(() => {
     const base = new Date();
@@ -126,42 +146,93 @@ export function TimelineControl() {
   ]);
 
   return (
-    <section className="pointer-events-auto absolute bottom-4 left-1/2 z-20 w-[min(825px,calc(100vw-2rem))] -translate-x-1/2 rounded-xl border border-white/10 bg-black/55 px-4 py-4 shadow-2xl backdrop-blur-md">
-      <div className="space-y-3">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center justify-center gap-2">
+    <>
+      <button
+        type="button"
+        onClick={() => {
+          setActiveUtilityTab("display");
+          setActiveUtilityPanel(activeUtilityPanel === "settings" ? null : "settings");
+        }}
+        className="pointer-events-auto absolute top-4 right-4 z-30 inline-flex items-center gap-2 rounded-full border border-white/20 bg-black/60 px-3 py-2 text-xs font-medium text-white/85 shadow-lg backdrop-blur transition hover:bg-black/75"
+        aria-expanded={activeUtilityPanel !== null}
+        aria-label={activeUtilityPanel ? "切換到設定抽屜" : "開啟設定抽屜"}
+      >
+        <Settings className="size-4" />
+        Settings
+      </button>
+
+      <section
+        aria-hidden={activeUtilityPanel !== "settings" && activeUtilityPanel !== "timeline"}
+        className={cn(
+          "absolute top-16 right-4 z-30 w-[min(420px,calc(100vw-1.5rem))] rounded-xl border border-white/10 bg-black/70 px-4 py-4 shadow-2xl backdrop-blur-md transform-gpu transition-transform duration-300 ease-out",
+          activeUtilityPanel === "settings" || activeUtilityPanel === "timeline"
+            ? "pointer-events-auto translate-x-0"
+            : "pointer-events-none translate-x-full",
+        )}
+      >
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold tracking-wide text-white/80 uppercase">Scene Settings</p>
+              <button
+                type="button"
+                onClick={() => setActiveUtilityPanel(null)}
+                className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 p-1.5 text-white/80 transition hover:bg-white/10"
+                aria-label="關閉設定抽屜"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+        <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <ControlTabButton
+              label="顯示"
+              active={activeUtilityTab === "display"}
+              onClick={() => setActiveUtilityTab("display")}
+            />
             <ControlTabButton
               label="光影風格"
-              active={activeTab === "lighting"}
-              onClick={() => setActiveTab("lighting")}
+              active={activeUtilityTab === "lighting"}
+              onClick={() => setActiveUtilityTab("lighting")}
             />
             <ControlTabButton
               label="細節程度"
-              active={activeTab === "detail"}
-              onClick={() => setActiveTab("detail")}
+              active={activeUtilityTab === "detail"}
+              onClick={() => setActiveUtilityTab("detail")}
             />
             <ControlTabButton
               label="時間軸"
-              active={activeTab === "timeline"}
-              onClick={() => setActiveTab("timeline")}
+              active={activeUtilityTab === "timeline"}
+              onClick={() => setActiveUtilityTab("timeline")}
+            />
+            <ControlTabButton
+              label="Debug"
+              active={activeUtilityTab === "debug"}
+              onClick={() => setActiveUtilityTab("debug")}
             />
           </div>
-
-          <button
-            type="button"
-            onClick={() => setIsCollapsed((current) => !current)}
-            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/10"
-            aria-expanded={!isCollapsed}
-            aria-label={isCollapsed ? "展開場景控制" : "收合場景控制"}
-          >
-            {isCollapsed ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
-            {isCollapsed ? "展開" : "收合"}
-          </button>
         </div>
 
-        {!isCollapsed ? (
-          <div className="space-y-3">
-            {activeTab === "lighting" ? (
+        <div className="space-y-3">
+            {activeUtilityTab === "display" ? (
+              <section
+                className="mx-auto w-full space-y-3 rounded-lg border border-white/10 bg-black/15 p-3"
+                style={{ maxWidth: SCENE_CONTROL_CONTENT_MAX_WIDTH }}
+              >
+                <div>
+                  <p className="text-xs font-semibold tracking-wide text-white/80 uppercase">顯示控制</p>
+                  <p className="text-[11px] text-white/55">區域切換已從左側移入這裡，左側面板現在只負責資訊顯示。</p>
+                </div>
+
+                <RegionSelector value={region} onChange={setRegion} disabled={loading} />
+
+                <p className="text-[11px] text-white/55">
+                  目前區域：{REGION_LABELS[region]}，切換後會更新左側摘要與地圖資料。
+                </p>
+              </section>
+            ) : null}
+
+            {activeUtilityTab === "lighting" ? (
               <section
                 className="mx-auto w-full space-y-2 rounded-lg border border-white/10 bg-black/15 p-3"
                 style={{ maxWidth: SCENE_CONTROL_CONTENT_MAX_WIDTH }}
@@ -207,7 +278,7 @@ export function TimelineControl() {
               </section>
             ) : null}
 
-            {activeTab === "detail" ? (
+            {activeUtilityTab === "detail" ? (
               <section
                 className="mx-auto w-full space-y-2 rounded-lg border border-white/10 bg-black/15 p-3"
                 style={{ maxWidth: SCENE_CONTROL_CONTENT_MAX_WIDTH }}
@@ -239,7 +310,7 @@ export function TimelineControl() {
               </section>
             ) : null}
 
-            {activeTab === "timeline" ? (
+            {activeUtilityTab === "timeline" ? (
               <section
                 className="mx-auto w-full space-y-3 rounded-lg border border-white/10 bg-black/15 p-3"
                 style={{ maxWidth: SCENE_CONTROL_CONTENT_MAX_WIDTH }}
@@ -324,14 +395,41 @@ export function TimelineControl() {
                 </div>
               </section>
             ) : null}
+
+            {activeUtilityTab === "debug" ? (
+              <section
+                className="mx-auto w-full space-y-3 rounded-lg border border-white/10 bg-black/15 p-3"
+                style={{ maxWidth: SCENE_CONTROL_CONTENT_MAX_WIDTH }}
+              >
+                <div>
+                  <p className="text-xs font-semibold tracking-wide text-white/80 uppercase">Debug 資訊</p>
+                  <p className="text-[11px] text-white/55">集中顯示場景與資料連動檢查訊息。</p>
+                </div>
+
+                <div className="rounded-md border border-white/10 bg-black/30 p-2 text-xs text-white/75">
+                  光照 debug · {lightingDebug.hour.toFixed(1)}h · day {lightingDebug.daylight.toFixed(2)} · sun {lightingDebug.sunIntensity.toFixed(2)}
+                </div>
+
+                <div className="rounded-md border border-white/10 bg-black/30 p-2 text-xs text-white/75">
+                  {REGION_LABELS[region]} ·{" "}
+                  {loading
+                    ? "載入資料中…"
+                    : shouldShowStations
+                      ? `${stationCount} 個測站待渲染`
+                      : shouldShowRoads
+                        ? `${roadCount} 段路況待渲染`
+                        : shouldShowPoiPins
+                          ? "景點圖釘待渲染"
+                          : "已收合資訊面板"}
+                </div>
+
+                <p className="text-[11px] text-white/50">3D 場景（Phase 2-1b：真實 DEM 地形）</p>
+              </section>
+            ) : null}
+        </div>
           </div>
-        ) : (
-          <div className="rounded-lg border border-white/10 bg-black/15 px-3 py-2 text-xs text-white/65">
-            已收合場景控制，點右上角可展開光影 / 細節 / 時間軸。
-          </div>
-        )}
-      </div>
-    </section>
+        </section>
+    </>
   );
 }
 

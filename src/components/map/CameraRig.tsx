@@ -20,6 +20,11 @@ const DEFAULT_CAMERA_TARGET = new Vector3(0, 0, 0);
 const CAMERA_TRANSITION_MS = 900;
 const POI_FOCUS_DISTANCE_MULTIPLIER = 2;
 const FREE_VIEW_MIN_DISTANCE = DEFAULT_CAMERA_POSITION.distanceTo(DEFAULT_CAMERA_TARGET);
+const MARKER_FOCUS_VIEW = {
+  distance: 4,
+  polarAngle: 1.05,
+  azimuthAngle: 0.2,
+};
 
 function easeInOutCubic(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -42,6 +47,7 @@ export function CameraRig() {
   const { points: pointsOfInterest } = useWorkspacePois();
   const activePoiId = useWorkspaceStore((s) => s.activePoiId);
   const poiFocusEnabled = useWorkspaceStore((s) => s.poiFocusEnabled);
+  const mapFocusTarget = useWorkspaceStore((s) => s.mapFocusTarget);
   const activePoi = useMemo(
     () => findPointOfInterestById(pointsOfInterest, activePoiId),
     [activePoiId, pointsOfInterest],
@@ -78,6 +84,22 @@ export function CameraRig() {
       );
       const offset = new Vector3().setFromSpherical(spherical);
       nextPosition.copy(nextTarget).add(offset);
+    } else if (mapFocusTarget) {
+      const { x, z } = lonLatToSceneXZ(mapFocusTarget.lon, mapFocusTarget.lat);
+      const surfaceY = heightmap
+        ? elevationToSceneY(sampleElevationMeters(heightmap, mapFocusTarget.lon, mapFocusTarget.lat))
+        : 0;
+      nextTarget.set(x, surfaceY, z);
+
+      minZoomDistance = MARKER_FOCUS_VIEW.distance * POI_FOCUS_DISTANCE_MULTIPLIER;
+
+      const spherical = new Spherical(
+        minZoomDistance,
+        MARKER_FOCUS_VIEW.polarAngle,
+        MARKER_FOCUS_VIEW.azimuthAngle,
+      );
+      const offset = new Vector3().setFromSpherical(spherical);
+      nextPosition.copy(nextTarget).add(offset);
     }
 
     // 鎖定為只能 zoom out：禁止鏡頭比目前模式的最小距離更靠近目標。
@@ -90,7 +112,7 @@ export function CameraRig() {
       toPosition: nextPosition,
       toTarget: nextTarget,
     };
-  }, [activePoi, heightmap, poiFocusEnabled]);
+  }, [activePoi, heightmap, mapFocusTarget, poiFocusEnabled]);
 
   useFrame(() => {
     const controls = controlsRef.current;

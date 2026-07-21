@@ -19,6 +19,7 @@ export type StatusPanelProps = {
   loading: boolean;
   error: string | null;
   onRetry: () => void;
+  showRoadList?: boolean;
 };
 
 /** 警示等級 → 圓點顏色（語意色，非主題色，故用固定 Tailwind 色階）。 */
@@ -37,7 +38,13 @@ const ROAD_DOT: Record<RoadStatus, string> = {
 /**
  * 天氣 / 路況摘要面板。純呈現，依 props 顯示 loading / error / 資料三種狀態。
  */
-export function StatusPanel({ data, loading, error, onRetry }: StatusPanelProps) {
+export function StatusPanel({
+  data,
+  loading,
+  error,
+  onRetry,
+  showRoadList = true,
+}: StatusPanelProps) {
   if (loading && !data) {
     return <p className="text-muted-foreground text-sm">載入中…</p>;
   }
@@ -112,36 +119,37 @@ export function StatusPanel({ data, loading, error, onRetry }: StatusPanelProps)
           </CardContent>
         </Card>
 
-        {/* 路況 */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">路況（{roads.length}）</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="divide-border divide-y">
-              {roads.slice(0, 20).map((r) => (
-                <li
-                  key={r.segmentId}
-                  className="flex items-center gap-2.5 py-1.5 text-sm"
-                >
-                  <span
-                    className={`size-2 shrink-0 rounded-full ${ROAD_DOT[r.status]}`}
-                  />
-                  <span className="flex-1 truncate">{r.name}</span>
-                  <span className="font-semibold">{r.status}</span>
-                  {r.reason && (
-                    <span className="text-muted-foreground">{r.reason}</span>
-                  )}
-                </li>
-              ))}
-            </ul>
-            {roads.length > 20 && (
-              <p className="text-muted-foreground mt-2 text-xs">
-                …另有 {roads.length - 20} 段
-              </p>
-            )}
-          </CardContent>
-        </Card>
+        {showRoadList ? (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">路況（{roads.length}）</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="divide-border divide-y">
+                {roads.slice(0, 20).map((r) => (
+                  <li
+                    key={r.segmentId}
+                    className="flex items-center gap-2.5 py-1.5 text-sm"
+                  >
+                    <span
+                      className={`size-2 shrink-0 rounded-full ${ROAD_DOT[r.status]}`}
+                    />
+                    <span className="flex-1 truncate">{r.name}</span>
+                    <span className="font-semibold">{r.status}</span>
+                    {r.reason && (
+                      <span className="text-muted-foreground">{r.reason}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+              {roads.length > 20 && (
+                <p className="text-muted-foreground mt-2 text-xs">
+                  …另有 {roads.length - 20} 段
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        ) : null}
       </div>
     </section>
   );

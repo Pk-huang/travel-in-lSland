@@ -282,7 +282,7 @@ async function fetchFresh(
     fetchSunBoundarySafe(region, at, requestId),
   ]);
   const weather = parseWeather(raw, coords);
-  const roads = deriveRoads(raw);
+  const roads = deriveRoads(raw, coords);
 
   return icelandStatusResponseSchema.parse({
     meta: {

@@ -9,7 +9,13 @@ import type { LightingPresetId, Region, TerrainDetailLevel } from "@/src/types";
 
 export type PlaybackState = "playing" | "paused";
 export type PlaybackSpeed = 0.5 | 1 | 2;
-export type InfoPanelSection = "weather" | "poi" | null;
+export type InfoPanelSection = "weather" | "poi" | "road" | null;
+export type MapFocusTarget = {
+  lon: number;
+  lat: number;
+} | null;
+export type UtilityPanel = "settings" | "timeline" | null;
+export type UtilityPanelTab = "display" | "lighting" | "detail" | "timeline" | "debug";
 
 /**
  * Workspace 意圖狀態（client state）。
@@ -40,8 +46,14 @@ export type WorkspaceState = {
   activePoiId: string | null;
   /** 景點模式啟用旗標；先與焦點 id 分離，後續方便加 loading/transition 條件。 */
   poiFocusEnabled: boolean;
+  /** 任意圖釘點擊後的通用鏡頭焦點（測站/路況可共用）。 */
+  mapFocusTarget: MapFocusTarget;
   /** 左側資訊面板目前展開的區塊。 */
   activeInfoPanelSection: InfoPanelSection;
+  /** 右上/右下工具抽屜目前開啟的模式。 */
+  activeUtilityPanel: UtilityPanel;
+  /** 工具抽屜目前顯示的分頁。 */
+  activeUtilityTab: UtilityPanelTab;
 
   setRegion: (region: Region) => void;
   setLightingPresetId: (lightingPresetId: LightingPresetId) => void;
@@ -53,6 +65,9 @@ export type WorkspaceState = {
   selectStation: (id: string | null) => void;
   setActivePoi: (id: string | null) => void;
   setPoiFocusEnabled: (enabled: boolean) => void;
+  setMapFocusTarget: (target: MapFocusTarget) => void;
+  setActiveUtilityPanel: (panel: UtilityPanel) => void;
+  setActiveUtilityTab: (tab: UtilityPanelTab) => void;
   clearPoiFocus: () => void;
   setActiveInfoPanelSection: (section: InfoPanelSection) => void;
 };
@@ -67,7 +82,10 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   selectedStationId: null,
   activePoiId: null,
   poiFocusEnabled: false,
+  mapFocusTarget: null,
   activeInfoPanelSection: "weather",
+  activeUtilityPanel: null,
+  activeUtilityTab: "display",
 
   setRegion: (region) => set({ region }),
   setLightingPresetId: (lightingPresetId) => set({ lightingPresetId }),
@@ -79,6 +97,10 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   selectStation: (selectedStationId) => set({ selectedStationId }),
   setActivePoi: (activePoiId) => set({ activePoiId }),
   setPoiFocusEnabled: (poiFocusEnabled) => set({ poiFocusEnabled }),
-  clearPoiFocus: () => set({ activePoiId: null, poiFocusEnabled: false }),
+  setMapFocusTarget: (mapFocusTarget) => set({ mapFocusTarget }),
+  setActiveUtilityPanel: (activeUtilityPanel) => set({ activeUtilityPanel }),
+  setActiveUtilityTab: (activeUtilityTab) => set({ activeUtilityTab }),
+  clearPoiFocus: () =>
+    set({ activePoiId: null, poiFocusEnabled: false, mapFocusTarget: null }),
   setActiveInfoPanelSection: (activeInfoPanelSection) => set({ activeInfoPanelSection }),
 }));

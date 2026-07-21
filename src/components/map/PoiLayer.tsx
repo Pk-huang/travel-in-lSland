@@ -1,6 +1,7 @@
 "use client";
 
 import { Html } from "@react-three/drei";
+import { MapPin } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { MapMarkerTag } from "@/src/components/map/MapMarkerTag";
@@ -57,8 +58,11 @@ export function PoiLayer() {
             z={z}
             isActive={isActive}
             isHovered={isHovered}
-            dotColorClass="bg-amber-300"
-            dotActiveColorClass="bg-sky-300"
+            dotColorClass="text-amber-300"
+            dotHoverColorClass="group-hover:text-amber-200"
+            dotActiveColorClass="text-sky-300"
+            dotActiveGlowShadowClass="drop-shadow-[0_0_8px_rgba(125,211,252,0.9)]"
+            markerIcon={<MapPin className="size-[1.04vw] min-h-4 min-w-4" strokeWidth={2.5} />}
             activeAccentClass="border-sky-300/80"
             widthClass={POI_CARD_WIDTH_CLASS}
             titleTextClass={POI_TITLE_TEXT_CLASS}

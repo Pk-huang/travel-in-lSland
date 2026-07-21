@@ -1,6 +1,7 @@
 "use client";
 
 import { Html } from "@react-three/drei";
+import type { ReactNode } from "react";
 
 type MapMarkerTagProps = {
   markerId: string;
@@ -15,6 +16,8 @@ type MapMarkerTagProps = {
   dotHoverColorClass?: string;
   dotActiveColorClass: string;
   dotActiveGlowShadowClass?: string;
+  markerIcon?: ReactNode;
+  markerIconClassName?: string;
   activeAccentClass: string;
   activeShadowClass?: string;
   hoverBorderClass?: string;
@@ -40,9 +43,11 @@ export function MapMarkerTag({
   isActive,
   isHovered,
   dotColorClass,
-  dotHoverColorClass = "group-hover:bg-sky-300",
+  dotHoverColorClass = "group-hover:text-sky-300",
   dotActiveColorClass,
-  dotActiveGlowShadowClass = "shadow-[0_0_12px_rgba(125,211,252,0.9)]",
+  dotActiveGlowShadowClass = "drop-shadow-[0_0_8px_rgba(125,211,252,0.9)]",
+  markerIcon,
+  markerIconClassName = "block",
   activeAccentClass,
   activeShadowClass = "shadow-sky-400/20",
   hoverBorderClass = "hover:border-sky-300/70",
@@ -84,12 +89,14 @@ export function MapMarkerTag({
         >
           <span
             className={[
-              "mt-0.5 h-[0.9vw] w-[0.9vw] min-h-3 min-w-3 rounded-full transition",
+              "mt-0.5 inline-flex shrink-0 items-center justify-center transition-colors",
               isActive
                 ? `${dotActiveColorClass} ${dotActiveGlowShadowClass}`
                 : `${dotColorClass} ${dotHoverColorClass}`,
             ].join(" ")}
-          />
+          >
+            {markerIcon ? <span className={markerIconClassName}>{markerIcon}</span> : null}
+          </span>
 
           <span className="min-w-0 flex-1 text-left">
             <span className={`block truncate text-white ${titleTextClass}`}>{label}</span>
