@@ -518,6 +518,16 @@
 - 已知缺口：weather/road 的 `lat/lon` 仍為 0（待接 Vedur `stations` 對照站點座標）
 - 下一步（擇一）：補站點經緯度，或進 Phase 1-2（快取 + 斷路器 + fallback）
 
+### 2026-07-21
+- 今日完成：右上 Settings / 右下操作 dock 重新整併，左側面板收斂為純資訊區
+- 今日完成：區域切換移入右上設定抽屜；debug / 顯示控制 / timeline 一併收進同一組工具抽屜
+- 今日完成：右下新增 Timeline icon 與模式切換 dock，接管 weather / poi / road 與時間軸入口
+- 今日完成：圖釘中心改為 icon 顯示，並將景點 / 測站 / 路況點擊統一為同一鏡頭放大幅度
+- 今日完成：測站與路況點擊會同步切換左側對應資訊面板
+- 今日完成：相關 store 狀態分層補齊（map focus / utility panel / utility tab）
+- 今日驗證：`corepack pnpm lint`、`corepack pnpm build`、`home:200` 全數通過
+- 今日提交：`1c39ca5` (`feat(map): reorganize controls and focus behavior`)
+
 ### 2026-06-24（Phase 1-2）
 - 今日完成：快取抽象層（介面 + 記憶體實作），之後換 Redis 只改單例
 - 今日完成：斷路器（連續 5 次失敗開啟、60s 半開試探）
