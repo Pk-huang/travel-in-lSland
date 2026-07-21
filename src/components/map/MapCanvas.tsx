@@ -22,17 +22,25 @@ import { useWorkspaceStore } from "@/src/lib/store/workspace";
 export function MapCanvas() {
   const activeInfoPanelSection = useWorkspaceStore((s) => s.activeInfoPanelSection);
   const clearPoiFocus = useWorkspaceStore((s) => s.clearPoiFocus);
+  const selectStation = useWorkspaceStore((s) => s.selectStation);
+  const selectRoadSegment = useWorkspaceStore((s) => s.selectRoadSegment);
   const { data } = useWorkspaceData();
   const shouldShowPoiPins = activeInfoPanelSection === "poi";
   const shouldShowStations = activeInfoPanelSection === "weather";
   const shouldShowRoads = activeInfoPanelSection === "road";
+
+  const handlePointerMissed = () => {
+    clearPoiFocus();
+    selectStation(null);
+    selectRoadSegment(null);
+  };
 
   return (
     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_oklch(0.22_0.03_250)_0%,_oklch(0.13_0.02_250)_100%)]">
       <Canvas
         camera={{ position: [12, 36, 12], fov: 50 }}
         dpr={[1, 2]}
-        onPointerMissed={() => clearPoiFocus()}
+        onPointerMissed={handlePointerMissed}
       >
         <Lighting />
         <Terrain />

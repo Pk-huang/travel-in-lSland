@@ -21,6 +21,10 @@ const CAMERA_TRANSITION_MS = 900;
 const POI_FOCUS_DISTANCE_MULTIPLIER = 2;
 const CAMERA_HEIGHT_SCALE = 3;
 const CAMERA_DISTANCE_SCALE = 3;
+const CAMERA_MIN_DISTANCE = 6;
+const CAMERA_MAX_DISTANCE = 90;
+const CAMERA_MIN_POLAR_ANGLE = 0.35;
+const CAMERA_MAX_POLAR_ANGLE = 1.45;
 const MARKER_FOCUS_VIEW = {
   distance: 4,
   polarAngle: 1.05,
@@ -32,8 +36,6 @@ const DEFAULT_CAMERA_POSITION_SCALED = new Vector3(
   DEFAULT_CAMERA_POSITION.y * CAMERA_HEIGHT_SCALE,
   DEFAULT_CAMERA_POSITION.z,
 );
-
-const FREE_VIEW_MIN_DISTANCE = DEFAULT_CAMERA_POSITION_SCALED.distanceTo(DEFAULT_CAMERA_TARGET);
 
 function easeInOutCubic(t: number) {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -73,9 +75,14 @@ export function CameraRig() {
     const controls = controlsRef.current;
     if (!controls) return;
 
+    controls.minDistance = CAMERA_MIN_DISTANCE;
+    controls.maxDistance = CAMERA_MAX_DISTANCE;
+    controls.minPolarAngle = CAMERA_MIN_POLAR_ANGLE;
+    controls.maxPolarAngle = CAMERA_MAX_POLAR_ANGLE;
+
     const nextTarget = DEFAULT_CAMERA_TARGET.clone();
     const nextPosition = DEFAULT_CAMERA_POSITION_SCALED.clone();
-    let minZoomDistance = FREE_VIEW_MIN_DISTANCE;
+    let focusDistance = CAMERA_MIN_DISTANCE;
 
     if (poiFocusEnabled && activePoi) {
       const { x, z } = lonLatToSceneXZ(activePoi.lon, activePoi.lat);
@@ -84,11 +91,11 @@ export function CameraRig() {
         : 0;
       nextTarget.set(x, surfaceY, z);
 
-      minZoomDistance =
+      focusDistance =
         activePoi.cameraView.distance * POI_FOCUS_DISTANCE_MULTIPLIER * CAMERA_DISTANCE_SCALE;
 
       const spherical = new Spherical(
-        minZoomDistance,
+        focusDistance,
         activePoi.cameraView.polarAngle,
         activePoi.cameraView.azimuthAngle,
       );
@@ -101,20 +108,17 @@ export function CameraRig() {
         : 0;
       nextTarget.set(x, surfaceY, z);
 
-      minZoomDistance =
+      focusDistance =
         MARKER_FOCUS_VIEW.distance * POI_FOCUS_DISTANCE_MULTIPLIER * CAMERA_DISTANCE_SCALE;
 
       const spherical = new Spherical(
-        minZoomDistance,
+        focusDistance,
         MARKER_FOCUS_VIEW.polarAngle,
         MARKER_FOCUS_VIEW.azimuthAngle,
       );
       const offset = new Vector3().setFromSpherical(spherical);
       nextPosition.copy(nextTarget).add(offset);
     }
-
-    // 鎖定為只能 zoom out：禁止鏡頭比目前模式的最小距離更靠近目標。
-    controls.minDistance = minZoomDistance;
 
     transitionRef.current = {
       startAt: performance.now(),
