@@ -15,6 +15,9 @@ import {
 import { useHeightmap } from "@/src/lib/map/use-heightmap";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
 
+const POI_MARKER_SURFACE_OFFSET = 0.35;
+const POI_MARKER_ELEVATED_OFFSET = POI_MARKER_SURFACE_OFFSET * 1.5;
+
 /**
  * POI 圖釘層：在地圖上顯示可點擊景點，hover 時顯示圖片預覽。
  */
@@ -43,25 +46,26 @@ export function PoiLayer() {
         const isHovered = hoveredPoiId === poi.id;
 
         return (
-          <MapMarkerTag
-            key={poi.id}
-            markerId={poi.id}
-            label={poi.label}
-            description={poi.description}
-            x={x}
-            y={surfaceY + 0.35}
-            z={z}
-            isActive={isActive}
-            isHovered={isHovered}
-            icon={MapPin}
-            tone="poi"
-            onHoverChange={setHoveredPoiId}
-            onSelect={(markerId) => {
-              setActivePoi(markerId);
-              setPoiFocusEnabled(true);
-              setActiveInfoPanelSection("poi");
-            }}
-          />
+          <group key={poi.id}>
+            <MapMarkerTag
+              markerId={poi.id}
+              label={poi.label}
+              description={poi.description}
+              x={x}
+              y={surfaceY + POI_MARKER_ELEVATED_OFFSET}
+              z={z}
+              isActive={isActive}
+              isHovered={isHovered}
+              icon={MapPin}
+              tone="poi"
+              onHoverChange={setHoveredPoiId}
+              onSelect={(markerId) => {
+                setActivePoi(markerId);
+                setPoiFocusEnabled(true);
+                setActiveInfoPanelSection("poi");
+              }}
+            />
+          </group>
         );
       })}
 

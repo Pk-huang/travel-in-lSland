@@ -277,9 +277,10 @@ export function MapMarkerTag({
   const toneKey = tone ?? "neutral";
 
   return (
-    <Html position={[x, y, z]} center distanceFactor={30}>
+    <Html position={[x, y, z]} distanceFactor={30}>
       <div
         className="pointer-events-auto flex w-[24vw] min-w-60 flex-col items-center overflow-visible"
+        style={{ transform: "translate3d(-50%, -100%, 0)" }}
         onPointerEnter={() => onHoverChange(markerId)}
         onPointerLeave={() => onHoverChange(null)}
       >

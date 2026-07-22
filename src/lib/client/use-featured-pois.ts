@@ -14,6 +14,10 @@ type PoiApiItem = {
     lat: number;
     lon: number;
   };
+  displayLocation?: {
+    lat: number;
+    lon: number;
+  };
   description: {
     medium: string;
   };
@@ -49,13 +53,16 @@ function isErrorResponse(value: unknown): value is ApiErrorResponse {
 }
 
 function mapApiItemToPoint(item: PoiApiItem): PointOfInterest {
+  const displayLat = item.displayLocation?.lat ?? item.location.lat;
+  const displayLon = item.displayLocation?.lon ?? item.location.lon;
+
   return {
     id: item.poiId,
     label: item.name.en,
     imageUrl: item.media.heroImageUrl,
     description: item.description.medium,
-    lat: item.location.lat,
-    lon: item.location.lon,
+    lat: displayLat,
+    lon: displayLon,
     cameraView: item.cameraView ?? {
       distance: 4,
       polarAngle: 1.05,

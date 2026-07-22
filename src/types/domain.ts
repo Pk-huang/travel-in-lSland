@@ -65,6 +65,10 @@ export type PoiSeedRecord = {
     lat: number;
     lon: number;
   };
+  displayLocation?: {
+    lat: number;
+    lon: number;
+  };
   category: string;
   description: {
     short: string;

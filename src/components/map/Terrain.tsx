@@ -7,7 +7,6 @@ import {
   Color,
   type BufferGeometry,
 } from "three";
-
 import {
   PLANE_WIDTH,
   computePlaneDepth,
@@ -27,7 +26,7 @@ import type { TerrainDetailLevel } from "@/src/types";
  * - 水平尺度 computePlaneDepth()、高度換算 elevationToSceneY(meters) 皆來自 coords，
  *   與 StationLayer 共用同一套 bbox/公式，確保測站精準貼合地形。
  * - 頂點與 heightmap 一對一對齊：PlaneGeometry segments = grid-1 → 頂點數 = grid×grid，
- *   ix/iy 直接對應 elevations[iy*grid+ix]，無需內插。
+ *   ix/iy 依北→南列序對應 elevations[iy*grid+ix]，無需內插。
  * - elevationToColor 為 Terrain 專屬色帶（非座標邏輯），保留於本檔。
  *
  * 座標約定（保留）：中心 = 冰島大致中心。
@@ -213,17 +212,18 @@ export function Terrain() {
       const ix = i % verts;
       const iy = Math.floor(i / verts);
       const normalizedX = ix / (grid - 1);
-      const normalizedY = iy / (grid - 1);
+      const dataY = grid - 1 - iy;
+      const sampleNormalizedY = dataY / (grid - 1);
 
-      const meters = elevations[iy * grid + ix];
+      const meters = elevations[dataY * grid + ix];
 
-      const classId = sampleLandcoverClass(normalizedX, normalizedY);
-      const classSnowMask = sampleSnowMask(normalizedX, normalizedY);
+      const classId = sampleLandcoverClass(normalizedX, sampleNormalizedY);
+      const classSnowMask = sampleSnowMask(normalizedX, sampleNormalizedY);
 
-      const east = getElevation(ix + 1, iy);
-      const west = getElevation(ix - 1, iy);
-      const north = getElevation(ix, iy + 1);
-      const south = getElevation(ix, iy - 1);
+      const east = getElevation(ix + 1, dataY);
+      const west = getElevation(ix - 1, dataY);
+      const north = getElevation(ix, dataY - 1);
+      const south = getElevation(ix, dataY + 1);
       const gradientX = (east - west) / (2 * cellMeters);
       const gradientY = (north - south) / (2 * cellMeters);
       const slopeMetersPerCell = Math.hypot(gradientX, gradientY) * cellMeters;

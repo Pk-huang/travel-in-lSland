@@ -6,13 +6,16 @@ import type { PoiSeedRecord, PointOfInterest } from "@/src/types";
  * 後續 UI/相機轉場都只讀這份設定，不把鏡位參數散落在各元件。
  */
 function toPointOfInterest(seed: PoiSeedRecord): PointOfInterest {
+  const displayLat = seed.displayLocation?.lat ?? seed.location.lat;
+  const displayLon = seed.displayLocation?.lon ?? seed.location.lon;
+
   return {
     id: seed.poiId,
     label: seed.name.en,
     imageUrl: seed.media.heroImageUrl,
     description: seed.description.medium,
-    lat: seed.location.lat,
-    lon: seed.location.lon,
+    lat: displayLat,
+    lon: displayLon,
     cameraView: seed.cameraView ?? {
       distance: 4,
       polarAngle: 1.05,

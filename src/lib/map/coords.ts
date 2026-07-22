@@ -58,6 +58,24 @@ export function lonLatToSceneXZ(
   return { x, z };
 }
 
+/**
+ * 場景平面座標 { x, z } → 經緯度。
+ * 供開發期手動校正圖釘落點使用，與 lonLatToSceneXZ 互為反函式。
+ */
+export function sceneXZToLonLat(
+  x: number,
+  z: number,
+): { lon: number; lat: number } {
+  const planeDepth = computePlaneDepth();
+  const lon =
+    ICELAND_BBOX.lonMin +
+    (x / PLANE_WIDTH + 0.5) * (ICELAND_BBOX.lonMax - ICELAND_BBOX.lonMin);
+  const lat =
+    ICELAND_BBOX.latMax -
+    (z / planeDepth + 0.5) * (ICELAND_BBOX.latMax - ICELAND_BBOX.latMin);
+  return { lon, lat };
+}
+
 // --- 高度換算（與 Terrain 對齊的共用公式；測站等點位貼地形用） ---
 //
 // 單一真相源：Terrain 與 StationLayer 皆從此處取用高度常數與公式（2026-07-02 收斂完成），
@@ -73,7 +91,7 @@ export const SEA_FLOOR_UNIT = -0.3;
 export type HeightmapGrid = {
   grid: number;
   bbox: { latMin: number; latMax: number; lonMin: number; lonMax: number };
-  elevations: number[]; // 長度 grid²，row-major（南→北、每列西→東），單位公尺
+  elevations: number[]; // 長度 grid²，row-major（北→南、每列西→東），單位公尺
 };
 
 /** 水平 units → km 換算係數（東西向，餘弦收斂）。 */
@@ -99,7 +117,7 @@ export function elevationToSceneY(meters: number): number {
 /**
  * 依經緯度在 heightmap 取最近格點的海拔（公尺）。
  * 取樣索引與 Terrain 寫入頂點時的 elevations[iy*grid+ix] 對齊：
- * ix 西→東、iy 南→北，故地理位置與地形表面一致。
+ * ix 西→東、iy 北→南，故地理位置與地形表面一致。
  */
 export function sampleElevationMeters(
   heightmap: HeightmapGrid,
@@ -108,7 +126,7 @@ export function sampleElevationMeters(
 ): number {
   const { grid, bbox, elevations } = heightmap;
   const fx = (lon - bbox.lonMin) / (bbox.lonMax - bbox.lonMin);
-  const fy = (lat - bbox.latMin) / (bbox.latMax - bbox.latMin); // 南→北
+  const fy = (bbox.latMax - lat) / (bbox.latMax - bbox.latMin); // 北→南
   const clampedX = Math.min(1, Math.max(0, fx));
   const clampedY = Math.min(1, Math.max(0, fy));
   const ix = Math.round(clampedX * (grid - 1));
