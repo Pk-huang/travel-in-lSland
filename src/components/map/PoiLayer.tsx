@@ -34,10 +34,14 @@ export function PoiLayer() {
     [activePoiId, pointsOfInterest],
   );
   const [hoveredPoiId, setHoveredPoiId] = useState<string | null>(null);
+  const visiblePois =
+    poiFocusEnabled && activePoiId
+      ? pointsOfInterest.filter((poi) => poi.id === activePoiId)
+      : pointsOfInterest;
 
   return (
     <>
-      {pointsOfInterest.map((poi) => {
+      {visiblePois.map((poi) => {
         const { x, z } = lonLatToSceneXZ(poi.lon, poi.lat);
         const surfaceY = heightmap
           ? elevationToSceneY(sampleElevationMeters(heightmap, poi.lon, poi.lat))

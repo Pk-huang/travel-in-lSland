@@ -8,14 +8,50 @@ import type { PoiSeedRecord, PointOfInterest } from "@/src/types";
 function toPointOfInterest(seed: PoiSeedRecord): PointOfInterest {
   const displayLat = seed.displayLocation?.lat ?? seed.location.lat;
   const displayLon = seed.displayLocation?.lon ?? seed.location.lon;
+  const gallery = seed.media.gallery ?? [
+    {
+      imageUrl: seed.media.heroImageUrl,
+      alt: `${seed.name.en} hero`,
+    },
+  ];
 
   return {
     id: seed.poiId,
     label: seed.name.en,
+    labelZhHant: seed.name.zhHant,
     imageUrl: seed.media.heroImageUrl,
+    imageGallery: gallery,
     description: seed.description.medium,
+    descriptionShort: seed.description.short,
+    descriptionLong: seed.description.long,
     lat: displayLat,
     lon: displayLon,
+    category: seed.category,
+    tags: seed.tags ?? [],
+    visitRegion: seed.visit?.region,
+    bestSeason: seed.visit?.bestSeason ?? [],
+    sources: {
+      wikidataUrl: seed.sources.wikidataUrl,
+      wikipediaUrl: seed.sources.wikipediaUrl,
+      osmReference: seed.sources.osmReference,
+    },
+    mediaAttribution: {
+      sourcePageUrl: seed.media.sourcePageUrl,
+      author: seed.media.author,
+      licenseName: seed.media.licenseName,
+      licenseUrl: seed.media.licenseUrl,
+      attributionText: seed.media.attributionText,
+    },
+    travel: seed.travel ?? {
+      access: "建議自駕前往，依地區道路與天候預留彈性時間。",
+      parking: "以現地停車場或遊客中心指示為準；旺季需提早抵達。",
+      publicTransport: "大眾運輸班次有限，通常需搭配當地一日遊或接駁安排。",
+      driveTimeFromReykjavik: "請依當日路況與季節天候預估行車時間。",
+    },
+    cautionNotes: seed.cautionNotes ?? [
+      "出發前先確認當地天氣與道路狀況。",
+      "高風、濕滑與海岸浪況可能快速變化，請遵循現場標示。",
+    ],
     cameraView: seed.cameraView ?? {
       distance: 4,
       polarAngle: 1.05,

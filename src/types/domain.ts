@@ -44,10 +44,40 @@ export type PoiCameraView = {
 export type PointOfInterest = {
   id: string;
   label: string;
+  labelZhHant: string;
   imageUrl: string;
+  imageGallery: Array<{
+    imageUrl: string;
+    alt: string;
+  }>;
   description: string;
+  descriptionShort: string;
+  descriptionLong: string;
   lat: number;
   lon: number;
+  category: string;
+  tags: string[];
+  visitRegion?: Region;
+  bestSeason: string[];
+  sources: {
+    wikidataUrl: string;
+    wikipediaUrl: string;
+    osmReference: string;
+  };
+  mediaAttribution: {
+    sourcePageUrl: string;
+    author: string;
+    licenseName: string;
+    licenseUrl: string;
+    attributionText: string;
+  };
+  travel: {
+    access: string;
+    parking: string;
+    publicTransport: string;
+    driveTimeFromReykjavik: string;
+  };
+  cautionNotes: string[];
   cameraView: PoiCameraView;
 };
 
@@ -77,6 +107,10 @@ export type PoiSeedRecord = {
   };
   media: {
     heroImageUrl: string;
+    gallery?: Array<{
+      imageUrl: string;
+      alt: string;
+    }>;
     sourcePageUrl: string;
     author: string;
     licenseName: string;
@@ -102,6 +136,13 @@ export type PoiSeedRecord = {
     region: Region;
     bestSeason: string[];
   };
+  travel?: {
+    access: string;
+    parking: string;
+    publicTransport: string;
+    driveTimeFromReykjavik: string;
+  };
+  cautionNotes?: string[];
   cameraView?: PoiCameraView;
 };
 
