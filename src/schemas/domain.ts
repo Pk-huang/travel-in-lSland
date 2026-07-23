@@ -48,6 +48,147 @@ export const itineraryItemSchema = z.object({
   riskNote: z.string().optional(),
 });
 
+const yyyyMmDdSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+
+export const travelPlanStatusSchema = z.enum([
+  "draft",
+  "active",
+  "completed",
+  "archived",
+]);
+
+export const travelStopCategorySchema = z.enum([
+  "sight",
+  "hot",
+  "info",
+  "food",
+  "hotel",
+  "supply",
+  "transport",
+  "camp",
+  "memo",
+]);
+
+export const travelPlanStopSchema = z.object({
+  stopId: z.string(),
+  poiId: z.string().optional(),
+  name: z.string(),
+  lat: z.number().optional(),
+  lon: z.number().optional(),
+  category: travelStopCategorySchema,
+  tags: z.array(z.string()),
+  distanceFromPrevKm: z.number().nonnegative().optional(),
+  note: z.string().optional(),
+});
+
+export const travelDateDisplaySchema = z.object({
+  day: z.number().int().positive(),
+  month: z.string(),
+  weekday: z.string(),
+});
+
+export const travelTimelineBadgeKindSchema = z.enum([
+  "free",
+  "paid",
+  "warn",
+  "hot",
+  "info",
+]);
+
+export const travelTimelineBadgeSchema = z.object({
+  kind: travelTimelineBadgeKindSchema,
+  text: z.string(),
+});
+
+export const travelTimelineLinkSchema = z.object({
+  label: z.string(),
+  url: z.string().url(),
+});
+
+export const travelTimelineItemSchema = z.object({
+  itemId: z.string(),
+  name: z.string(),
+  type: travelStopCategorySchema,
+  bulletColor: z.enum(["blue", "purple", "amber", "yellow"]),
+  badge: travelTimelineBadgeSchema.optional(),
+  description: z.string().optional(),
+  timeWindow: z.string().optional(),
+  links: z.array(travelTimelineLinkSchema).optional(),
+  poiId: z.string().optional(),
+  lat: z.number().optional(),
+  lon: z.number().optional(),
+});
+
+export const travelTimelineSectionSchema = z.object({
+  sectionId: z.string(),
+  label: z.string(),
+  items: z.array(travelTimelineItemSchema),
+});
+
+export const travelCampInfoSchema = z.object({
+  name: z.string(),
+  url: z.string().url(),
+  note: z.string(),
+});
+
+export const travelPlanDaySchema = z.object({
+  dayId: z.string(),
+  dayIndex: z.number().int().positive(),
+  date: yyyyMmDdSchema,
+  dateDisplay: travelDateDisplaySchema,
+  regionLabel: z.string(),
+  title: z.string(),
+  driveText: z.string(),
+  distanceKm: z.number().nonnegative().optional(),
+  mapRouteUrl: z.string().url().optional(),
+  timelineSections: z.array(travelTimelineSectionSchema),
+  camp: travelCampInfoSchema.optional(),
+  stops: z.array(travelPlanStopSchema),
+  note: z.string().optional(),
+});
+
+export const travelMemoLinkSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  url: z.string().url(),
+  note: z.string().optional(),
+});
+
+export const travelSupplyItemSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  note: z.string().optional(),
+  region: regionSchema.optional(),
+});
+
+export const travelReminderLevelSchema = z.enum(["info", "warning", "critical"]);
+
+export const travelReminderItemSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  detail: z.string().optional(),
+  level: travelReminderLevelSchema,
+});
+
+export const travelPlanSchema = z.object({
+  planId: z.string(),
+  title: z.string(),
+  titleEn: z.string().optional(),
+  startDate: yyyyMmDdSchema,
+  endDate: yyyyMmDdSchema,
+  status: travelPlanStatusSchema,
+  days: z.array(travelPlanDaySchema),
+  memoLinks: z.array(travelMemoLinkSchema),
+  supplies: z.array(travelSupplyItemSchema),
+  reminders: z.array(travelReminderItemSchema),
+  updatedAt: z.string().datetime(),
+});
+
+export const travelPlanCollectionSchema = z.object({
+  generatedAt: z.string().datetime(),
+  plans: z.array(travelPlanSchema),
+});
+
 export const auroraConditionsSchema = z.object({
   source: z.literal("noaa"),
   observationTime: z.string().datetime(),

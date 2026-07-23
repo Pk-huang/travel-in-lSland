@@ -437,6 +437,13 @@ export type AuroraConditions = {
   3. AI 建議可被加入清單並形成可演示流程。
   4. API 波動時畫面不白屏，Demo 可連續演示。
 
+#### 3-4 旅行計劃資料契約（2026-07-23 決議）
+- 目前以 `TravelPlanCollection -> TravelPlan -> TravelPlanDay` 為主資料樹。
+- `TravelPlanDay` 直接承接 UI 需要的欄位：`dateDisplay`、`regionLabel`、`title`、`driveText`、`mapRouteUrl`、`timelineSections`、`camp`。
+- `timelineSections` 是左側面板的主要渲染來源，取代原先考慮的 `spotTags`。
+- `stops` 保留為地圖整合專用的精簡點位欄位，允許部分項目先無座標，之後再逐步補齊。
+- 首版 demo 以靜態 JSON 驅動完整 8/26 ~ 9/5 行程，先完成 CRUD 與面板呈現，再接地圖互動。
+
 ---
 
 ## Phase 4：AI 智慧規劃（4~6 天）

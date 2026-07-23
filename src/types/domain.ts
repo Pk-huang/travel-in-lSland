@@ -180,6 +180,138 @@ export type ItineraryItem = {
   riskNote?: string;
 };
 
+export type TravelPlanStatus = "draft" | "active" | "completed" | "archived";
+
+export type TravelStopCategory =
+  | "sight"
+  | "hot"
+  | "info"
+  | "food"
+  | "hotel"
+  | "supply"
+  | "transport"
+  | "camp"
+  | "memo";
+
+export type TravelPlanStop = {
+  stopId: string;
+  poiId?: string;
+  name: string;
+  lat?: number;
+  lon?: number;
+  category: TravelStopCategory;
+  tags: string[];
+  distanceFromPrevKm?: number;
+  note?: string;
+};
+
+export type TravelDateDisplay = {
+  day: number;
+  month: string;
+  weekday: string;
+};
+
+export type TravelTimelineBadgeKind =
+  | "free"
+  | "paid"
+  | "warn"
+  | "hot"
+  | "info";
+
+export type TravelTimelineBadge = {
+  kind: TravelTimelineBadgeKind;
+  text: string;
+};
+
+export type TravelTimelineLink = {
+  label: string;
+  url: string;
+};
+
+export type TravelTimelineItem = {
+  itemId: string;
+  name: string;
+  type: TravelStopCategory;
+  bulletColor: "blue" | "purple" | "amber" | "yellow";
+  badge?: TravelTimelineBadge;
+  description?: string;
+  timeWindow?: string;
+  links?: TravelTimelineLink[];
+  poiId?: string;
+  lat?: number;
+  lon?: number;
+};
+
+export type TravelTimelineSection = {
+  sectionId: string;
+  label: string;
+  items: TravelTimelineItem[];
+};
+
+export type TravelCampInfo = {
+  name: string;
+  url: string;
+  note: string;
+};
+
+export type TravelPlanDay = {
+  dayId: string;
+  dayIndex: number;
+  date: string;
+  dateDisplay: TravelDateDisplay;
+  regionLabel: string;
+  title: string;
+  driveText: string;
+  distanceKm?: number;
+  mapRouteUrl?: string;
+  timelineSections: TravelTimelineSection[];
+  camp?: TravelCampInfo;
+  stops: TravelPlanStop[];
+  note?: string;
+};
+
+export type TravelMemoLink = {
+  id: string;
+  title: string;
+  url: string;
+  note?: string;
+};
+
+export type TravelSupplyItem = {
+  id: string;
+  title: string;
+  note?: string;
+  region?: Region;
+};
+
+export type TravelReminderLevel = "info" | "warning" | "critical";
+
+export type TravelReminderItem = {
+  id: string;
+  title: string;
+  detail?: string;
+  level: TravelReminderLevel;
+};
+
+export type TravelPlan = {
+  planId: string;
+  title: string;
+  titleEn?: string;
+  startDate: string;
+  endDate: string;
+  status: TravelPlanStatus;
+  days: TravelPlanDay[];
+  memoLinks: TravelMemoLink[];
+  supplies: TravelSupplyItem[];
+  reminders: TravelReminderItem[];
+  updatedAt: string;
+};
+
+export type TravelPlanCollection = {
+  generatedAt: string;
+  plans: TravelPlan[];
+};
+
 export type AuroraConditions = {
   source: "noaa";
   observationTime: string;

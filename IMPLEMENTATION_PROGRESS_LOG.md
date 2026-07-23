@@ -3,6 +3,34 @@
 更新日期：2026-07-20  
 用途：依照既有 Phase 規劃，集中記錄實作進度、決策、阻塞與下一步
 
+## 2026-07-23 決議紀錄（旅行計劃 CRUD / Demo）
+
+- 狀態：完成記錄
+- 決議摘要：
+  - 左側面板 Demo 先固定顯示 26 號單日資料，作為第一階段可視化驗收樣本。
+  - UI 主要內容直接使用 timelineSections 渲染（早上 / 下午 / 晚上分段與項目清單）。
+  - spotTags 欄位先移除，資料層與 UI 均不建立、不顯示。
+  - 先以靜態 JSON 驅動內容，後續再接完整多日與地圖聯動。
+- 後續動作：
+  - 先更新旅行計劃型別與 schema（移除 spotTags，保留 timelineSections）。
+  - 再更新 fixtures 的 26 號資料為 UI 直接可渲染格式。
+  - 最後接入 ControlPanel 左側單日呈現。
+
+## 2026-07-23 旅行計劃資料契約升級（全日期）
+
+- 狀態：完成
+- 產出：
+  - 旅行計劃型別升級：[src/types/domain.ts](src/types/domain.ts)
+  - 旅行計劃 schema 升級：[src/schemas/domain.ts](src/schemas/domain.ts)
+  - 全日期靜態 JSON：[fixtures/travel-plans.iceland-three.json](fixtures/travel-plans.iceland-three.json)
+  - 契約說明筆記：[docs/notes/travel-plan-data-contract.md](docs/notes/travel-plan-data-contract.md)
+  - 規格文件同步：[PROJECT_SPEC_AND_PLAN.md](PROJECT_SPEC_AND_PLAN.md)
+- 決議摘要：
+  - 26 號到 9/5 全部日期改為同一份 `TravelPlanDay` 契約。
+  - `spotTags` 正式移除，UI 改由 `timelineSections` 直接渲染。
+  - 每日資料新增 `dateDisplay`、`regionLabel`、`driveText`、`mapRouteUrl`、`camp`。
+  - `stops` 保留給地圖使用，座標缺口允許後補。
+
 ---
 
 ## 使用方式
