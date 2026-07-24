@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -10,6 +10,7 @@ import { Badge } from "@/src/components/ui/badge";
 import {
   useWorkspaceData,
   useWorkspacePois,
+  useWorkspaceTravelPlans,
 } from "@/src/components/providers/WorkspaceProvider";
 import {
   DEFAULT_LIGHTING_PRESET_ID,
@@ -45,22 +46,24 @@ export function ControlPanel() {
   const selectRoadSegment = useWorkspaceStore((s) => s.selectRoadSegment);
   const setMapFocusTarget = useWorkspaceStore((s) => s.setMapFocusTarget);
   const setPoiFocusEnabled = useWorkspaceStore((s) => s.setPoiFocusEnabled);
-  const activeSection = useWorkspaceStore((s) => s.activeInfoPanelSection);
   const setActiveInfoPanelSection = useWorkspaceStore((s) => s.setActiveInfoPanelSection);
+  const selectedTravelDayId = useWorkspaceStore((s) => s.selectedTravelDayId);
+  const setSelectedTravelDayId = useWorkspaceStore((s) => s.setSelectedTravelDayId);
   const { data, loading, error, refetch } = useWorkspaceData();
   const { points: pointsOfInterest } = useWorkspacePois();
+  const { data: travelPlans } = useWorkspaceTravelPlans();
   const [activePoiImageIndex, setActivePoiImageIndex] = useState(0);
 
   const isLightingPresetLocked = INTERNAL_LIGHTING_PRESET_OVERRIDE != null;
-  const isWeatherOpen = activeSection === "weather";
-  const isPoiOpen = activeSection === "poi";
-  const isRoadOpen = activeSection === "road";
+  const isPoiOpen = false;
+  const isRoadOpen = false;
   const activePoi = activePoiFromStore(pointsOfInterest, activePoiId);
   const activePoiGallery = activePoi?.imageGallery ?? [];
   const effectivePoiImageIndex =
     activePoiGallery.length === 0
       ? 0
       : Math.min(activePoiImageIndex, activePoiGallery.length - 1);
+  const travelDays = useMemo(() => travelPlans.plans[0]?.days ?? [], [travelPlans]);
 
   useEffect(() => {
     if (isLightingPresetLocked) {
@@ -94,17 +97,45 @@ export function ControlPanel() {
     window.history.replaceState(window.history.state, "", currentUrl.toString());
   }, [isLightingPresetLocked, lightingPresetId, pathname]);
 
+  useEffect(() => {
+    if (travelDays.length === 0) {
+      return;
+    }
+
+    const isSelectedDayValid = travelDays.some((day) => day.dayId === selectedTravelDayId);
+    if (!isSelectedDayValid) {
+      setSelectedTravelDayId(travelDays[0]?.dayId ?? null);
+    }
+  }, [selectedTravelDayId, setSelectedTravelDayId, travelDays]);
+
   return (
     <div className="space-y-4">
       <section className="space-y-3 rounded-lg border border-white/10 bg-black/10 p-3">
-        {isWeatherOpen ? (
-          <div className="space-y-3">
-            <p className="text-[11px] text-white/55">
-              區域切換已移到右上 Settings；左側現在只顯示觀測站、風險分數與路況摘要。
-            </p>
-          </div>
-        ) : null}
+        <p className="text-[11px] text-white/55">
+          單日行程：點擊日期後，地圖只顯示該日站點（不連動時間軸）。
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {travelDays.map((day) => {
+            const isSelected = day.dayId === selectedTravelDayId;
+            return (
+              <button
+                key={day.dayId}
+                type="button"
+                onClick={() => setSelectedTravelDayId(day.dayId)}
+                className={
+                  isSelected
+                    ? "rounded-full border border-sky-300/70 bg-sky-400/20 px-3 py-1.5 text-xs font-medium text-sky-100"
+                    : "rounded-full border border-white/20 bg-black/20 px-3 py-1.5 text-xs font-medium text-white/75 transition hover:border-sky-300/50 hover:text-white"
+                }
+              >
+                {day.dateDisplay.month}/{day.dateDisplay.day} {day.dateDisplay.weekday}
+              </button>
+            );
+          })}
+        </div>
+      </section>
 
+      <section className="space-y-3 rounded-lg border border-white/10 bg-black/10 p-3">
         {isPoiOpen ? (
           <div className="flex min-h-[34rem] flex-col gap-3">
             <p className="text-[11px] text-white/55">
@@ -168,14 +199,6 @@ export function ControlPanel() {
 
                 <div className="space-y-2 p-4">
                   <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-base font-semibold text-white">{activePoi.label}</p>
-                      <p className="text-xs text-white/65">{activePoi.labelZhHant}</p>
-                      <p className="text-xs text-white/55">
-                        {activePoi.lat.toFixed(4)}, {activePoi.lon.toFixed(4)}
-                      </p>
-                    </div>
-                    <Badge variant="secondary">已選擇</Badge>
                   </div>
 
                   <p className="text-sm leading-6 text-white/75">{activePoi.description}</p>
@@ -315,14 +338,14 @@ export function ControlPanel() {
         ) : null}
       </section>
 
-      {isWeatherOpen || isRoadOpen ? (
+      {isRoadOpen ? (
         <StatusPanel
           data={data}
           loading={loading}
           error={error}
           onRetry={refetch}
-          showWeatherList={isWeatherOpen}
-          showRoadList={isRoadOpen}
+          showWeatherList={false}
+          showRoadList
           onSelectWeather={({ index, lat, lon }) => {
             setPoiFocusEnabled(false);
             selectRoadSegment(null);

@@ -8,8 +8,12 @@ import { CameraRig } from "@/src/components/map/CameraRig";
 import { PoiLayer } from "@/src/components/map/PoiLayer";
 import { RoadLayer } from "@/src/components/map/RoadLayer";
 import { StationLayer } from "@/src/components/map/StationLayer";
+import { TravelStopLayer } from "@/src/components/map/TravelStopLayer";
 import { Lighting } from "@/src/components/map/Lighting";
-import { useWorkspaceData } from "@/src/components/providers/WorkspaceProvider";
+import {
+  useWorkspaceData,
+  useWorkspaceTravelPlans,
+} from "@/src/components/providers/WorkspaceProvider";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
 
 /**
@@ -24,10 +28,14 @@ export function MapCanvas() {
   const clearPoiFocus = useWorkspaceStore((s) => s.clearPoiFocus);
   const selectStation = useWorkspaceStore((s) => s.selectStation);
   const selectRoadSegment = useWorkspaceStore((s) => s.selectRoadSegment);
+  const selectedTravelDayId = useWorkspaceStore((s) => s.selectedTravelDayId);
   const { data } = useWorkspaceData();
+  const { data: travelPlans } = useWorkspaceTravelPlans();
   const shouldShowPoiPins = activeInfoPanelSection === "poi";
-  const shouldShowStations = activeInfoPanelSection === "weather";
+  const isWeatherMode = activeInfoPanelSection === "weather";
   const shouldShowRoads = activeInfoPanelSection === "road";
+  const selectedDay =
+    travelPlans.plans[0]?.days.find((day) => day.dayId === selectedTravelDayId) ?? null;
 
   const handlePointerMissed = () => {
     clearPoiFocus();
@@ -45,8 +53,9 @@ export function MapCanvas() {
         <Lighting />
         <Terrain />
         <SeaLevel />
+        {selectedDay ? <TravelStopLayer day={selectedDay} /> : null}
         {shouldShowPoiPins ? <PoiLayer /> : null}
-        {shouldShowStations && data ? <StationLayer stations={data.weather} /> : null}
+        {data ? <StationLayer stations={data.weather} isWeatherMode={isWeatherMode} /> : null}
         {shouldShowRoads && data ? <RoadLayer roads={data.roads} /> : null}
         <CameraRig />
       </Canvas>

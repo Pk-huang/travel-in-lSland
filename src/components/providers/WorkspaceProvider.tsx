@@ -10,6 +10,10 @@ import {
   useFeaturedPois,
   type FeaturedPoisState,
 } from "@/src/lib/client/use-featured-pois";
+import {
+  useTravelPlans,
+  type TravelPlansState,
+} from "@/src/lib/client/use-travel-plans";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
 
 /**
@@ -26,6 +30,7 @@ import { useWorkspaceStore } from "@/src/lib/store/workspace";
 type WorkspaceContextValue = {
   status: IcelandStatusState;
   pois: FeaturedPoisState;
+  travelPlans: TravelPlansState;
 };
 
 const WorkspaceDataContext = createContext<WorkspaceContextValue | null>(null);
@@ -34,9 +39,10 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   const region = useWorkspaceStore((s) => s.region);
   const status = useIcelandStatus(region);
   const pois = useFeaturedPois();
+  const travelPlans = useTravelPlans();
 
   return (
-    <WorkspaceDataContext.Provider value={{ status, pois }}>
+    <WorkspaceDataContext.Provider value={{ status, pois, travelPlans }}>
       {children}
     </WorkspaceDataContext.Provider>
   );
@@ -58,4 +64,13 @@ export function useWorkspacePois(): FeaturedPoisState {
     throw new Error("useWorkspacePois 必須在 <WorkspaceProvider> 內使用");
   }
   return ctx.pois;
+}
+
+/** 取得旅行計劃資料來源（目前為本地 fixture）。 */
+export function useWorkspaceTravelPlans(): TravelPlansState {
+  const ctx = useContext(WorkspaceDataContext);
+  if (!ctx) {
+    throw new Error("useWorkspaceTravelPlans 必須在 <WorkspaceProvider> 內使用");
+  }
+  return ctx.travelPlans;
 }

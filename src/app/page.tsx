@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { MapCanvasLoader } from "@/src/components/map/MapCanvasLoader";
 import { FloatingPanel } from "@/src/components/panel/FloatingPanel";
 import { InfoModeDock } from "@/src/components/panel/InfoModeDock";
+import { WeatherDrawer } from "@/src/components/panel/WeatherDrawer";
 import { WorkspaceProvider } from "@/src/components/providers/WorkspaceProvider";
 import { TimelineControl } from "@/src/components/timeline/TimelineControl";
 
@@ -28,6 +29,7 @@ export default function HomePage() {
           <Suspense fallback={null}>
             <FloatingPanel />
           </Suspense>
+          <WeatherDrawer />
           <InfoModeDock />
           <TimelineControl />
         </div>

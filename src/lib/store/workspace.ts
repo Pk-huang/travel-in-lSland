@@ -50,6 +50,8 @@ export type WorkspaceState = {
   poiFocusEnabled: boolean;
   /** 任意圖釘點擊後的通用鏡頭焦點（測站/路況可共用）。 */
   mapFocusTarget: MapFocusTarget;
+  /** 左側旅行計劃目前選擇的日期。 */
+  selectedTravelDayId: string | null;
   /** 左側資訊面板目前展開的區塊。 */
   activeInfoPanelSection: InfoPanelSection;
   /** 右上/右下工具抽屜目前開啟的模式。 */
@@ -69,6 +71,7 @@ export type WorkspaceState = {
   setActivePoi: (id: string | null) => void;
   setPoiFocusEnabled: (enabled: boolean) => void;
   setMapFocusTarget: (target: MapFocusTarget) => void;
+  setSelectedTravelDayId: (dayId: string | null) => void;
   setActiveUtilityPanel: (panel: UtilityPanel) => void;
   setActiveUtilityTab: (tab: UtilityPanelTab) => void;
   clearPoiFocus: () => void;
@@ -87,6 +90,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   activePoiId: null,
   poiFocusEnabled: false,
   mapFocusTarget: null,
+  selectedTravelDayId: null,
   activeInfoPanelSection: "weather",
   activeUtilityPanel: null,
   activeUtilityTab: "display",
@@ -103,6 +107,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   setActivePoi: (activePoiId) => set({ activePoiId }),
   setPoiFocusEnabled: (poiFocusEnabled) => set({ poiFocusEnabled }),
   setMapFocusTarget: (mapFocusTarget) => set({ mapFocusTarget }),
+  setSelectedTravelDayId: (selectedTravelDayId) => set({ selectedTravelDayId }),
   setActiveUtilityPanel: (activeUtilityPanel) => set({ activeUtilityPanel }),
   setActiveUtilityTab: (activeUtilityTab) => set({ activeUtilityTab }),
   clearPoiFocus: () =>
