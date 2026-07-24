@@ -119,7 +119,7 @@ export function ControlPanel() {
                     alt={activePoiGallery[effectivePoiImageIndex]?.alt ?? activePoi.label}
                     width={960}
                     height={540}
-                    className="h-40 w-full object-cover"
+                    className=" w-full object-cover aspect-ratio-1/1"
                   />
                   {activePoiGallery.length > 1 ? (
                     <>
