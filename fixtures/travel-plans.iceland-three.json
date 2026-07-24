@@ -38,7 +38,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "paid", "text": "2500 ISK" },
                   "description": "系統性了解冰島歷史的首選地。",
-                  "timeWindow": "10:00-17:00"
+                  "timeWindow": "10:00-17:00",
+                  "lat": 64.14182,
+                  "lon": -21.94783
                 },
                 {
                   "itemId": "d1-m-03",
@@ -58,7 +60,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "民眾集結成的二手服裝店",
-                  "timeWindow": "10:00-18:00"
+                  "timeWindow": "10:00-18:00",
+                  "lat": 64.145324,
+                  "lon": -21.9283212
                 },
                 {
                   "itemId": "d1-m-05",
@@ -67,7 +71,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "黑膠唱片",
-                  "timeWindow": "13:00-18:00"
+                  "timeWindow": "13:00-18:00",
+                  "lat": 64.1453869,
+                  "lon": -21.9293141
                 },
                 {
                   "itemId": "d1-m-06",
@@ -85,7 +91,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "不一定要去，CD、卡帶、電子音樂 live",
-                  "timeWindow": "14:00-18:00"
+                  "timeWindow": "14:00-18:00",
+                  "lat": 64.1440135,
+                  "lon": -21.9300106
                 }
               ]
             },
@@ -157,7 +165,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "唱片行 + 酒吧",
-                  "timeWindow": "10:00-01:00"
+                  "timeWindow": "10:00-01:00",
+                  "lat": 64.1448823,
+                  "lon": -21.9307702
                 }
               ]
             }
@@ -218,7 +228,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "冰島第二高瀑布，需健行約 3-4 小時",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 64.3927,
+                  "lon": -21.296
                 },
                 {
                   "itemId": "d2-s2",
@@ -227,7 +239,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "據說是小精靈居住地，水量充沛",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 64.7023,
+                  "lon": -20.9789
                 },
                 {
                   "itemId": "d2-s3",
@@ -236,7 +250,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "位於 1 號公路旁，可俯視熔岩地貌",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 64.7604,
+                  "lon": -20.8057
                 }
               ]
             },
@@ -251,7 +267,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "整齊的巨大玄武岩牆",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 64.7659,
+                  "lon": -23.1733
                 },
                 {
                   "itemId": "d2-s5",
@@ -260,7 +278,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "常年有海豹在海灘礁石上曬太陽",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 64.8024,
+                  "lon": -23.0801
                 }
               ]
             },
@@ -274,7 +294,9 @@
                   "type": "sight",
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 64.7518,
+                  "lon": -23.4238
                 },
                 {
                   "itemId": "d2-s7",
@@ -283,7 +305,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "遺世獨立的小教堂，攝影愛好者必訪",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 64.82197,
+                  "lon": -23.3847
                 },
                 {
                   "itemId": "d2-s8",
@@ -292,7 +316,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "可進入峽谷深處",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 64.7504,
+                  "lon": -23.5019
                 },
                 {
                   "itemId": "d2-s9",
@@ -312,7 +338,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "海岸線奇石嶺岫，有著名石橋與紀念碑",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 64.7692,
+                  "lon": -23.6211
                 }
               ]
             }
@@ -356,7 +384,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "白日夢冒險王拍攝地，色彩繽紛",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 65.07536,
+                  "lon": -22.72966
                 },
                 {
                   "itemId": "d3-i-02",
@@ -365,7 +395,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "paid", "text": "2000/1900 ISK" },
                   "description": "草泥屋農場，組合方案含泳池券",
-                  "timeWindow": "10:00-18:00"
+                  "timeWindow": "10:00-18:00",
+                  "lat": 65.60061,
+                  "lon": -19.52816
                 },
                 {
                   "itemId": "d3-i-03",
@@ -376,7 +408,9 @@
                     "kind": "hot",
                     "text": "752號公路轉753公路，過小橋後看右手邊指示牌往左，溫泉靠在瀑布旁小溪邊，水溫溫和不燙，無遮蔽更衣"
                   },
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 65.74655,
+                  "lon": -19.13731
                 },
                 {
                   "itemId": "d3-i-04",
@@ -393,7 +427,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "小鎮加油、買東西、小博物館",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 66.15198,
+                  "lon": -18.90815
                 }
               ]
             }
@@ -407,18 +443,24 @@
             {
               "stopId": "d3-stop-1",
               "name": "Stykkishólmur 小鎮",
+              "lat": 65.07536,
+              "lon": -22.72966,
               "category": "sight",
               "tags": ["小鎮"]
             },
             {
               "stopId": "d3-stop-2",
               "name": "Fosslaug 野溪溫泉",
+              "lat": 65.74655,
+              "lon": -19.13731,
               "category": "hot",
               "tags": ["野溪溫泉"]
             },
             {
               "stopId": "d3-stop-3",
               "name": "Siglufjörður 小鎮",
+              "lat": 66.15198,
+              "lon": -18.90815,
               "category": "sight",
               "tags": ["北部小鎮"]
             }
@@ -446,7 +488,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "北部之都地標，階梯極具特色",
-                  "timeWindow": "10:00-18:00"
+                  "timeWindow": "10:00-18:00",
+                  "lat": 65.68255,
+                  "lon": -18.08972
                 },
                 {
                   "itemId": "d4-i-02",
@@ -490,7 +534,9 @@
                   "bulletColor": "yellow",
                   "badge": { "kind": "hot", "text": "7490 ISK｜需提前預約" },
                   "description": "隱身森林的高質感溫泉",
-                  "timeWindow": "10:00-24:00"
+                  "timeWindow": "10:00-24:00",
+                  "lat": 65.68808,
+                  "lon": -18.07225
                 },
                 {
                   "itemId": "d4-i-07",
@@ -499,7 +545,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "氣勢磅礡，呈半圓形的絕美瀑布",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 65.68278,
+                  "lon": -17.55019
                 },
                 {
                   "itemId": "d4-i-08",
@@ -508,7 +556,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "歐洲觀鯨之都，漁業與旅遊業是當地主力",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 66.04489,
+                  "lon": -17.33885
                 }
               ]
             }
@@ -522,12 +572,16 @@
             {
               "stopId": "d4-stop-1",
               "name": "Goðafoss 眾神瀑布",
+              "lat": 65.68278,
+              "lon": -17.55019,
               "category": "sight",
               "tags": ["瀑布"]
             },
             {
               "stopId": "d4-stop-2",
               "name": "胡薩維克小鎮",
+              "lat": 66.04489,
+              "lon": -17.33885,
               "category": "hotel",
               "tags": ["住宿", "小鎮"]
             }
@@ -555,7 +609,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "paid", "text": "停車 1200 ISK" },
                   "description": "充滿硫磺味、冒泡泥漿，彷彿外星地表",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 65.64153,
+                  "lon": -16.80931
                 },
                 {
                   "itemId": "d5-i-02",
@@ -564,7 +620,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "黑色巨大的碗狀火山口，可繞行一圈",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 65.61116,
+                  "lon": -16.88713
                 },
                 {
                   "itemId": "d5-i-03",
@@ -573,7 +631,9 @@
                   "bulletColor": "yellow",
                   "badge": { "kind": "hot", "text": "6490 ISK｜建議提前預約" },
                   "description": "北部的藍湖，泉水偏藍且富含礦物質",
-                  "timeWindow": "12:00-22:00"
+                  "timeWindow": "12:00-22:00",
+                  "lat": 65.63046,
+                  "lon": -16.84764
                 },
                 {
                   "itemId": "d5-i-04",
@@ -581,7 +641,9 @@
                   "type": "hot",
                   "bulletColor": "yellow",
                   "badge": { "kind": "hot", "text": "權力遊戲取景地，現因水溫過高禁止進入" },
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 65.62634,
+                  "lon": -16.88371
                 },
                 {
                   "itemId": "d5-i-05",
@@ -590,7 +652,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "全歐洲水量最大，震耳欲聾的壓迫感",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 65.8143509,
+                  "lon": -16.3844911
                 }
               ]
             }
@@ -604,6 +668,8 @@
             {
               "stopId": "d5-stop-1",
               "name": "米湖溫泉",
+              "lat": 65.63046,
+              "lon": -16.84764,
               "category": "hot",
               "tags": ["溫泉"]
             }
@@ -631,7 +697,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "paid", "text": "停車 1000 ISK" },
                   "description": "世界級玄武岩柱峽谷，河水呈蒂芬妮藍",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 65.16338,
+                  "lon": -15.3097
                 },
                 {
                   "itemId": "d6-i-02",
@@ -640,7 +708,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "往 Hengifoss 途中，有極細長玄武岩柱",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 65.10151,
+                  "lon": -14.88353
                 },
                 {
                   "itemId": "d6-i-03",
@@ -649,7 +719,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "paid", "text": "停車 1000 ISK" },
                   "description": "健行約需 1.5 小時，建議穿防水服",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 65.10123,
+                  "lon": -14.88255
                 },
                 {
                   "itemId": "d6-i-04",
@@ -658,7 +730,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "冰島古老農莊與歷史遺址，自助午餐 1000 ISK",
-                  "timeWindow": "11:00-17:00"
+                  "timeWindow": "11:00-17:00",
+                  "lat": 65.0606,
+                  "lon": -14.7603
                 },
                 {
                   "itemId": "d6-i-05",
@@ -667,7 +741,9 @@
                   "bulletColor": "yellow",
                   "badge": { "kind": "hot", "text": "7650/5690 ISK" },
                   "description": "浮動地熱游泳池，桑浴室、冰水噴霧通道、湖中泳池酒吧",
-                  "timeWindow": "10:00-22:00"
+                  "timeWindow": "10:00-22:00",
+                  "lat": 65.28892,
+                  "lon": -14.46453
                 },
                 {
                   "itemId": "d6-i-06",
@@ -676,7 +752,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "超可愛戶外雕塑",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 65.26197,
+                  "lon": -14.00742
                 },
                 {
                   "itemId": "d6-i-07",
@@ -685,7 +763,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "著名的彩虹步道與藍色教堂",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 65.26017,
+                  "lon": -14.00991
                 }
               ]
             }
@@ -699,6 +779,8 @@
             {
               "stopId": "d6-stop-1",
               "name": "Seyðisfjörður 小鎮",
+              "lat": 65.26017,
+              "lon": -14.00991,
               "category": "sight",
               "tags": ["彩虹小鎮"]
             }
@@ -726,7 +808,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "paid", "text": "1000 ISK" },
                   "description": "蜘蛛山倒影聖地，需在收費站購票",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 64.24233,
+                  "lon": -14.96862
                 },
                 {
                   "itemId": "d7-i-02",
@@ -735,7 +819,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "paid", "text": "含在沙灘票" },
                   "description": "冰島東部最受攝影師歡迎的山景",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 64.2541,
+                  "lon": -14.97557
                 },
                 {
                   "itemId": "d7-i-03",
@@ -744,7 +830,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "paid", "text": "含在停車費" },
                   "description": "冰塊被浪沖上黑沙灘，像鑽石般閃爍",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 64.0434,
+                  "lon": -16.1788
                 },
                 {
                   "itemId": "d7-i-04",
@@ -765,7 +853,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "規模較小但離冰河更近，遊客較少",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 64.01482,
+                  "lon": -16.36262
                 },
                 {
                   "itemId": "d7-i-06",
@@ -774,7 +864,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "隱藏版秘境峽谷，瀑布從高處傾瀉而下",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 63.98874,
+                  "lon": -16.39974
                 },
                 {
                   "itemId": "d7-i-07",
@@ -783,7 +875,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "冰島最後一座傳統草皮教堂",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 63.89306,
+                  "lon": -16.71371
                 }
               ]
             }
@@ -797,6 +891,8 @@
             {
               "stopId": "d7-stop-1",
               "name": "Diamond Beach",
+              "lat": 64.0434,
+              "lon": -16.1788,
               "category": "sight",
               "tags": ["黑沙灘", "冰塊"]
             },
@@ -834,6 +930,8 @@
                   "badge": { "kind": "paid", "text": "每人 USD 165.5｜需預約" },
                   "description": "10:00 到 Troll Expeditions Skaftafell 集合，距離營地開車 16 分鐘",
                   "timeWindow": "10:30-16:30",
+                  "lat": 64.01623,
+                  "lon": -16.96635,
                   "links": [
                     { "label": "Meeting place", "url": "https://maps.app.goo.gl/Gspqa8kA4bgkhYTX8" },
                     { "label": "Booking website", "url": "https://troll.is/tour/skaftafell-5-hour-glacier-hike/?_gl=1*dxkra5*_up*MQ..*_gs*MQ..*_ga*MTI3NTUyNDIzLjE3NzY1OTA5MjU.*_ga_B5BK0T4PKP*czE3NzY1OTA5MjUkbzEkZzEkdDE3NzY1OTA5NTAkajM1JGwwJGgxMjQ1ODgyOTg.&gbraid=0AAAAADJ22qH7V69KQeb1Od3qBnP3zVdP_" },
@@ -847,7 +945,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "要買羊毛衣物可以在這買",
-                  "timeWindow": "09:00-21:00"
+                  "timeWindow": "09:00-21:00",
+                  "lat": 63.41954,
+                  "lon": -19.00635
                 },
                 {
                   "itemId": "d8-i-03",
@@ -856,7 +956,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "位在小鎮高處，可俯視黑沙灘美景",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 63.41868,
+                  "lon": -19.00607
                 },
                 {
                   "itemId": "d8-i-04",
@@ -877,7 +979,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "巨大海蝕洞景觀，夏季亦可賞 Puffin",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 63.3996,
+                  "lon": -19.12694
                 }
               ]
             }
@@ -891,6 +995,8 @@
             {
               "stopId": "d8-stop-1",
               "name": "維克教堂",
+              "lat": 63.41868,
+              "lon": -19.00607,
               "category": "sight",
               "tags": ["小鎮", "教堂"]
             },
@@ -926,7 +1032,9 @@
                   "type": "sight",
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 63.52782,
+                  "lon": -19.37052
                 },
                 {
                   "itemId": "d9-i-02",
@@ -947,7 +1055,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "paid", "text": "含在停車費" },
                   "description": "躲在岩縫中的瀑布，需涉水進入",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 63.62076,
+                  "lon": -19.99104
                 },
                 {
                   "itemId": "d9-i-04",
@@ -968,7 +1078,9 @@
                   "bulletColor": "yellow",
                   "badge": { "kind": "hot", "text": "1000 ISK" },
                   "description": "私人經營的傳統草屋小溫泉池",
-                  "timeWindow": "09:00-21:00"
+                  "timeWindow": "09:00-21:00",
+                  "lat": 64.12546,
+                  "lon": -20.33562
                 },
                 {
                   "itemId": "d9-i-06",
@@ -1063,7 +1175,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "paid", "text": "停車 750 ISK" },
                   "description": "漂亮的瀑布",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 64.26429,
+                  "lon": -20.51461
                 },
                 {
                   "itemId": "d10-i-02",
@@ -1071,7 +1185,9 @@
                   "type": "food",
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
-                  "description": "可以免費續湯還有麵包，有蔬菜濃湯和馬鈴薯餅"
+                  "description": "可以免費續湯還有麵包，有蔬菜濃湯和馬鈴薯餅",
+                  "lat": 64.24127,
+                  "lon": -20.87046
                 },
                 {
                   "itemId": "d10-i-03",
@@ -1092,7 +1208,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "paid", "text": "500 ISK" },
                   "description": "湛藍的湖水與紅色的岩石對比鮮明",
-                  "timeWindow": "08:30-21:00"
+                  "timeWindow": "08:30-21:00",
+                  "lat": 64.0413,
+                  "lon": -20.8852
                 },
                 {
                   "itemId": "d10-i-05",
@@ -1101,7 +1219,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "paid", "text": "停車 1000 ISK" },
                   "description": "溫泉河，需爬山 1 小時，在河裡泡溫泉",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 64.02137,
+                  "lon": -21.21451
                 },
                 {
                   "itemId": "d10-i-06",
@@ -1119,7 +1239,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "南岸純樸的海邊古鎮，歷史氛圍濃厚",
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 63.86323,
+                  "lon": -21.14919
                 }
               ]
             }
@@ -1161,7 +1283,9 @@
                   "type": "sight",
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
-                  "timeWindow": "24 小時"
+                  "timeWindow": "24 小時",
+                  "lat": 63.89599,
+                  "lon": -22.05269
                 },
                 {
                   "itemId": "d11-i-02",
@@ -1169,7 +1293,9 @@
                   "type": "transport",
                   "bulletColor": "purple",
                   "badge": { "kind": "info", "text": "交通" },
-                  "description": "10:40 起飛，預計 8:00 到機場"
+                  "description": "10:40 起飛，預計 8:00 到機場",
+                  "lat": 63.985,
+                  "lon": -22.6056
                 },
                 {
                   "itemId": "d11-i-03",
@@ -1178,7 +1304,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "冰島唯一的跳蚤市場，可試吃發酵鯊魚",
-                  "timeWindow": "週末 11:00-17:00"
+                  "timeWindow": "週末 11:00-17:00",
+                  "lat": 64.14866,
+                  "lon": -21.94036
                 },
                 {
                   "itemId": "d11-i-04",
@@ -1187,7 +1315,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "絕美玻璃幾何建築，冰島文化中心",
-                  "timeWindow": "10:00-18:00"
+                  "timeWindow": "10:00-18:00",
+                  "lat": 64.15027,
+                  "lon": -21.93212
                 },
                 {
                   "itemId": "d11-i-05",
@@ -1196,7 +1326,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "paid", "text": "2350 ISK" },
                   "description": "位於港口區，展出當代前衛藝術",
-                  "timeWindow": "10:00-17:00"
+                  "timeWindow": "10:00-17:00",
+                  "lat": 64.14844,
+                  "lon": -21.94256
                 },
                 {
                   "itemId": "d11-i-06",
@@ -1205,7 +1337,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "冰島最小的博物館",
-                  "timeWindow": "10:00-18:00"
+                  "timeWindow": "10:00-18:00",
+                  "lat": 64.14655,
+                  "lon": -21.94288
                 },
                 {
                   "itemId": "d11-i-07",
@@ -1241,7 +1375,9 @@
                   "bulletColor": "blue",
                   "badge": { "kind": "free", "text": "免費" },
                   "description": "表演空間，時間近一點可以看有沒有演出",
-                  "timeWindow": "19:30-22:00"
+                  "timeWindow": "19:30-22:00",
+                  "lat": 64.14571,
+                  "lon": -21.93174
                 }
               ]
             }
