@@ -5,6 +5,7 @@ import { ExternalLink, MapPinned } from "lucide-react";
 
 import { useWorkspaceTravelPlans } from "@/src/components/providers/WorkspaceProvider";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
+import { buildTravelMapMarkers } from "@/src/lib/travel-plans/travel-plan-map-utils";
 
 export function ControlPanel() {
   const selectedTravelDayId = useWorkspaceStore((s) => s.selectedTravelDayId);
@@ -20,6 +21,13 @@ export function ControlPanel() {
     () => travelDays.find((day) => day.dayId === selectedTravelDayId) ?? null,
     [selectedTravelDayId, travelDays],
   );
+  const travelMarkers = useMemo(() => {
+    if (!selectedDay) {
+      return [];
+    }
+
+    return buildTravelMapMarkers(selectedDay);
+  }, [selectedDay]);
 
   useEffect(() => {
     if (travelDays.length === 0) {
@@ -132,12 +140,19 @@ export function ControlPanel() {
 
           <div className="rounded-xl border border-white/10 bg-black/15 p-3">
             <p className="mb-2 text-xs font-semibold tracking-wide text-white/70">
-              地圖站點（{selectedDay.stops.length}）
+              地圖站點（{travelMarkers.length}）
             </p>
             <ul className="space-y-1.5">
-              {selectedDay.stops.map((stop, index) => (
-                <li key={stop.stopId} className="text-xs text-white/75">
-                  {String(index + 1).padStart(2, "0")} · {stop.name}
+              {travelMarkers.map((marker) => (
+                <li key={marker.markerId} className="text-xs text-white/75">
+                  <div className="flex items-center justify-between gap-2">
+                    <span>
+                      {String(marker.sequence).padStart(2, "0")} · {marker.name}
+                    </span>
+                    <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] uppercase tracking-wide text-white/55">
+                      {marker.hasLocation ? "map" : "info"}
+                    </span>
+                  </div>
                 </li>
               ))}
             </ul>

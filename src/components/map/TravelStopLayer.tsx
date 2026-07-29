@@ -11,59 +11,23 @@ import {
   sampleElevationMeters,
 } from "@/src/lib/map/coords";
 import { useHeightmap } from "@/src/lib/map/use-heightmap";
+import { buildTravelMapMarkers } from "@/src/lib/travel-plans/travel-plan-map-utils";
 
 const TRAVEL_STOP_SURFACE_OFFSET = 0.42;
 
 export function TravelStopLayer({ day }: { day: TravelPlanDay }) {
   const heightmap = useHeightmap();
   const stopMarkers = useMemo(() => {
-    const seen = new Set<string>();
-    const markers: Array<{ markerId: string; name: string; lat: number; lon: number; note?: string }> = [];
-
-    day.stops.forEach((stop) => {
-      if (stop.lat == null || stop.lon == null) {
-        return;
-      }
-
-      const dedupeKey = `${stop.name}-${stop.lat}-${stop.lon}`;
-      seen.add(dedupeKey);
-      markers.push({
-        markerId: `travel-stop-${day.dayId}-${stop.stopId}`,
-        name: stop.name,
-        lat: stop.lat,
-        lon: stop.lon,
-        note: stop.note,
-      });
-    });
-
-    day.timelineSections.forEach((section) => {
-      section.items.forEach((item) => {
-        if (item.lat == null || item.lon == null) {
-          return;
-        }
-
-        const dedupeKey = `${item.name}-${item.lat}-${item.lon}`;
-        if (seen.has(dedupeKey)) {
-          return;
-        }
-
-        seen.add(dedupeKey);
-        markers.push({
-          markerId: `travel-item-${day.dayId}-${item.itemId}`,
-          name: item.name,
-          lat: item.lat,
-          lon: item.lon,
-          note: item.description,
-        });
-      });
-    });
-
-    return markers;
+    return buildTravelMapMarkers(day).filter((marker) => marker.hasLocation);
   }, [day]);
 
   return (
     <>
       {stopMarkers.map((stop, index) => {
+          if (stop.lat == null || stop.lon == null) {
+            return null;
+          }
+
           const { x, z } = lonLatToSceneXZ(stop.lon, stop.lat);
           const surfaceY = heightmap
             ? elevationToSceneY(
