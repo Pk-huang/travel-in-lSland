@@ -5,7 +5,7 @@ import { Canvas } from "@react-three/fiber";
 import { Terrain } from "@/src/components/map/Terrain";
 import { SeaLevel } from "@/src/components/map/SeaLevel";
 import { CameraRig } from "@/src/components/map/CameraRig";
-import { PoiLayer } from "@/src/components/map/PoiLayer";
+import { PoiLayer } from "@/src/components/map/poi";
 import { RoadLayer } from "@/src/components/map/RoadLayer";
 import { StationLayer } from "@/src/components/map/StationLayer";
 import { TravelStopLayer } from "@/src/components/map/TravelStopLayer";

@@ -256,6 +256,48 @@
 
 ---
 
+## 2026-07-29 旅行計劃地圖互動整合
+- 狀態：完成
+- 目標：讓旅行計畫的每日 itinerary 與地圖標記不再各自維護一套邏輯，將「哪些項目要顯示在地圖上、哪些只保留為資訊」統一收斂成一個共用流程。
+- 利用 agent skill 的流程與產出：
+  - 先由 /ask-matt 釐清這個功能要解決的核心問題，確認是「旅行計畫與地圖互動斷裂」而不是單純做一個新按鈕。
+  - 接著由 /grill-with-docs 依照既有規劃與資料契約，整理出實際需要落地的需求與限制，避免把這次改動做成無法接上現有架構的獨立功能。
+  - 再由 /to-spec 產出 [.scratch/to-spec/travel-plan-map-first-spec.md](.scratch/to-spec/travel-plan-map-first-spec.md) 這份規格，明確定義使用者故事、實作決策與測試方向。
+  - 最後由 /implement 依照這份規格把功能落到實作層：地圖層、控制面板、共用 marker 邏輯與回歸測試都一併補齊。
+  - 這個流程的價值不只是「生成程式碼」，而是把需求、規格、實作與驗證串成一條可重複的工程路徑。
+- 實作內容：
+  1. 地圖層更新：
+     - [src/components/map/TravelStopLayer.tsx](src/components/map/TravelStopLayer.tsx) 改為從共用 marker helper 產生資料，再過濾出真正有座標的項目才渲染。
+     - 這使地圖標記與當日行程資料的來源一致，不再依賴地圖層自行組裝一份臨時清單。
+     - 透過座標轉換與高度圖取樣，把 travel stop 放到 3D 地圖上的正確位置。
+  2. 左側控制面板更新：
+     - [src/components/panel/ControlPanel.tsx](src/components/panel/ControlPanel.tsx) 改為使用同一套 marker builder，將「地圖站點」清單與當日 itinerary 的顯示內容對齊。
+     - 面板會顯示每個項目是「可定位到地圖」還是「僅資訊」，讓使用者一眼看出哪些內容有地圖對應。
+     - 對於具座標的行程項目，點擊後會把地圖焦點切到對應位置，讓面板與地圖互動更緊密。
+  3. 共用 marker 邏輯：
+     - 新增 [src/lib/travel-plans/travel-plan-map-utils.js](src/lib/travel-plans/travel-plan-map-utils.js)，把 stops 與 timeline items 合併成一份統一的 marker 結構。
+     - 每個 marker 會保留 `kind`、`hasLocation`、`sequence` 等資訊，讓地圖與面板都能一致地理解它是什麼、要不要顯示到地圖上。
+     - 透過去重邏輯與穩定排序，避免同一日內出現重複標記或順序漂移。
+     - 同時補上 [src/lib/travel-plans/travel-plan-map-utils.d.ts](src/lib/travel-plans/travel-plan-map-utils.d.ts)，讓此共用模組可在 TypeScript / build 流程中正常被識別。
+  4. 回歸測試：
+     - 新增 [src/lib/travel-plans/travel-plan-map-utils.test.mjs](src/lib/travel-plans/travel-plan-map-utils.test.mjs)，針對 marker 合併、順序、座標狀態與去重行為做回歸驗證。
+- 驗收結果：
+  - 地圖層與左側控制面板已共用同一套旅行標記邏輯。
+  - 有座標的行程項目會出現在地圖上；沒有座標的項目仍保留在資訊流中，但不會被錯誤地當成可定位站點。
+  - 這一步讓後續的地圖互動與 itinerary 互動有了更穩定的基礎，後續可再擴充為「點擊行程即聚焦地圖」等更深度互動。
+- 產出：
+  - 旅行計劃 stop / timeline item 已統一收斂為共享 marker 建構邏輯：[src/lib/travel-plans/travel-plan-map-utils.js](src/lib/travel-plans/travel-plan-map-utils.js)
+  - 地圖層已改為只顯示具座標的旅行站點，避免空座標造成錯誤互動：[src/components/map/TravelStopLayer.tsx](src/components/map/TravelStopLayer.tsx)
+  - 左側控制面板已顯示當日地圖站點清單，並標示哪些項目可在地圖上呈現：[src/components/panel/ControlPanel.tsx](src/components/panel/ControlPanel.tsx)
+  - 新增回歸測試，確認 marker 的順序與位置狀態保持穩定：[src/lib/travel-plans/travel-plan-map-utils.test.mjs](src/lib/travel-plans/travel-plan-map-utils.test.mjs)
+- 驗收結果（實作驗證）：
+  - `node --test src/lib/travel-plans/travel-plan-map-utils.test.mjs`：1 test passed, 0 failed
+  - `corepack pnpm lint`：通過
+  - `corepack pnpm build`：成功完成 Next.js production build
+- 後續建議：下一步可把 itinerary item 的點擊行為進一步接到地圖相機聚焦，讓旅行站點從「可見」提升到「可互動」。
+
+---
+
 ## Phase 2：3D 地圖與互動 UI（7~10 天）
 
 ### 2-3 時間軸 × 日照模型（2026-07-08 除錯紀錄）

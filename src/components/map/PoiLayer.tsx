@@ -39,6 +39,13 @@ export function PoiLayer() {
       ? pointsOfInterest.filter((poi) => poi.id === activePoiId)
       : pointsOfInterest;
 
+  const handleSelectPoi = (markerId: string) => {
+    const shouldToggleOff = activePoiId === markerId && poiFocusEnabled;
+    setActivePoi(shouldToggleOff ? null : markerId);
+    setPoiFocusEnabled(!shouldToggleOff);
+    setActiveInfoPanelSection("poi");
+  };
+
   return (
     <>
       {visiblePois.map((poi) => {
@@ -63,10 +70,17 @@ export function PoiLayer() {
               icon={MapPin}
               tone="poi"
               onHoverChange={setHoveredPoiId}
-              onSelect={(markerId) => {
-                setActivePoi(markerId);
-                setPoiFocusEnabled(true);
-                setActiveInfoPanelSection("poi");
+              onSelect={handleSelectPoi}
+              detailContent={{
+                title: poi.labelZhHant || poi.label,
+                description: poi.descriptionShort,
+                longDescription: poi.descriptionLong || poi.description,
+                imageUrl: poi.imageGallery[0]?.imageUrl ?? poi.imageUrl,
+                imageAlt: `${poi.label} photo`,
+                images: poi.imageGallery.length > 0 ? poi.imageGallery : [{ imageUrl: poi.imageUrl, alt: `${poi.label} photo` }],
+                tags: poi.tags.slice(0, 4),
+                travelInfo: poi.travel?.publicTransport,
+                cautionNotes: poi.cautionNotes.slice(0, 3),
               }}
             />
           </group>
