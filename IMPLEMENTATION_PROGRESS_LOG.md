@@ -282,6 +282,24 @@ page
   - [src/app-shell/SharedViewState.tsx](src/app-shell/SharedViewState.tsx) 提供跨元件共用的視圖狀態。
   - [src/components/panel/WeatherDrawer.tsx](src/components/panel/WeatherDrawer.tsx)、[src/components/panel/InfoModeDock.tsx](src/components/panel/InfoModeDock.tsx) 與 [src/components/timeline/TimelineControl.tsx](src/components/timeline/TimelineControl.tsx) 透過 shared state 讀寫，而非各自散落地管理。
 - 後續擴充方向：下一步會把 MapModule 與 PanelModule 再往內拆，讓 map / panel / weather / timeline 的邊界更清楚。
+
+## 2026-08-03 PanelModule 第一階段重構
+- 狀態：完成
+- 目標：把 panel 的入口從 AppShell 直掛式組裝，改為由 PanelModule 入口負責聚合，並把 shell 與 feature blocks 分層。
+- 結論：PanelModule 已拆成三層：
+
+```text
+AppShell
+└── PanelModule
+    ├── PanelShell
+    └── PanelFeatureBlocks
+```
+
+- 具體落地：
+  - [src/panel/PanelModule.tsx](src/panel/PanelModule.tsx) 成為 panel 領域入口。
+  - [src/panel/shell/PanelShell.tsx](src/panel/shell/PanelShell.tsx) 負責外殼與版面層。
+  - [src/panel/feature-blocks/PanelFeatureBlocks.tsx](src/panel/feature-blocks/PanelFeatureBlocks.tsx) 聚合 Weather / Info / Timeline 功能區塊。
+- 設計方向：後續 PanelShell 會專注於 UI 版面配置，PanelFeatureBlocks 會以 Shared View State 驅動內容與互動，避免外殼與功能邏輯混在一起。
 - 目標：讓旅行計畫的每日 itinerary 與地圖標記不再各自維護一套邏輯，將「哪些項目要顯示在地圖上、哪些只保留為資訊」統一收斂成一個共用流程。
 - 利用 agent skill 的流程與產出：
   - 先由 /ask-matt 釐清這個功能要解決的核心問題，確認是「旅行計畫與地圖互動斷裂」而不是單純做一個新按鈕。
