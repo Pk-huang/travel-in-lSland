@@ -6,6 +6,7 @@ import {
   useWorkspaceData,
   useWorkspacePois,
 } from "@/src/components/providers/WorkspaceProvider";
+import { useSharedViewState } from "@/src/app-shell/SharedViewState";
 import { StatusPanel } from "@/src/components/panel/StatusPanel";
 import { Button } from "@/src/components/ui/button";
 import { cn } from "@/src/lib/utils";
@@ -19,8 +20,10 @@ function isDrawerSection(value: string | null): value is DrawerSection {
 }
 
 export function WeatherDrawer() {
-  const activeInfoPanelSection = useWorkspaceStore((s) => s.activeInfoPanelSection);
-  const setActiveInfoPanelSection = useWorkspaceStore((s) => s.setActiveInfoPanelSection);
+  const {
+    activeInfoPanelSection,
+    setActiveInfoPanelSection,
+  } = useSharedViewState();
   const setActivePoi = useWorkspaceStore((s) => s.setActivePoi);
   const setPoiFocusEnabled = useWorkspaceStore((s) => s.setPoiFocusEnabled);
   const selectRoadSegment = useWorkspaceStore((s) => s.selectRoadSegment);

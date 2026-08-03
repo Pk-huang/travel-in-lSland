@@ -1,11 +1,5 @@
-import { Suspense } from "react";
-
-import { MapCanvasLoader } from "@/src/components/map/MapCanvasLoader";
-import { FloatingPanel } from "@/src/components/panel/FloatingPanel";
-import { InfoModeDock } from "@/src/components/panel/InfoModeDock";
-import { WeatherDrawer } from "@/src/components/panel/WeatherDrawer";
+import { AppShell } from "@/src/app-shell/AppShell";
 import { WorkspaceProvider } from "@/src/components/providers/WorkspaceProvider";
-import { TimelineControl } from "@/src/components/timeline/TimelineControl";
 
 /**
  * 首頁：Server Component（全螢幕版面外框，Google Maps 風格）。
@@ -20,19 +14,8 @@ import { TimelineControl } from "@/src/components/timeline/TimelineControl";
 export default function HomePage() {
   return (
     <main className="relative h-dvh w-full overflow-hidden">
-      {/* WorkspaceProvider 在頂層抓一次資料，供兩島共用 */}
       <WorkspaceProvider>
-        {/* 底層：全螢幕地圖背景（dynamic import，three.js 不進首包） */}
-        <MapCanvasLoader />
-        {/* 上層：浮動操作面板（pointer-events 由子層各自開啟） */}
-        <div className="pointer-events-none absolute inset-0">
-          <Suspense fallback={null}>
-            <FloatingPanel />
-          </Suspense>
-          <WeatherDrawer />
-          <InfoModeDock />
-          <TimelineControl />
-        </div>
+        <AppShell />
       </WorkspaceProvider>
     </main>
   );

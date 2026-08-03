@@ -6,6 +6,7 @@ import { Clock, Pause, Play, RotateCcw, Settings, X } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { useWorkspaceData } from "@/src/components/providers/WorkspaceProvider";
 import { computeLighting } from "@/src/components/map/Lighting";
+import { useSharedViewState } from "@/src/app-shell/SharedViewState";
 import { RegionSelector } from "@/src/components/panel/RegionSelector";
 import {
   DEFAULT_LIGHTING_PRESET_ID,
@@ -62,7 +63,7 @@ export function TimelineControl() {
   const lightingPresetId = useWorkspaceStore((s) => s.lightingPresetId);
   const terrainDetailLevel = useWorkspaceStore((s) => s.terrainDetailLevel);
   const region = useWorkspaceStore((s) => s.region);
-  const activeInfoPanelSection = useWorkspaceStore((s) => s.activeInfoPanelSection);
+  const { activeInfoPanelSection, activeUtilityPanel, setActiveUtilityPanel, setActiveUtilityTab } = useSharedViewState();
   const setTime = useWorkspaceStore((s) => s.setTime);
   const play = useWorkspaceStore((s) => s.play);
   const pause = useWorkspaceStore((s) => s.pause);
@@ -71,10 +72,7 @@ export function TimelineControl() {
   const setTerrainDetailLevel = useWorkspaceStore((s) => s.setTerrainDetailLevel);
   const setRegion = useWorkspaceStore((s) => s.setRegion);
   const setMapFocusTarget = useWorkspaceStore((s) => s.setMapFocusTarget);
-  const activeUtilityPanel = useWorkspaceStore((s) => s.activeUtilityPanel);
   const activeUtilityTab = useWorkspaceStore((s) => s.activeUtilityTab);
-  const setActiveUtilityPanel = useWorkspaceStore((s) => s.setActiveUtilityPanel);
-  const setActiveUtilityTab = useWorkspaceStore((s) => s.setActiveUtilityTab);
   const { data, loading } = useWorkspaceData();
   const isLightingPresetLocked = INTERNAL_LIGHTING_PRESET_OVERRIDE != null;
   const isAlreadyDefaultPreset = lightingPresetId === DEFAULT_LIGHTING_PRESET_ID;

@@ -2,6 +2,7 @@
 
 import { Clock3, CloudSun, MapPin, Route } from "lucide-react";
 
+import { useSharedViewState } from "@/src/app-shell/SharedViewState";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
 
 type ModeOption = {
@@ -17,11 +18,9 @@ const MODE_OPTIONS: readonly ModeOption[] = [
 ] as const;
 
 export function InfoModeDock() {
-  const activeSection = useWorkspaceStore((s) => s.activeInfoPanelSection);
-  const setActiveSection = useWorkspaceStore((s) => s.setActiveInfoPanelSection);
-  const activeUtilityPanel = useWorkspaceStore((s) => s.activeUtilityPanel);
-  const setActiveUtilityPanel = useWorkspaceStore((s) => s.setActiveUtilityPanel);
-  const setActiveUtilityTab = useWorkspaceStore((s) => s.setActiveUtilityTab);
+  const { activeInfoPanelSection, setActiveInfoPanelSection, activeUtilityPanel, setActiveUtilityPanel, setActiveUtilityTab } = useSharedViewState();
+  const activeSection = activeInfoPanelSection;
+  const setActiveSection = setActiveInfoPanelSection;
 
   return (
     <div className="pointer-events-auto absolute right-4 bottom-4 z-30">

@@ -258,6 +258,30 @@
 
 ## 2026-07-29 旅行計劃地圖互動整合
 - 狀態：完成
+
+## 2026-08-03 AppShell 與 Shared View State 重整
+- 狀態：完成
+- 目標：把首頁入口從「直接在 page 中組裝所有 UI」改為「由 AppShell 負責組裝，Shared View State 負責跨元件共用的視圖狀態」。
+- 結論：是的，當前頁面結構已對齊以下層次：
+
+```text
+page
+└── AppShell
+    ├── WorkspaceProvider
+    ├── MapModule
+    ├── PanelModule
+    │   ├── WeatherModule
+    │   ├── TimelineModule
+    │   └── InfoModule
+    └── SharedViewState
+```
+
+- 具體落地：
+  - [src/app/page.tsx](src/app/page.tsx) 只保留頁面入口。
+  - [src/app-shell/AppShell.tsx](src/app-shell/AppShell.tsx) 負責把地圖與面板區塊組裝起來。
+  - [src/app-shell/SharedViewState.tsx](src/app-shell/SharedViewState.tsx) 提供跨元件共用的視圖狀態。
+  - [src/components/panel/WeatherDrawer.tsx](src/components/panel/WeatherDrawer.tsx)、[src/components/panel/InfoModeDock.tsx](src/components/panel/InfoModeDock.tsx) 與 [src/components/timeline/TimelineControl.tsx](src/components/timeline/TimelineControl.tsx) 透過 shared state 讀寫，而非各自散落地管理。
+- 後續擴充方向：下一步會把 MapModule 與 PanelModule 再往內拆，讓 map / panel / weather / timeline 的邊界更清楚。
 - 目標：讓旅行計畫的每日 itinerary 與地圖標記不再各自維護一套邏輯，將「哪些項目要顯示在地圖上、哪些只保留為資訊」統一收斂成一個共用流程。
 - 利用 agent skill 的流程與產出：
   - 先由 /ask-matt 釐清這個功能要解決的核心問題，確認是「旅行計畫與地圖互動斷裂」而不是單純做一個新按鈕。
