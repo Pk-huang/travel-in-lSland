@@ -3,7 +3,6 @@
 import { Clock3, CloudSun, MapPin, Route } from "lucide-react";
 
 import { useSharedViewState } from "@/src/app-shell/SharedViewState";
-import { useWorkspaceStore } from "@/src/lib/store/workspace";
 
 type ModeOption = {
   id: "weather" | "poi" | "road";

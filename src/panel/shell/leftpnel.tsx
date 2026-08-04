@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ChevronLeft, PanelLeftOpen } from "lucide-react";
 
-import { ControlPanel } from "@/src/components/panel/ControlPanel";
+import { ControlPanel } from "@/src/panel/ControlPanel";
 import { Button } from "@/src/components/ui/button";
 import { cn } from "@/src/lib/utils";
 
@@ -15,7 +15,7 @@ import { cn } from "@/src/lib/utils";
  *
  * 內容委派給 ControlPanel；本元件只負責：標題列、收合/展開、捲動。
  */
-export function FloatingPanel() {
+export function LeftPanel() {
   const [open, setOpen] = useState(true);
 
   return (
@@ -32,7 +32,7 @@ export function FloatingPanel() {
         <header className="border-border flex items-center justify-between border-b px-4 py-3">
           <div>
             <h1 className="text-lg leading-tight font-bold">Iceland Insight</h1>
-            <p className="text-muted-foreground text-xs">天氣概況與詳細資訊</p>
+            <p className="text-muted-foreground text-xs">左側面板</p>
           </div>
           <Button
             variant="ghost"

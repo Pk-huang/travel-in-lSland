@@ -7,7 +7,7 @@ import { Button } from "@/src/components/ui/button";
 import { useWorkspaceData } from "@/src/components/providers/WorkspaceProvider";
 import { computeLighting } from "@/src/components/map/Lighting";
 import { useSharedViewState } from "@/src/app-shell/SharedViewState";
-import { RegionSelector } from "@/src/components/panel/RegionSelector";
+import { RegionSelector } from "@/src/panel/RegionSelector";
 import {
   DEFAULT_LIGHTING_PRESET_ID,
   INTERNAL_LIGHTING_PRESET_OVERRIDE,

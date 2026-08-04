@@ -7,7 +7,7 @@ import {
   useWorkspacePois,
 } from "@/src/components/providers/WorkspaceProvider";
 import { useSharedViewState } from "@/src/app-shell/SharedViewState";
-import { StatusPanel } from "@/src/components/panel/StatusPanel";
+import { StatusPanel } from "@/src/panel/StatusPanel";
 import { Button } from "@/src/components/ui/button";
 import { cn } from "@/src/lib/utils";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
