@@ -1,7 +1,5 @@
 "use client";
 
-import { Suspense } from "react";
-
 import { InfoModeDock } from "@/src/panel/feature-blocks/InfoModeDock";
 import { LeftPanel } from "@/src/panel/shell/leftpnel";
 import { TimelineControl } from "@/src/panel/feature-blocks/TimelineControl";
@@ -21,8 +19,14 @@ export function PanelShell() {
 
           {/* 右側功能區塊：放置抽屜、模式切換、時間軸與其他功能內容 */}
           <div className="pointer-events-none relative flex-1">
-            <WeatherDrawer />
-            <InfoModeDock />
+            <div className="pointer-events-none absolute top-16 right-4">
+              <WeatherDrawer />
+            </div>
+
+            <div className="pointer-events-none absolute right-4 bottom-4">
+              <InfoModeDock />
+            </div>
+
             <TimelineControl />
           </div>
         </div>

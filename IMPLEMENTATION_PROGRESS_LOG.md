@@ -3,6 +3,40 @@
 更新日期：2026-07-20  
 用途：依照既有 Phase 規劃，集中記錄實作進度、決策、阻塞與下一步
 
+## 2026-08-05 app-shell 命名整理與 info mode hook 分層
+
+- 狀態：完成（commit: pending）
+- 目標：讓 `src/app-shell` 的角色名稱更精準，並把 info mode state 移到獨立 hooks 資料夾，方便後續再拆其他 state hook。
+- 本次調整：
+	- `SharedViewStateProvider` / `useSharedViewState` 改名為 `ShellUiStateProvider` / `useShellUiState`
+	- `SharedViewState.tsx` 改為 `ShellUiState.tsx`，只保留 shell UI 的抽屜與分頁狀態
+	- `useInfoModeState` 移到 `src/app-shell/hooks/useInfoModeState.ts`
+	- `AppShell` 與 `TimelineControl` 同步改用新名稱與新路徑
+- 驗證結果：
+	- 尚待執行
+- 影響說明：
+	- `app-shell` 內的資料分層更清楚，之後若還有其他 shell state hook，可直接放進 `src/app-shell/hooks/`。
+
+## 2026-08-04 Panel 結構收斂（Phase 1）
+
+- 狀態：完成（commit: 962c5b7）
+- 目標：將 panel 相關元件集中到 `src/panel` 領域，讓 PanelShell 直接組裝右側功能區塊。
+- 本次調整：
+	- 路徑集中：
+		- `ControlPanel`、`RegionSelector`、`StatusPanel` 移至 `src/panel/`
+		- `InfoModeDock`、`WeatherDrawer`、`TimelineControl` 移至 `src/panel/feature-blocks/`
+		- `FloatingPanel` 更名並移至 `src/panel/shell/leftpnel.tsx`
+	- 模組收斂：
+		- `PanelShell` 直接引入 `WeatherDrawer` / `InfoModeDock` / `TimelineControl`
+		- `PanelModule` 簡化為僅渲染 `PanelShell`
+		- `PanelFeatureBlocks.tsx` 移除（不再作為中介組裝層）
+- 驗證結果：
+	- `get_errors`：本次修改檔案無錯誤
+	- `corepack pnpm lint`：存在既有錯誤於 `src/components/ui/map-marker-tag.tsx`（非本步驟新增）
+	- `curl -s -o /dev/null -w "home:%{http_code}\\n" http://localhost:3000/`：`home:200`
+- 影響說明：
+	- panel 入口與組裝責任更集中，後續可直接在 `PanelShell` 進行左/右/底部區塊化重構。
+
 ## 2026-07-24 決議紀錄（UI / 地圖優先）
 
 - 狀態：完成記錄

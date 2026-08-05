@@ -6,7 +6,8 @@ import { Clock, Pause, Play, RotateCcw, Settings, X } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { useWorkspaceData } from "@/src/components/providers/WorkspaceProvider";
 import { computeLighting } from "@/src/components/map/Lighting";
-import { useSharedViewState } from "@/src/app-shell/SharedViewState";
+import { useShellUiState } from "@/src/app-shell/ShellUiState";
+import { useInfoModeState } from "@/src/app-shell/hooks/useInfoModeState";
 import { RegionSelector } from "@/src/panel/RegionSelector";
 import {
   DEFAULT_LIGHTING_PRESET_ID,
@@ -63,7 +64,8 @@ export function TimelineControl() {
   const lightingPresetId = useWorkspaceStore((s) => s.lightingPresetId);
   const terrainDetailLevel = useWorkspaceStore((s) => s.terrainDetailLevel);
   const region = useWorkspaceStore((s) => s.region);
-  const { activeInfoPanelSection, activeUtilityPanel, setActiveUtilityPanel, setActiveUtilityTab } = useSharedViewState();
+  const { activeMode } = useInfoModeState();
+  const { activeUtilityPanel, setActiveUtilityPanel, setActiveUtilityTab } = useShellUiState();
   const setTime = useWorkspaceStore((s) => s.setTime);
   const play = useWorkspaceStore((s) => s.play);
   const pause = useWorkspaceStore((s) => s.pause);
@@ -78,9 +80,9 @@ export function TimelineControl() {
   const isAlreadyDefaultPreset = lightingPresetId === DEFAULT_LIGHTING_PRESET_ID;
   const stationCount = data?.weather.length ?? 0;
   const roadCount = data?.roads.length ?? 0;
-  const shouldShowPoiPins = activeInfoPanelSection === "poi";
-  const shouldShowStations = activeInfoPanelSection === "weather";
-  const shouldShowRoads = activeInfoPanelSection === "road";
+  const shouldShowPoiPins = activeMode === "poi";
+  const shouldShowStations = activeMode === "weather";
+  const shouldShowRoads = activeMode === "road";
   const activePresetId =
     INTERNAL_LIGHTING_PRESET_OVERRIDE ?? lightingPresetId ?? DEFAULT_LIGHTING_PRESET_ID;
   const lightingDebug = computeLighting(
@@ -164,7 +166,7 @@ export function TimelineControl() {
       <section
         aria-hidden={activeUtilityPanel !== "settings" && activeUtilityPanel !== "timeline"}
         className={cn(
-          "absolute top-16 right-4 z-30 w-[min(420px,calc(100vw-1.5rem))] rounded-xl border border-white/10 bg-black/70 px-4 py-4 shadow-2xl backdrop-blur-md transform-gpu transition-transform duration-300 ease-out",
+          "absolute top-16 right-0 z-30 w-[min(420px,calc(100vw-1.5rem))] rounded-xl border border-white/10 bg-black/70 px-4 py-4 shadow-2xl backdrop-blur-md transform-gpu transition-transform duration-300 ease-out",
           activeUtilityPanel === "settings" || activeUtilityPanel === "timeline"
             ? "pointer-events-auto translate-x-0"
             : "pointer-events-none translate-x-full",

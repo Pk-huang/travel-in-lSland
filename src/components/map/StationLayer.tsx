@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 
 import { cn } from "@/src/lib/utils";
 import type { WeatherConditions } from "@/src/types";
+import { useInfoModeState } from "@/src/app-shell/hooks/useInfoModeState";
 import {
   lonLatToSceneXZ,
   elevationToSceneY,
@@ -63,7 +64,7 @@ export function StationLayer({
   const selectStation = useWorkspaceStore((s) => s.selectStation);
   const setMapFocusTarget = useWorkspaceStore((s) => s.setMapFocusTarget);
   const setPoiFocusEnabled = useWorkspaceStore((s) => s.setPoiFocusEnabled);
-  const setActiveInfoPanelSection = useWorkspaceStore((s) => s.setActiveInfoPanelSection);
+  const { setMode } = useInfoModeState();
 
   const positions = useMemo(
     () =>
@@ -112,7 +113,7 @@ export function StationLayer({
                   setPoiFocusEnabled(false);
                   selectStation(markerId);
                   setMapFocusTarget({ lon: station.lon, lat: station.lat });
-                  setActiveInfoPanelSection("weather");
+                    setMode("weather");
                 }}
                 className={cn(STATION_ICON_BASE_CLASS, markerToneClass)}
                 aria-label={`天氣站 ${markerId}`}

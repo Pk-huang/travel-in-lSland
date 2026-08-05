@@ -4,6 +4,7 @@ import { Route } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { MapMarkerTag } from "@/src/components/ui/map-marker-tag";
+import { useInfoModeState } from "@/src/app-shell/hooks/useInfoModeState";
 import {
   elevationToSceneY,
   lonLatToSceneXZ,
@@ -30,7 +31,7 @@ export function RoadLayer({ roads }: { roads: RoadSegment[] }) {
   const selectRoadSegment = useWorkspaceStore((s) => s.selectRoadSegment);
   const setMapFocusTarget = useWorkspaceStore((s) => s.setMapFocusTarget);
   const setPoiFocusEnabled = useWorkspaceStore((s) => s.setPoiFocusEnabled);
-  const setActiveInfoPanelSection = useWorkspaceStore((s) => s.setActiveInfoPanelSection);
+  const { setMode } = useInfoModeState();
 
   const markerItems = useMemo(
     () =>
@@ -94,7 +95,7 @@ export function RoadLayer({ roads }: { roads: RoadSegment[] }) {
               setPoiFocusEnabled(false);
               selectRoadSegment(markerId);
               setMapFocusTarget({ lon, lat });
-              setActiveInfoPanelSection("road");
+              setMode("road");
             }}
           />
         );

@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 
 import type { PointOfInterest } from "../../../types/domain";
+import { useInfoModeState } from "@/src/app-shell/hooks/useInfoModeState";
 import { useWorkspaceStore } from "../../../lib/store/workspace";
 
 export type PoiDetailContent = {
@@ -32,7 +33,7 @@ export function usePoiController(pointsOfInterest: PointOfInterest[]): PoiIntera
   const poiFocusEnabled = useWorkspaceStore((s) => s.poiFocusEnabled);
   const setActivePoi = useWorkspaceStore((s) => s.setActivePoi);
   const setPoiFocusEnabled = useWorkspaceStore((s) => s.setPoiFocusEnabled);
-  const setActiveInfoPanelSection = useWorkspaceStore((s) => s.setActiveInfoPanelSection);
+  const { setMode } = useInfoModeState();
 
   const visiblePois = useMemo(() => {
     if (poiFocusEnabled && activePoiId) {
@@ -55,7 +56,7 @@ export function usePoiController(pointsOfInterest: PointOfInterest[]): PoiIntera
       const shouldToggleOff = activePoiId === poiId && poiFocusEnabled;
       setActivePoi(shouldToggleOff ? null : poiId);
       setPoiFocusEnabled(!shouldToggleOff);
-      setActiveInfoPanelSection("poi");
+      setMode("poi");
     };
 
     return {
@@ -80,5 +81,5 @@ export function usePoiController(pointsOfInterest: PointOfInterest[]): PoiIntera
         cautionNotes: poi.cautionNotes.slice(0, 3),
       }),
     };
-  }, [activePoi, activePoiId, poiFocusEnabled, visiblePois, setActivePoi, setPoiFocusEnabled, setActiveInfoPanelSection]);
+  }, [activePoi, activePoiId, poiFocusEnabled, visiblePois, setActivePoi, setPoiFocusEnabled, setMode]);
 }

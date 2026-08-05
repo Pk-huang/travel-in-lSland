@@ -1,29 +1,19 @@
 "use client";
 
-import { ChevronRight, CloudSun, MapPin, Route } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 import {
   useWorkspaceData,
   useWorkspacePois,
 } from "@/src/components/providers/WorkspaceProvider";
-import { useSharedViewState } from "@/src/app-shell/SharedViewState";
+import { useInfoModeState } from "@/src/app-shell/hooks/useInfoModeState";
 import { StatusPanel } from "@/src/panel/StatusPanel";
 import { Button } from "@/src/components/ui/button";
 import { cn } from "@/src/lib/utils";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
 
-const DRAWER_SECTIONS = ["weather", "road", "poi"] as const;
-type DrawerSection = (typeof DRAWER_SECTIONS)[number];
-
-function isDrawerSection(value: string | null): value is DrawerSection {
-  return value != null && DRAWER_SECTIONS.includes(value as DrawerSection);
-}
-
 export function WeatherDrawer() {
-  const {
-    activeInfoPanelSection,
-    setActiveInfoPanelSection,
-  } = useSharedViewState();
+  const { activeMode, isOpen, options, setMode, closeMode } = useInfoModeState();
   const setActivePoi = useWorkspaceStore((s) => s.setActivePoi);
   const setPoiFocusEnabled = useWorkspaceStore((s) => s.setPoiFocusEnabled);
   const selectRoadSegment = useWorkspaceStore((s) => s.selectRoadSegment);
@@ -31,10 +21,9 @@ export function WeatherDrawer() {
   const setMapFocusTarget = useWorkspaceStore((s) => s.setMapFocusTarget);
   const { data, loading, error, refetch } = useWorkspaceData();
   const { points: pointsOfInterest } = useWorkspacePois();
-  const isOpen = isDrawerSection(activeInfoPanelSection);
-  const activeSection: DrawerSection = isDrawerSection(activeInfoPanelSection)
-    ? activeInfoPanelSection
-    : "weather";
+  const activeSection = activeMode ?? "weather";
+  const weatherModeOption = options.find((option) => option.id === "weather");
+  const WeatherModeIcon = weatherModeOption?.Icon;
 
   return (
     <>
@@ -49,7 +38,7 @@ export function WeatherDrawer() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setActiveInfoPanelSection(null)}
+            onClick={closeMode}
             aria-label="收合右側面板"
           >
             <ChevronRight className="size-5" />
@@ -62,36 +51,19 @@ export function WeatherDrawer() {
 
         <div className="min-h-0 flex-1 overflow-y-auto p-4">
           <div className="mb-3 grid grid-cols-3 gap-2">
-            <Button
-              type="button"
-              variant={activeSection === "weather" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setActiveInfoPanelSection("weather")}
-              className="justify-center gap-1"
-            >
-              <CloudSun className="size-4" />
-              天氣
-            </Button>
-            <Button
-              type="button"
-              variant={activeSection === "road" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setActiveInfoPanelSection("road")}
-              className="justify-center gap-1"
-            >
-              <Route className="size-4" />
-              路況
-            </Button>
-            <Button
-              type="button"
-              variant={activeSection === "poi" ? "default" : "outline"}
-              size="sm"
-              onClick={() => setActiveInfoPanelSection("poi")}
-              className="justify-center gap-1"
-            >
-              <MapPin className="size-4" />
-              景點
-            </Button>
+            {options.map(({ id, label, Icon }) => (
+              <Button
+                key={id}
+                type="button"
+                variant={activeSection === id ? "default" : "outline"}
+                size="sm"
+                onClick={() => setMode(id)}
+                className="justify-center gap-1"
+              >
+                <Icon className="size-4" />
+                {label}
+              </Button>
+            ))}
           </div>
 
           {activeSection === "weather" ? (
@@ -107,7 +79,7 @@ export function WeatherDrawer() {
                 selectRoadSegment(null);
                 selectStation(`station-${index}`);
                 setMapFocusTarget({ lon, lat });
-                setActiveInfoPanelSection("weather");
+                setMode("weather");
               }}
             />
           ) : null}
@@ -125,7 +97,7 @@ export function WeatherDrawer() {
                 selectStation(null);
                 selectRoadSegment(segmentId);
                 setMapFocusTarget({ lon, lat });
-                setActiveInfoPanelSection("road");
+                setMode("road");
               }}
             />
           ) : null}
@@ -149,7 +121,7 @@ export function WeatherDrawer() {
                           selectStation(null);
                           selectRoadSegment(null);
                           setMapFocusTarget({ lon: poi.lon, lat: poi.lat });
-                          setActiveInfoPanelSection("poi");
+                          setMode("poi");
                         }}
                         className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-left transition hover:border-sky-300/40 hover:bg-black/30"
                       >
@@ -168,14 +140,14 @@ export function WeatherDrawer() {
       <Button
         variant="secondary"
         size="icon"
-        onClick={() => setActiveInfoPanelSection("weather")}
+        onClick={() => setMode("weather")}
         aria-label="展開天氣面板"
         className={cn(
           "pointer-events-auto absolute top-16 right-4 z-20 shadow-lg backdrop-blur-md transition-opacity duration-200",
           isOpen ? "pointer-events-none opacity-0" : "opacity-100",
         )}
       >
-        <CloudSun className="size-5" />
+        {WeatherModeIcon ? <WeatherModeIcon className="size-5" /> : null}
       </Button>
     </>
   );

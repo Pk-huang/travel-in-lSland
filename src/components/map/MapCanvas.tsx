@@ -14,6 +14,7 @@ import {
   useWorkspaceData,
   useWorkspaceTravelPlans,
 } from "@/src/components/providers/WorkspaceProvider";
+import { useInfoModeState } from "@/src/app-shell/hooks/useInfoModeState";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
 
 /**
@@ -24,16 +25,16 @@ import { useWorkspaceStore } from "@/src/lib/store/workspace";
  * 再來 2-2 以 data.weather 的 lat/lon 用 InstancedMesh 畫測站點位。
  */
 export function MapCanvas() {
-  const activeInfoPanelSection = useWorkspaceStore((s) => s.activeInfoPanelSection);
   const clearPoiFocus = useWorkspaceStore((s) => s.clearPoiFocus);
   const selectStation = useWorkspaceStore((s) => s.selectStation);
   const selectRoadSegment = useWorkspaceStore((s) => s.selectRoadSegment);
   const selectedTravelDayId = useWorkspaceStore((s) => s.selectedTravelDayId);
+  const { activeMode } = useInfoModeState();
   const { data } = useWorkspaceData();
   const { data: travelPlans } = useWorkspaceTravelPlans();
-  const shouldShowPoiPins = activeInfoPanelSection === "poi";
-  const isWeatherMode = activeInfoPanelSection === "weather";
-  const shouldShowRoads = activeInfoPanelSection === "road";
+  const shouldShowPoiPins = activeMode === "poi";
+  const isWeatherMode = activeMode === "weather";
+  const shouldShowRoads = activeMode === "road";
   const selectedDay =
     travelPlans.plans[0]?.days.find((day) => day.dayId === selectedTravelDayId) ?? null;
 

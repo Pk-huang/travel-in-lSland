@@ -7,6 +7,7 @@ import { useMemo, useState } from "react";
 import { MapMarkerTag } from "@/src/components/ui/map-marker-tag";
 import { findPointOfInterestById } from "@/src/lib/config/poi";
 import { useWorkspacePois } from "@/src/components/providers/WorkspaceProvider";
+import { useInfoModeState } from "@/src/app-shell/hooks/useInfoModeState";
 import {
   elevationToSceneY,
   lonLatToSceneXZ,
@@ -28,7 +29,7 @@ export function PoiLayer() {
   const poiFocusEnabled = useWorkspaceStore((s) => s.poiFocusEnabled);
   const setActivePoi = useWorkspaceStore((s) => s.setActivePoi);
   const setPoiFocusEnabled = useWorkspaceStore((s) => s.setPoiFocusEnabled);
-  const setActiveInfoPanelSection = useWorkspaceStore((s) => s.setActiveInfoPanelSection);
+  const { setMode } = useInfoModeState();
   const activePoi = useMemo(
     () => findPointOfInterestById(pointsOfInterest, activePoiId),
     [activePoiId, pointsOfInterest],
@@ -43,7 +44,7 @@ export function PoiLayer() {
     const shouldToggleOff = activePoiId === markerId && poiFocusEnabled;
     setActivePoi(shouldToggleOff ? null : markerId);
     setPoiFocusEnabled(!shouldToggleOff);
-    setActiveInfoPanelSection("poi");
+    setMode("poi");
   };
 
   return (
