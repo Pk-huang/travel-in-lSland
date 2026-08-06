@@ -3,6 +3,23 @@
 更新日期：2026-08-06  
 用途：依照既有 Phase 規劃，集中記錄實作進度、決策、阻塞與下一步
 
+## 2026-08-06 Panel 模組扁平化與命名整理
+
+- 狀態：完成（commit: 6274e98）
+- 目標：把左側與右側 panel 的中介 shell 層收斂掉，讓入口直接由 `PanelModule` 組裝，並替未來的旅行紀錄與功能擴充保留更通用的資料夾名稱。
+- 本次調整：
+	- `RegionSelector` 併入 [src/panel/control-panel/DisplayTab.tsx](src/panel/control-panel/DisplayTab.tsx)
+	- `StatusPanel` 併入 [src/panel/feature-blocks/WeatherDrawer.tsx](src/panel/feature-blocks/WeatherDrawer.tsx)
+	- 左側面板元件由 `src/panel/left-panel/` 移到 `src/panel/workspace-panel/`
+	- `PanelShell` 移除，`PanelModule` 上移到 [src/PanelModule.tsx](src/PanelModule.tsx)
+	- `AppShell` 改為直接引用新的 `PanelModule` 入口
+- 驗證結果：
+	- `get_errors`：本次修改檔案無錯誤
+	- `curl -s -o /dev/null -w "home:%{http_code}\n" http://localhost:3000/`：`home:200`
+	- `corepack pnpm lint`：仍存在既有錯誤於 [src/components/ui/map-marker-tag.tsx](src/components/ui/map-marker-tag.tsx)（非本步驟新增）
+- 影響說明：
+	- 面板入口更單純，後續若要新增旅行紀錄、功能捷徑或其他工作區內容，可直接放進 `workspace-panel`，不用再經過 shell 中介層。
+
 ## 2026-08-06 Timeline / Scene Panel 重構實作
 
 - 狀態：完成（commit: b47e898）
