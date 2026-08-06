@@ -2,7 +2,7 @@
 
 import { InfoModeDock } from "@/src/panel/feature-blocks/InfoModeDock";
 import { LeftPanel } from "@/src/panel/shell/leftpnel";
-import { TimelineControl } from "@/src/panel/feature-blocks/TimelineControl";
+import { SceneControlPanel } from "@/src/panel/control-panel/SceneControlPanel";
 import { WeatherDrawer } from "@/src/panel/feature-blocks/WeatherDrawer";
 
 export function PanelShell() {
@@ -27,7 +27,7 @@ export function PanelShell() {
               <InfoModeDock />
             </div>
 
-            <TimelineControl />
+            <SceneControlPanel />
           </div>
         </div>
       </div>
