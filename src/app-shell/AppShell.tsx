@@ -2,7 +2,7 @@
 
 import { MapCanvasLoader } from "@/src/components/map/MapCanvasLoader";
 import { ShellUiStateProvider } from "@/src/app-shell/ShellUiState";
-import { PanelModule } from "@/src/panel/PanelModule";
+import { PanelModule } from "@/src/PanelModule";
 
 export function AppShell() {
   return (

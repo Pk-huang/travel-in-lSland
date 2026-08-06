@@ -1,8 +1,11 @@
 "use client";
 
-import { RegionSelector } from "@/src/panel/RegionSelector";
+import { Button } from "@/src/components/ui/button";
 import { REGION_LABELS } from "@/src/lib/config/app";
+import type { Region } from "@/src/types";
 import { useDisplaySettingsController } from "./useDisplaySettingsController";
+
+const REGIONS: Region[] = ["south", "west", "north", "east", "all"];
 
 export function DisplayTab() {
   const { region, regionLabel, loading, onRegionChange, onRegionSelect } = useDisplaySettingsController();
@@ -16,12 +19,28 @@ export function DisplayTab() {
         </p>
       </div>
 
-      <RegionSelector
-        value={region}
-        onChange={onRegionChange}
-        onSelect={onRegionSelect}
-        disabled={loading}
-      />
+      <nav aria-label="選擇地區" className="flex flex-wrap gap-2">
+        {REGIONS.map((nextRegion) => {
+          const active = nextRegion === region;
+
+          return (
+            <Button
+              key={nextRegion}
+              type="button"
+              size="sm"
+              variant={active ? "default" : "secondary"}
+              onClick={() => {
+                onRegionChange(nextRegion);
+                onRegionSelect(nextRegion);
+              }}
+              disabled={loading}
+              aria-pressed={active}
+            >
+              {REGION_LABELS[nextRegion]}
+            </Button>
+          );
+        })}
+      </nav>
 
       <p className="text-[11px] text-white/55">
         目前區域：{regionLabel}（{REGION_LABELS[region]}），切換後會更新左側摘要與地圖資料。

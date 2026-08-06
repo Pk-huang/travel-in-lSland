@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { ChevronLeft, PanelLeftOpen } from "lucide-react";
 
-import { ControlPanel } from "@/src/panel/ControlPanel";
 import { Button } from "@/src/components/ui/button";
 import { cn } from "@/src/lib/utils";
+import { ControlPanel } from "./ControlPanel";
 
 /**
- * FloatingPanel：浮在地圖之上的操作面板外殼（Google Maps 風格）。
+ * LeftPanel：浮在地圖之上的左側操作面板外殼（Google Maps 風格）。
  *
  * 職責單一＝「面板的開合與定位」。開合是純 UI 局部狀態（只有這個外殼關心），
  * 故用 useState，不放進 workspace store（store 只管跨島共享的意圖狀態）。
