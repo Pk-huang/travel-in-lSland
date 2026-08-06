@@ -1,7 +1,20 @@
 # Iceland Insight 實作進度紀錄
 
-更新日期：2026-07-20  
+更新日期：2026-08-06  
 用途：依照既有 Phase 規劃，集中記錄實作進度、決策、阻塞與下一步
+
+## 2026-08-06 Timeline / Scene Panel 重構實作
+
+- 狀態：完成（commit: b47e898）
+- 目標：把右側控制面板的時間軸與場景設定邏輯拆成更小的責任區塊，降低耦合並提升可讀性。
+- 本次調整：
+	- 新增 [src/panel/control-panel/SceneControlPanel.tsx](src/panel/control-panel/SceneControlPanel.tsx)、[src/panel/control-panel/TimelineTab.tsx](src/panel/control-panel/TimelineTab.tsx)、[src/panel/control-panel/DisplayTab.tsx](src/panel/control-panel/DisplayTab.tsx)、[src/panel/control-panel/LightingTab.tsx](src/panel/control-panel/LightingTab.tsx)、[src/panel/control-panel/DetailTab.tsx](src/panel/control-panel/DetailTab.tsx)
+	- 拆出對應的 controller hooks：[src/panel/control-panel/useTimelineIntentController.ts](src/panel/control-panel/useTimelineIntentController.ts)、[src/panel/control-panel/useDisplaySettingsController.ts](src/panel/control-panel/useDisplaySettingsController.ts)、[src/panel/control-panel/useLightingSettingsController.ts](src/panel/control-panel/useLightingSettingsController.ts)、[src/panel/control-panel/useTerrainDetailController.ts](src/panel/control-panel/useTerrainDetailController.ts)
+	- 將抽屜開合與分頁狀態收回到面板元件自身，避免不必要的 shell state plumbing。
+- 驗證結果：
+	- `get_errors`：相關檔案無錯誤
+- 影響說明：
+	- 右側面板的互動邏輯更容易理解、後續維護與拆分測試也更清楚；使用者可見操作流程維持不變。
 
 ## 2026-08-05 app-shell 命名整理與 info mode hook 分層
 

@@ -1,5 +1,21 @@
 # 功能規格：時間軸控制與場景設定面板重構
 
+## Implementation Status (2026-08-06)
+
+- 狀態：已完成實作
+- 目前成果：時間軸與場景設定邏輯已拆分為更小的面板元件與 controller hooks，並將抽屜開合與分頁狀態收回到面板元件本身。
+- 主要落地檔案：
+  - [src/panel/control-panel/SceneControlPanel.tsx](src/panel/control-panel/SceneControlPanel.tsx)
+  - [src/panel/control-panel/TimelineTab.tsx](src/panel/control-panel/TimelineTab.tsx)
+  - [src/panel/control-panel/DisplayTab.tsx](src/panel/control-panel/DisplayTab.tsx)
+  - [src/panel/control-panel/LightingTab.tsx](src/panel/control-panel/LightingTab.tsx)
+  - [src/panel/control-panel/DetailTab.tsx](src/panel/control-panel/DetailTab.tsx)
+  - [src/panel/control-panel/useTimelineIntentController.ts](src/panel/control-panel/useTimelineIntentController.ts)
+  - [src/panel/control-panel/useDisplaySettingsController.ts](src/panel/control-panel/useDisplaySettingsController.ts)
+  - [src/panel/control-panel/useLightingSettingsController.ts](src/panel/control-panel/useLightingSettingsController.ts)
+  - [src/panel/control-panel/useTerrainDetailController.ts](src/panel/control-panel/useTerrainDetailController.ts)
+- 後續建議：可在下一階段補上針對 timeline / scene panel 的互動回歸測試，進一步鎖住行為。
+
 ## Problem Statement
 
 目前右側的時間軸與場景設定控制邏輯散落在同一個過於龐大的 UI module 中，使用者在操作「時間軸」、「播放控制」、「設定抽屜」、「顯示控制」、「光影樣式」、「地形細節」與「地圖焦點」時，會感受到邏輯過於混雜。這會讓後續維護與擴充變得困難，也讓不同互動行為難以獨立測試與理解。
