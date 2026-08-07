@@ -4,16 +4,46 @@ import { useCallback, useMemo } from "react";
 
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
 import {
-  clearInteractionBySource,
-  clearMarkerSelections,
+  createMarkerSelectionSnapshot,
+  isMarkerActive as isMarkerActiveWithCore,
+  projectMarkerInteraction,
+  transitionMarkerInteraction,
+} from "@/src/lib/map/marker-interaction/core";
+import {
   type MarkerInteractionAdapter,
 } from "@/src/lib/map/marker-interaction/adapters";
 import type {
   IsMarkerActiveInput,
+  MarkerInteractionCoreState,
   MarkerInteractionIntent,
   MarkerInteractionProjection,
   MarkerSelectionSnapshot,
 } from "@/src/lib/map/marker-interaction/types";
+
+function toCoreState(adapter: MarkerInteractionAdapter): MarkerInteractionCoreState {
+  return {
+    activePoiId: adapter.activePoiId,
+    activeTravelItemId: adapter.activeTravelItemId,
+    poiFocusEnabled: adapter.poiFocusEnabled,
+    selectedStationId: adapter.selectedStationId,
+    selectedRoadSegmentId: adapter.selectedRoadSegmentId,
+    activeInfoMode: adapter.activeInfoMode,
+    mapFocusTarget: adapter.mapFocusTarget,
+  };
+}
+
+function applyCoreState(
+  adapter: MarkerInteractionAdapter,
+  nextState: MarkerInteractionCoreState,
+) {
+  adapter.setActivePoi(nextState.activePoiId);
+  adapter.setActiveTravelItemId(nextState.activeTravelItemId);
+  adapter.setPoiFocusEnabled(nextState.poiFocusEnabled);
+  adapter.selectStation(nextState.selectedStationId);
+  adapter.selectRoadSegment(nextState.selectedRoadSegmentId);
+  adapter.setMapFocusTarget(nextState.mapFocusTarget);
+  adapter.setActiveInfoMode(nextState.activeInfoMode);
+}
 
 export function useMarkerInteraction() {
   const activePoiId = useWorkspaceStore((state) => state.activePoiId);
@@ -67,114 +97,25 @@ export function useMarkerInteraction() {
   );
 
   const snapshot = useCallback((): MarkerSelectionSnapshot => {
-    let activeKind: MarkerSelectionSnapshot["activeKind"] = null;
-
-    if (adapter.poiFocusEnabled && adapter.activePoiId) {
-      activeKind = "poi";
-    } else if (adapter.selectedStationId) {
-      activeKind = "weather";
-    } else if (adapter.selectedRoadSegmentId) {
-      activeKind = "road";
-    } else if (adapter.activeTravelItemId) {
-      activeKind = "travel";
-    }
-
-    return {
-      activeKind,
-      activePoiId: adapter.activePoiId,
-      activeStationId: adapter.selectedStationId,
-      activeRoadSegmentId: adapter.selectedRoadSegmentId,
-      activeTravelItemId: adapter.activeTravelItemId,
-      isPoiFocusEnabled: adapter.poiFocusEnabled,
-      focusTarget: adapter.mapFocusTarget,
-      activeInfoMode: adapter.activeInfoMode,
-    };
+    return createMarkerSelectionSnapshot(toCoreState(adapter));
   }, [adapter]);
 
   const isMarkerActive = useCallback(
     (input: IsMarkerActiveInput) => {
-      const current = snapshot();
-
-      if (input.kind === "poi") {
-        return current.isPoiFocusEnabled && current.activePoiId === input.poiId;
-      }
-
-      if (input.kind === "weather") {
-        return current.activeStationId === input.stationId;
-      }
-
-      if (input.kind === "road") {
-        return current.activeRoadSegmentId === input.roadSegmentId;
-      }
-
-      return current.activeTravelItemId === input.travelItemId;
+      return isMarkerActiveWithCore(toCoreState(adapter), input);
     },
-    [snapshot],
+    [adapter],
   );
 
   const project = useCallback((): MarkerInteractionProjection => {
-    const current = snapshot();
-
-    return {
-      selectedIds: {
-        poiId: current.activePoiId,
-        stationId: current.activeStationId,
-        roadSegmentId: current.activeRoadSegmentId,
-        travelItemId: current.activeTravelItemId,
-      },
-      mode: current.activeInfoMode,
-      focusTarget: current.focusTarget,
-      shouldClearPoiFocus: current.activeKind !== "poi",
-    };
-  }, [snapshot]);
+    return projectMarkerInteraction(toCoreState(adapter));
+  }, [adapter]);
 
   const dispatch = useCallback(
     (intent: MarkerInteractionIntent) => {
-      if (intent.type === "clear-interaction") {
-        clearInteractionBySource(adapter, intent.source);
-        return;
-      }
-
-      if (intent.kind === "poi") {
-        const shouldToggleOff =
-          adapter.poiFocusEnabled && adapter.activePoiId === intent.poiId;
-        adapter.selectStation(null);
-        adapter.selectRoadSegment(null);
-
-        if (shouldToggleOff) {
-          adapter.setActivePoi(null);
-          adapter.setPoiFocusEnabled(false);
-          adapter.setMapFocusTarget(null);
-        } else {
-          adapter.setActiveTravelItemId(null);
-          adapter.setActivePoi(intent.poiId);
-          adapter.setPoiFocusEnabled(true);
-          adapter.setMapFocusTarget({ lon: intent.lon, lat: intent.lat });
-        }
-
-        adapter.setActiveInfoMode("poi");
-        return;
-      }
-
-      if (intent.kind === "weather") {
-        clearMarkerSelections(adapter);
-        adapter.selectStation(intent.stationId);
-        adapter.setMapFocusTarget({ lon: intent.lon, lat: intent.lat });
-        adapter.setActiveInfoMode("weather");
-        return;
-      }
-
-      if (intent.kind === "road") {
-        clearMarkerSelections(adapter);
-        adapter.selectRoadSegment(intent.roadSegmentId);
-        adapter.setMapFocusTarget({ lon: intent.lon, lat: intent.lat });
-        adapter.setActiveInfoMode("road");
-        return;
-      }
-
-      clearMarkerSelections(adapter);
-      adapter.setActiveTravelItemId(intent.travelItemId);
-      adapter.setMapFocusTarget({ lon: intent.lon, lat: intent.lat });
+      const currentState = toCoreState(adapter);
+      const nextState = transitionMarkerInteraction(currentState, intent);
+      applyCoreState(adapter, nextState);
     },
     [adapter],
   );

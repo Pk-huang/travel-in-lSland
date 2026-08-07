@@ -57,3 +57,13 @@ export type MarkerInteractionProjection = {
   focusTarget: { lon: number; lat: number } | null;
   shouldClearPoiFocus: boolean;
 };
+
+export type MarkerInteractionCoreState = {
+  activePoiId: string | null;
+  activeTravelItemId: string | null;
+  poiFocusEnabled: boolean;
+  selectedStationId: string | null;
+  selectedRoadSegmentId: string | null;
+  activeInfoMode: InfoPanelSection;
+  mapFocusTarget: { lon: number; lat: number } | null;
+};
