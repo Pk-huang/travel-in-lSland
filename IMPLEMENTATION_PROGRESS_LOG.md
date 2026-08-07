@@ -1,7 +1,26 @@
 # Iceland Insight 實作進度紀錄
 
-更新日期：2026-08-06  
+更新日期：2026-08-07  
 用途：依照既有 Phase 規劃，集中記錄實作進度、決策、阻塞與下一步
+
+## 2026-08-07 Marker Interaction Phase 3（Core 分離 + transition 測試）
+
+- 狀態：完成（commit: 92ebf21）
+- 目標：不改既有互動邏輯，只把 marker interaction 規則從 hook 抽到 core，建立可測的單一 test surface。
+- 本次調整：
+	- 新增 Core 純規則入口：[src/lib/map/marker-interaction/core.ts](src/lib/map/marker-interaction/core.ts)
+	- 新增 core state 型別：[src/lib/map/marker-interaction/types.ts](src/lib/map/marker-interaction/types.ts)
+	- `useMarkerInteraction` 改為 adapter（讀 state → 呼叫 transition → 寫回 state）：[src/lib/map/marker-interaction/use-marker-interaction.ts](src/lib/map/marker-interaction/use-marker-interaction.ts)
+	- module 匯出補上 core：[src/lib/map/marker-interaction/index.ts](src/lib/map/marker-interaction/index.ts)
+	- 新增 transition table-driven 測試：[src/lib/map/marker-interaction/core.test.ts](src/lib/map/marker-interaction/core.test.ts)
+- 驗證結果：
+	- `node --test --experimental-strip-types src/lib/map/marker-interaction/core.test.ts`：通過
+	- `get_errors`：相關檔案無錯誤
+	- `corepack pnpm lint`：0 error（保留既有 warning：`@next/next/no-img-element`）
+	- `curl -s -o /dev/null -w "home:%{http_code}\n" http://localhost:3000/`：`home:200`
+	- `corepack pnpm build`：通過
+- 影響說明：
+	- marker interaction 的 interface 深度提高，後續變更可集中在 core；caller 保持同樣 intent，使用者可見行為不變。
 
 ## 2026-08-06 Panel 模組扁平化與命名整理
 

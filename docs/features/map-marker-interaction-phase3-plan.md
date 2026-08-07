@@ -1,7 +1,21 @@
 # Phase 3 規劃：深化 Marker Interaction Core
 
 更新日期：2026-08-07  
-狀態：規劃中（未實作）
+狀態：進行中（Step 1~2 已完成）
+
+## 最新進度（2026-08-07）
+
+- 狀態：部分完成（Core 分離完成，transition 測試已建立）
+- 對應 commit：`92ebf21`
+- 已完成：
+  - 新增 Marker Interaction Core 純規則入口：`transitionMarkerInteraction`、`createMarkerSelectionSnapshot`、`isMarkerActive`、`projectMarkerInteraction`。
+  - `useMarkerInteraction` 降階為 adapter：只做「讀 store -> 呼叫 core -> 寫回 store」。
+  - 新增 transition table-driven 測試，鎖定 Phase 2 凍結行為。
+- 驗證結果：
+  - `node --test --experimental-strip-types src/lib/map/marker-interaction/core.test.ts`：通過
+  - `corepack pnpm lint`：通過（0 error，保留既有 1 warning）
+  - `curl -s -o /dev/null -w "home:%{http_code}\n" http://localhost:3000/`：`home:200`
+  - `corepack pnpm build`：通過
 
 ## 背景
 
