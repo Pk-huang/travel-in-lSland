@@ -3,7 +3,7 @@
 import { Html } from "@react-three/drei";
 import { cva, type VariantProps } from "class-variance-authority";
 import { ChevronLeft, ChevronRight, type LucideIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { cn } from "@/src/lib/utils";
 
@@ -291,22 +291,24 @@ export function MapMarkerTag({
   const isDetailExpanded = isActive;
   const isHighlighted = isActive || isHovered;
   const toneKey = tone ?? "neutral";
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [activeImageUrl, setActiveImageUrl] = useState<string | null>(null);
   const detailImages = detailContent?.images?.length ? detailContent.images : [];
-  const activeImage = detailImages[Math.min(activeImageIndex, Math.max(detailImages.length - 1, 0))];
-
-  useEffect(() => {
-    setActiveImageIndex(0);
-  }, [detailContent?.title, detailContent?.images?.map((image) => image.imageUrl).join("|")]);
+  const activeImageIndex = Math.max(
+    0,
+    detailImages.findIndex((image) => image.imageUrl === activeImageUrl),
+  );
+  const activeImage = detailImages[activeImageIndex];
 
   const showPreviousImage = () => {
     if (detailImages.length <= 1) return;
-    setActiveImageIndex((current) => (current === 0 ? detailImages.length - 1 : current - 1));
+    const previousIndex = activeImageIndex === 0 ? detailImages.length - 1 : activeImageIndex - 1;
+    setActiveImageUrl(detailImages[previousIndex]?.imageUrl ?? null);
   };
 
   const showNextImage = () => {
     if (detailImages.length <= 1) return;
-    setActiveImageIndex((current) => (current + 1) % detailImages.length);
+    const nextIndex = (activeImageIndex + 1) % detailImages.length;
+    setActiveImageUrl(detailImages[nextIndex]?.imageUrl ?? null);
   };
 
   return (
@@ -376,7 +378,7 @@ export function MapMarkerTag({
                           type="button"
                           onClick={(event) => {
                             event.stopPropagation();
-                            setActiveImageIndex(index);
+                            setActiveImageUrl(image.imageUrl);
                           }}
                           className={cn(
                             "h-1.5 rounded-full transition-all",

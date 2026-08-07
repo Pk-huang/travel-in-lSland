@@ -46,6 +46,8 @@ export type WorkspaceState = {
   selectedRoadSegmentId: string | null;
   /** 目前焦點景點 id；null 代表未進入景點模式。 */
   activePoiId: string | null;
+  /** 目前焦點旅行項目 id。 */
+  activeTravelItemId: string | null;
   /** 景點模式啟用旗標；先與焦點 id 分離，後續方便加 loading/transition 條件。 */
   poiFocusEnabled: boolean;
   /** 任意圖釘點擊後的通用鏡頭焦點（測站/路況可共用）。 */
@@ -69,6 +71,7 @@ export type WorkspaceState = {
   selectStation: (id: string | null) => void;
   selectRoadSegment: (id: string | null) => void;
   setActivePoi: (id: string | null) => void;
+  setActiveTravelItemId: (id: string | null) => void;
   setPoiFocusEnabled: (enabled: boolean) => void;
   setMapFocusTarget: (target: MapFocusTarget) => void;
   setSelectedTravelDayId: (dayId: string | null) => void;
@@ -88,6 +91,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   selectedStationId: null,
   selectedRoadSegmentId: null,
   activePoiId: null,
+  activeTravelItemId: null,
   poiFocusEnabled: false,
   mapFocusTarget: null,
   selectedTravelDayId: null,
@@ -105,12 +109,13 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   selectStation: (selectedStationId) => set({ selectedStationId }),
   selectRoadSegment: (selectedRoadSegmentId) => set({ selectedRoadSegmentId }),
   setActivePoi: (activePoiId) => set({ activePoiId }),
+  setActiveTravelItemId: (activeTravelItemId) => set({ activeTravelItemId }),
   setPoiFocusEnabled: (poiFocusEnabled) => set({ poiFocusEnabled }),
   setMapFocusTarget: (mapFocusTarget) => set({ mapFocusTarget }),
   setSelectedTravelDayId: (selectedTravelDayId) => set({ selectedTravelDayId }),
   setActiveUtilityPanel: (activeUtilityPanel) => set({ activeUtilityPanel }),
   setActiveUtilityTab: (activeUtilityTab) => set({ activeUtilityTab }),
   clearPoiFocus: () =>
-    set({ activePoiId: null, poiFocusEnabled: false, mapFocusTarget: null }),
+    set({ activePoiId: null, poiFocusEnabled: false, activeTravelItemId: null, mapFocusTarget: null }),
   setActiveInfoPanelSection: (activeInfoPanelSection) => set({ activeInfoPanelSection }),
 }));

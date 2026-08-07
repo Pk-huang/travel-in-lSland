@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 
 import type { PointOfInterest } from "../../../types/domain";
-import { useInfoModeState } from "@/src/app-shell/hooks/useInfoModeState";
+import { useMarkerInteraction } from "@/src/lib/map/marker-interaction";
 import { useWorkspaceStore } from "../../../lib/store/workspace";
 
 export type PoiDetailContent = {
@@ -29,11 +29,9 @@ export type PoiInteractionState = {
 };
 
 export function usePoiController(pointsOfInterest: PointOfInterest[]): PoiInteractionState {
+  const { dispatch } = useMarkerInteraction();
   const activePoiId = useWorkspaceStore((s) => s.activePoiId);
   const poiFocusEnabled = useWorkspaceStore((s) => s.poiFocusEnabled);
-  const setActivePoi = useWorkspaceStore((s) => s.setActivePoi);
-  const setPoiFocusEnabled = useWorkspaceStore((s) => s.setPoiFocusEnabled);
-  const { setMode } = useInfoModeState();
 
   const visiblePois = useMemo(() => {
     if (poiFocusEnabled && activePoiId) {
@@ -53,10 +51,16 @@ export function usePoiController(pointsOfInterest: PointOfInterest[]): PoiIntera
 
   return useMemo(() => {
     const selectPoi = (poiId: string) => {
-      const shouldToggleOff = activePoiId === poiId && poiFocusEnabled;
-      setActivePoi(shouldToggleOff ? null : poiId);
-      setPoiFocusEnabled(!shouldToggleOff);
-      setMode("poi");
+      const selectedPoi = pointsOfInterest.find((poi) => poi.id === poiId);
+      if (!selectedPoi) return;
+
+      dispatch({
+        type: "select-marker",
+        kind: "poi",
+        poiId,
+        lon: selectedPoi.lon,
+        lat: selectedPoi.lat,
+      });
     };
 
     return {
@@ -81,5 +85,5 @@ export function usePoiController(pointsOfInterest: PointOfInterest[]): PoiIntera
         cautionNotes: poi.cautionNotes.slice(0, 3),
       }),
     };
-  }, [activePoi, activePoiId, poiFocusEnabled, visiblePois, setActivePoi, setPoiFocusEnabled, setMode]);
+  }, [activePoi, activePoiId, dispatch, poiFocusEnabled, pointsOfInterest, visiblePois]);
 }

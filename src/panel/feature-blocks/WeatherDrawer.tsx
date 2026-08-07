@@ -15,8 +15,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/src/components/ui/card";
+import { useMarkerInteraction } from "@/src/lib/map/marker-interaction";
 import { cn } from "@/src/lib/utils";
-import { useWorkspaceStore } from "@/src/lib/store/workspace";
 import type {
   AlertLevel,
   IcelandStatusResponse,
@@ -171,12 +171,8 @@ function Metric({ label, value }: { label: string; value: number }) {
 }
 
 export function WeatherDrawer() {
-  const { activeMode, isOpen, options, setMode, closeMode } = useInfoModeState();
-  const setActivePoi = useWorkspaceStore((s) => s.setActivePoi);
-  const setPoiFocusEnabled = useWorkspaceStore((s) => s.setPoiFocusEnabled);
-  const selectRoadSegment = useWorkspaceStore((s) => s.selectRoadSegment);
-  const selectStation = useWorkspaceStore((s) => s.selectStation);
-  const setMapFocusTarget = useWorkspaceStore((s) => s.setMapFocusTarget);
+  const { activeMode, isOpen, options, setMode } = useInfoModeState();
+  const { dispatch } = useMarkerInteraction();
   const { data, loading, error, refetch } = useWorkspaceData();
   const { points: pointsOfInterest } = useWorkspacePois();
   const activeSection = activeMode ?? "weather";
@@ -196,7 +192,7 @@ export function WeatherDrawer() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={closeMode}
+            onClick={() => dispatch({ type: "clear-interaction", source: "panel-close" })}
             aria-label="收合右側面板"
           >
             <ChevronRight className="size-5" />
@@ -215,7 +211,12 @@ export function WeatherDrawer() {
                 type="button"
                 variant={activeSection === id ? "default" : "outline"}
                 size="sm"
-                onClick={() => setMode(id)}
+                onClick={() => {
+                  if (activeSection !== id) {
+                    dispatch({ type: "clear-interaction", source: "mode-switch" });
+                  }
+                  setMode(id);
+                }}
                 className="justify-center gap-1"
               >
                 <Icon className="size-4" />
@@ -233,11 +234,13 @@ export function WeatherDrawer() {
               showWeatherList
               showRoadList={false}
               onSelectWeather={({ index, lat, lon }) => {
-                setPoiFocusEnabled(false);
-                selectRoadSegment(null);
-                selectStation(`station-${index}`);
-                setMapFocusTarget({ lon, lat });
-                setMode("weather");
+                dispatch({
+                  type: "select-marker",
+                  kind: "weather",
+                  stationId: `station-${index}`,
+                  lon,
+                  lat,
+                });
               }}
             />
           ) : null}
@@ -251,11 +254,13 @@ export function WeatherDrawer() {
               showWeatherList={false}
               showRoadList
               onSelectRoad={({ segmentId, lon, lat }) => {
-                setPoiFocusEnabled(false);
-                selectStation(null);
-                selectRoadSegment(segmentId);
-                setMapFocusTarget({ lon, lat });
-                setMode("road");
+                dispatch({
+                  type: "select-marker",
+                  kind: "road",
+                  roadSegmentId: segmentId,
+                  lon,
+                  lat,
+                });
               }}
             />
           ) : null}
@@ -274,12 +279,13 @@ export function WeatherDrawer() {
                       <button
                         type="button"
                         onClick={() => {
-                          setPoiFocusEnabled(true);
-                          setActivePoi(poi.id);
-                          selectStation(null);
-                          selectRoadSegment(null);
-                          setMapFocusTarget({ lon: poi.lon, lat: poi.lat });
-                          setMode("poi");
+                          dispatch({
+                            type: "select-marker",
+                            kind: "poi",
+                            poiId: poi.id,
+                            lon: poi.lon,
+                            lat: poi.lat,
+                          });
                         }}
                         className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-left transition hover:border-sky-300/40 hover:bg-black/30"
                       >

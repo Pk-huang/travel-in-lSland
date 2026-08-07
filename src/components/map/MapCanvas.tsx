@@ -15,6 +15,7 @@ import {
   useWorkspaceTravelPlans,
 } from "@/src/components/providers/WorkspaceProvider";
 import { useInfoModeState } from "@/src/app-shell/hooks/useInfoModeState";
+import { useMarkerInteraction } from "@/src/lib/map/marker-interaction";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
 
 /**
@@ -25,9 +26,7 @@ import { useWorkspaceStore } from "@/src/lib/store/workspace";
  * 再來 2-2 以 data.weather 的 lat/lon 用 InstancedMesh 畫測站點位。
  */
 export function MapCanvas() {
-  const clearPoiFocus = useWorkspaceStore((s) => s.clearPoiFocus);
-  const selectStation = useWorkspaceStore((s) => s.selectStation);
-  const selectRoadSegment = useWorkspaceStore((s) => s.selectRoadSegment);
+  const { dispatch } = useMarkerInteraction();
   const selectedTravelDayId = useWorkspaceStore((s) => s.selectedTravelDayId);
   const { activeMode } = useInfoModeState();
   const { data } = useWorkspaceData();
@@ -39,9 +38,7 @@ export function MapCanvas() {
     travelPlans.plans[0]?.days.find((day) => day.dayId === selectedTravelDayId) ?? null;
 
   const handlePointerMissed = () => {
-    clearPoiFocus();
-    selectStation(null);
-    selectRoadSegment(null);
+    dispatch({ type: "clear-interaction", source: "blank-map" });
   };
 
   return (

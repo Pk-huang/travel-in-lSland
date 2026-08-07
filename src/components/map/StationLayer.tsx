@@ -6,7 +6,7 @@ import { useMemo, useState } from "react";
 
 import { cn } from "@/src/lib/utils";
 import type { WeatherConditions } from "@/src/types";
-import { useInfoModeState } from "@/src/app-shell/hooks/useInfoModeState";
+import { useMarkerInteraction } from "@/src/lib/map/marker-interaction";
 import {
   lonLatToSceneXZ,
   elevationToSceneY,
@@ -59,12 +59,9 @@ export function StationLayer({
   isWeatherMode: boolean;
 }) {
   const heightmap = useHeightmap();
+  const { dispatch } = useMarkerInteraction();
   const [hoveredStationKey, setHoveredStationKey] = useState<string | null>(null);
   const selectedStationId = useWorkspaceStore((s) => s.selectedStationId);
-  const selectStation = useWorkspaceStore((s) => s.selectStation);
-  const setMapFocusTarget = useWorkspaceStore((s) => s.setMapFocusTarget);
-  const setPoiFocusEnabled = useWorkspaceStore((s) => s.setPoiFocusEnabled);
-  const { setMode } = useInfoModeState();
 
   const positions = useMemo(
     () =>
@@ -110,10 +107,13 @@ export function StationLayer({
                 type="button"
                 onClick={(event) => {
                   event.stopPropagation();
-                  setPoiFocusEnabled(false);
-                  selectStation(markerId);
-                  setMapFocusTarget({ lon: station.lon, lat: station.lat });
-                    setMode("weather");
+                  dispatch({
+                    type: "select-marker",
+                    kind: "weather",
+                    stationId: markerId,
+                    lon: station.lon,
+                    lat: station.lat,
+                  });
                 }}
                 className={cn(STATION_ICON_BASE_CLASS, markerToneClass)}
                 aria-label={`天氣站 ${markerId}`}

@@ -4,7 +4,7 @@ import { Route } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { MapMarkerTag } from "@/src/components/ui/map-marker-tag";
-import { useInfoModeState } from "@/src/app-shell/hooks/useInfoModeState";
+import { useMarkerInteraction } from "@/src/lib/map/marker-interaction";
 import {
   elevationToSceneY,
   lonLatToSceneXZ,
@@ -26,12 +26,9 @@ function getRoadPriority(status: RoadSegment["status"]) {
 
 export function RoadLayer({ roads }: { roads: RoadSegment[] }) {
   const heightmap = useHeightmap();
+  const { dispatch } = useMarkerInteraction();
   const [hoveredRoadId, setHoveredRoadId] = useState<string | null>(null);
   const selectedRoadSegmentId = useWorkspaceStore((s) => s.selectedRoadSegmentId);
-  const selectRoadSegment = useWorkspaceStore((s) => s.selectRoadSegment);
-  const setMapFocusTarget = useWorkspaceStore((s) => s.setMapFocusTarget);
-  const setPoiFocusEnabled = useWorkspaceStore((s) => s.setPoiFocusEnabled);
-  const { setMode } = useInfoModeState();
 
   const markerItems = useMemo(
     () =>
@@ -92,10 +89,13 @@ export function RoadLayer({ roads }: { roads: RoadSegment[] }) {
             onHoverChange={setHoveredRoadId}
             onSelect={() => {
               const [lon = 0, lat = 0] = road.geometry[0] ?? [0, 0];
-              setPoiFocusEnabled(false);
-              selectRoadSegment(markerId);
-              setMapFocusTarget({ lon, lat });
-              setMode("road");
+              dispatch({
+                type: "select-marker",
+                kind: "road",
+                roadSegmentId: markerId,
+                lon,
+                lat,
+              });
             }}
           />
         );

@@ -4,16 +4,14 @@ import { useEffect, useMemo } from "react";
 import { ExternalLink, MapPinned } from "lucide-react";
 
 import { useWorkspaceTravelPlans } from "@/src/components/providers/WorkspaceProvider";
+import { useMarkerInteraction } from "@/src/lib/map/marker-interaction";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
 import { buildTravelMapMarkers } from "@/src/lib/travel-plans/travel-plan-map-utils";
 
 export function ControlPanel() {
+  const { dispatch } = useMarkerInteraction();
   const selectedTravelDayId = useWorkspaceStore((s) => s.selectedTravelDayId);
   const setSelectedTravelDayId = useWorkspaceStore((s) => s.setSelectedTravelDayId);
-  const setPoiFocusEnabled = useWorkspaceStore((s) => s.setPoiFocusEnabled);
-  const selectStation = useWorkspaceStore((s) => s.selectStation);
-  const selectRoadSegment = useWorkspaceStore((s) => s.selectRoadSegment);
-  const setMapFocusTarget = useWorkspaceStore((s) => s.setMapFocusTarget);
   const { data: travelPlans } = useWorkspaceTravelPlans();
 
   const travelDays = useMemo(() => travelPlans.plans[0]?.days ?? [], [travelPlans]);
@@ -104,10 +102,14 @@ export function ControlPanel() {
                             if (!hasLocation) {
                               return;
                             }
-                            setPoiFocusEnabled(false);
-                            selectStation(null);
-                            selectRoadSegment(null);
-                            setMapFocusTarget({ lon: item.lon as number, lat: item.lat as number });
+
+                            dispatch({
+                              type: "select-marker",
+                              kind: "travel",
+                              travelItemId: `travel-item-${selectedDay.dayId}-${item.itemId}`,
+                              lon: item.lon as number,
+                              lat: item.lat as number,
+                            });
                           }}
                           className={
                             hasLocation
