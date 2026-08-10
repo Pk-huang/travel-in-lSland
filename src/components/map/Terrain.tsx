@@ -59,6 +59,79 @@ function hashNoise(ix: number, iy: number) {
   return (seed & 1023) / 1023 - 0.5;
 }
 
+function clampGridIndex(value: number, max: number): number {
+  return Math.max(0, Math.min(max, value));
+}
+
+function getElevationAtGrid(
+  elevations: number[],
+  grid: number,
+  x: number,
+  y: number,
+): number {
+  const clampedX = clampGridIndex(x, grid - 1);
+  const clampedY = clampGridIndex(y, grid - 1);
+  return elevations[clampedY * grid + clampedX];
+}
+
+function sampleLandcoverClass(
+  landcoverClasses: number[] | null,
+  terrainDetailLevel: TerrainDetailLevel,
+  normalizedX: number,
+  normalizedY: number,
+): number | undefined {
+  if (!landcoverClasses) {
+    return undefined;
+  }
+
+  const clampedX = Math.max(0, Math.min(1, normalizedX));
+  const clampedY = Math.max(0, Math.min(1, normalizedY));
+  const ix = Math.round(clampedX * (terrainDetailLevel - 1));
+  const iy = Math.round(clampedY * (terrainDetailLevel - 1));
+  return landcoverClasses[iy * terrainDetailLevel + ix];
+}
+
+function sampleSnowMask(
+  landcoverClasses: number[] | null,
+  terrainDetailLevel: TerrainDetailLevel,
+  normalizedX: number,
+  normalizedY: number,
+  grid: number,
+): number {
+  if (!landcoverClasses) {
+    return 0;
+  }
+
+  const kernel = [
+    [1, 4, 7, 4, 1],
+    [4, 16, 26, 16, 4],
+    [7, 26, 41, 26, 7],
+    [4, 16, 26, 16, 4],
+    [1, 4, 7, 4, 1],
+  ];
+  const step = 1 / Math.max(grid - 1, 1);
+  let weightedSnow = 0;
+  let totalWeight = 0;
+
+  for (let ky = -2; ky <= 2; ky += 1) {
+    for (let kx = -2; kx <= 2; kx += 1) {
+      const weight = kernel[ky + 2][kx + 2];
+      const neighborClass = sampleLandcoverClass(
+        landcoverClasses,
+        terrainDetailLevel,
+        normalizedX + kx * step,
+        normalizedY + ky * step,
+      );
+      if (neighborClass === 70) {
+        weightedSnow += weight;
+      }
+      totalWeight += weight;
+    }
+  }
+
+  return totalWeight > 0 ? weightedSnow / totalWeight : 0;
+}
+
 function applyWorldCoverClassColor(classId: number | undefined, targetColor: Color) {
   switch (classId) {
     case 10:
@@ -142,6 +215,107 @@ function worldCoverBaseColor(
   return targetColor;
 }
 
+function createTerrainGeometry({
+  baseHeightmap,
+  landcover,
+  terrainDetailLevel,
+  demUrl,
+}: {
+  baseHeightmap: { grid: number; elevations: number[] };
+  landcover: { grid: number; classes: number[] } | null | undefined;
+  terrainDetailLevel: TerrainDetailLevel;
+  demUrl: string;
+}): BufferGeometry {
+  const { grid, elevations } = baseHeightmap;
+  const landcoverClasses = landcover?.grid === terrainDetailLevel ? landcover.classes : null;
+
+  const planeDepth = computePlaneDepth();
+  const segments = grid - 1;
+  const geometry = new PlaneGeometry(PLANE_WIDTH, planeDepth, segments, segments);
+  const positions = geometry.attributes.position;
+  const colors = new Float32Array(positions.count * 3);
+  const vertexColor = new Color();
+  let brightVertexCount = 0;
+
+  const cellWidthKm = PLANE_WIDTH / (grid - 1);
+  const cellDepthKm = planeDepth / (grid - 1);
+  const cellMeters = Math.min(cellWidthKm, cellDepthKm) * 1000;
+  const verts = segments + 1;
+
+  for (let i = 0; i < positions.count; i += 1) {
+    const ix = i % verts;
+    const iy = Math.floor(i / verts);
+    const normalizedX = ix / (grid - 1);
+    const dataY = grid - 1 - iy;
+    const sampleNormalizedY = dataY / (grid - 1);
+
+    const meters = elevations[dataY * grid + ix];
+    const classId = sampleLandcoverClass(
+      landcoverClasses,
+      terrainDetailLevel,
+      normalizedX,
+      sampleNormalizedY,
+    );
+    const classSnowMask = sampleSnowMask(
+      landcoverClasses,
+      terrainDetailLevel,
+      normalizedX,
+      sampleNormalizedY,
+      grid,
+    );
+
+    const east = getElevationAtGrid(elevations, grid, ix + 1, dataY);
+    const west = getElevationAtGrid(elevations, grid, ix - 1, dataY);
+    const north = getElevationAtGrid(elevations, grid, ix, dataY - 1);
+    const south = getElevationAtGrid(elevations, grid, ix, dataY + 1);
+    const gradientX = (east - west) / (2 * cellMeters);
+    const gradientY = (north - south) / (2 * cellMeters);
+    const slopeMetersPerCell = Math.hypot(gradientX, gradientY) * cellMeters;
+
+    const height = elevationToSceneY(meters);
+    positions.setZ(i, height);
+
+    const noise = hashNoise(ix, iy);
+    const noiseFine = hashNoise(ix * 5 + 11, iy * 5 + 7);
+    worldCoverBaseColor(
+      meters,
+      slopeMetersPerCell,
+      noise,
+      noiseFine,
+      classId,
+      classSnowMask,
+      vertexColor,
+    );
+
+    const luma =
+      vertexColor.r * 0.2126 + vertexColor.g * 0.7152 + vertexColor.b * 0.0722;
+    if (luma > 0.86) {
+      brightVertexCount += 1;
+    }
+
+    colors[i * 3] = vertexColor.r;
+    colors[i * 3 + 1] = vertexColor.g;
+    colors[i * 3 + 2] = vertexColor.b;
+  }
+
+  if (process.env.NODE_ENV !== "production") {
+    const brightRatio = brightVertexCount / positions.count;
+    if (brightRatio > 0.45) {
+      console.warn(
+        `[Terrain] bright vertex ratio high: ${(brightRatio * 100).toFixed(1)}% (check landcover/snow blend)`,
+      );
+    }
+
+    console.info(
+      `[Terrain] detail level active: dem=${demUrl} landcover=${terrainDetailLevel} grid=${grid}`,
+    );
+  }
+
+  geometry.setAttribute("color", new Float32BufferAttribute(colors, 3));
+  geometry.computeVertexNormals();
+  return geometry as BufferGeometry;
+}
+
 export function Terrain() {
   const terrainDetailLevel = useWorkspaceStore((s) => s.terrainDetailLevel);
   const demUrl = getDemUrlByLevel(terrainDetailLevel);
@@ -149,124 +323,16 @@ export function Terrain() {
   const landcover = useLandcover(terrainDetailLevel);
 
   const geometry = useMemo(() => {
-    if (!baseHeightmap) return null;
-
-    const { grid, elevations } = baseHeightmap;
-    const landcoverClasses =
-      landcover?.grid === terrainDetailLevel ? landcover.classes : null;
-
-    const planeDepth = computePlaneDepth();
-    const segments = grid - 1;
-    const geo = new PlaneGeometry(PLANE_WIDTH, planeDepth, segments, segments);
-    const positions = geo.attributes.position;
-    const colors = new Float32Array(positions.count * 3);
-    const vertexColor = new Color();
-    let brightVertexCount = 0;
-
-    const cellWidthKm = PLANE_WIDTH / (grid - 1);
-    const cellDepthKm = planeDepth / (grid - 1);
-    const cellMeters = Math.min(cellWidthKm, cellDepthKm) * 1000;
-
-    const getElevation = (x: number, y: number) =>
-      elevations[Math.max(0, Math.min(grid - 1, y)) * grid + Math.max(0, Math.min(grid - 1, x))];
-
-    const sampleLandcoverClass = (normalizedX: number, normalizedY: number): number | undefined => {
-      if (!landcoverClasses) return undefined;
-      const clampedX = Math.max(0, Math.min(1, normalizedX));
-      const clampedY = Math.max(0, Math.min(1, normalizedY));
-      const ix = Math.round(clampedX * (terrainDetailLevel - 1));
-      const iy = Math.round(clampedY * (terrainDetailLevel - 1));
-      return landcoverClasses[iy * terrainDetailLevel + ix];
-    };
-
-    const sampleSnowMask = (normalizedX: number, normalizedY: number) => {
-      if (!landcoverClasses) return 0;
-      const kernel = [
-        [1, 4, 7, 4, 1],
-        [4, 16, 26, 16, 4],
-        [7, 26, 41, 26, 7],
-        [4, 16, 26, 16, 4],
-        [1, 4, 7, 4, 1],
-      ];
-      const step = 1 / Math.max(grid - 1, 1);
-      let weightedSnow = 0;
-      let totalWeight = 0;
-
-      for (let ky = -2; ky <= 2; ky++) {
-        for (let kx = -2; kx <= 2; kx++) {
-          const weight = kernel[ky + 2][kx + 2];
-          const neighborClass = sampleLandcoverClass(
-            normalizedX + kx * step,
-            normalizedY + ky * step,
-          );
-          if (neighborClass === 70) weightedSnow += weight;
-          totalWeight += weight;
-        }
-      }
-
-      return totalWeight > 0 ? weightedSnow / totalWeight : 0;
-    };
-
-    const verts = segments + 1;
-    for (let i = 0; i < positions.count; i++) {
-      const ix = i % verts;
-      const iy = Math.floor(i / verts);
-      const normalizedX = ix / (grid - 1);
-      const dataY = grid - 1 - iy;
-      const sampleNormalizedY = dataY / (grid - 1);
-
-      const meters = elevations[dataY * grid + ix];
-
-      const classId = sampleLandcoverClass(normalizedX, sampleNormalizedY);
-      const classSnowMask = sampleSnowMask(normalizedX, sampleNormalizedY);
-
-      const east = getElevation(ix + 1, dataY);
-      const west = getElevation(ix - 1, dataY);
-      const north = getElevation(ix, dataY - 1);
-      const south = getElevation(ix, dataY + 1);
-      const gradientX = (east - west) / (2 * cellMeters);
-      const gradientY = (north - south) / (2 * cellMeters);
-      const slopeMetersPerCell = Math.hypot(gradientX, gradientY) * cellMeters;
-
-      const height = elevationToSceneY(meters);
-      positions.setZ(i, height);
-
-      const noise = hashNoise(ix, iy);
-      const noiseFine = hashNoise(ix * 5 + 11, iy * 5 + 7);
-      worldCoverBaseColor(
-        meters,
-        slopeMetersPerCell,
-        noise,
-        noiseFine,
-        classId,
-        classSnowMask,
-        vertexColor,
-      );
-
-      const luma = vertexColor.r * 0.2126 + vertexColor.g * 0.7152 + vertexColor.b * 0.0722;
-      if (luma > 0.86) brightVertexCount += 1;
-
-      colors[i * 3] = vertexColor.r;
-      colors[i * 3 + 1] = vertexColor.g;
-      colors[i * 3 + 2] = vertexColor.b;
+    if (!baseHeightmap) {
+      return null;
     }
 
-    if (process.env.NODE_ENV !== "production") {
-      const brightRatio = brightVertexCount / positions.count;
-      if (brightRatio > 0.45) {
-        console.warn(
-          `[Terrain] bright vertex ratio high: ${(brightRatio * 100).toFixed(1)}% (check landcover/snow blend)`,
-        );
-      }
-
-      console.info(
-        `[Terrain] detail level active: dem=${demUrl} landcover=${terrainDetailLevel} grid=${grid}`,
-      );
-    }
-
-    geo.setAttribute("color", new Float32BufferAttribute(colors, 3));
-    geo.computeVertexNormals();
-    return geo as unknown as BufferGeometry;
+    return createTerrainGeometry({
+      baseHeightmap,
+      landcover,
+      terrainDetailLevel,
+      demUrl,
+    });
   }, [baseHeightmap, demUrl, landcover, terrainDetailLevel]);
 
   // heightmap 尚未載入 → 先不畫（loading fallback 由 MapCanvasLoader 提供）

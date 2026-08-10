@@ -17,45 +17,47 @@ type SceneTabDefinition = {
   content: ReactNode;
 };
 
+const SCENE_TABS: SceneTabDefinition[] = [
+  {
+    key: "display",
+    label: "顯示",
+    content: (
+      <div style={{ maxWidth: "100%" }}>
+        <DisplayTab />
+      </div>
+    ),
+  },
+  {
+    key: "lighting",
+    label: "光影風格",
+    content: (
+      <div style={{ maxWidth: "100%" }}>
+        <LightingTab />
+      </div>
+    ),
+  },
+  {
+    key: "detail",
+    label: "細節程度",
+    content: (
+      <div style={{ maxWidth: "100%" }}>
+        <DetailTab />
+      </div>
+    ),
+  },
+  {
+    key: "timeline",
+    label: "時間軸",
+    content: (
+      <div style={{ maxWidth: "100%" }}>
+        <TimelineTab />
+      </div>
+    ),
+  },
+];
+
 function getSceneTabs(): SceneTabDefinition[] {
-  return [
-    {
-      key: "display",
-      label: "顯示",
-      content: (
-        <div style={{ maxWidth: "100%" }}>
-          <DisplayTab />
-        </div>
-      ),
-    },
-    {
-      key: "lighting",
-      label: "光影風格",
-      content: (
-        <div style={{ maxWidth: "100%" }}>
-          <LightingTab />
-        </div>
-      ),
-    },
-    {
-      key: "detail",
-      label: "細節程度",
-      content: (
-        <div style={{ maxWidth: "100%" }}>
-          <DetailTab />
-        </div>
-      ),
-    },
-    {
-      key: "timeline",
-      label: "時間軸",
-      content: (
-        <div style={{ maxWidth: "100%" }}>
-          <TimelineTab />
-        </div>
-      ),
-    },
-  ];
+  return SCENE_TABS;
 }
 
 export function SceneControlPanel() {

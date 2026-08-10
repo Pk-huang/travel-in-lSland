@@ -19,6 +19,60 @@ import { useWorkspaceStore } from "@/src/lib/store/workspace";
 const POI_MARKER_SURFACE_OFFSET = 0.35;
 const POI_MARKER_ELEVATED_OFFSET = POI_MARKER_SURFACE_OFFSET * 1.5;
 
+type PoiMarkerModel = {
+  id: string;
+  label: string;
+  labelZhHant?: string;
+  description?: string;
+  descriptionShort?: string;
+  descriptionLong?: string;
+  imageGallery: Array<{ imageUrl: string; alt?: string }>;
+  imageUrl?: string;
+  tags: string[];
+  travel?: { publicTransport?: string };
+  cautionNotes: string[];
+  lon: number;
+  lat: number;
+};
+
+function getVisiblePois(
+  pointsOfInterest: PoiMarkerModel[],
+  poiFocusEnabled: boolean,
+  activePoiId: string | null,
+) {
+  if (poiFocusEnabled && activePoiId) {
+    return pointsOfInterest.filter((poi) => poi.id === activePoiId);
+  }
+
+  return pointsOfInterest;
+}
+
+function getPoiMarkerPosition(poi: PoiMarkerModel, heightmap: ReturnType<typeof useHeightmap>) {
+  const { x, z } = lonLatToSceneXZ(poi.lon, poi.lat);
+  const surfaceY = heightmap
+    ? elevationToSceneY(sampleElevationMeters(heightmap, poi.lon, poi.lat))
+    : 0;
+
+  return { x, z, surfaceY };
+}
+
+function buildPoiDetailContent(poi: PoiMarkerModel) {
+  return {
+    title: poi.labelZhHant || poi.label,
+    description: poi.descriptionShort,
+    longDescription: poi.descriptionLong || poi.description,
+    imageUrl: poi.imageGallery[0]?.imageUrl ?? poi.imageUrl,
+    imageAlt: `${poi.label} photo`,
+    images:
+      poi.imageGallery.length > 0
+        ? poi.imageGallery
+        : [{ imageUrl: poi.imageUrl ?? "", alt: `${poi.label} photo` }],
+    tags: poi.tags.slice(0, 4),
+    travelInfo: poi.travel?.publicTransport,
+    cautionNotes: poi.cautionNotes.slice(0, 3),
+  };
+}
+
 /**
  * POI 圖釘層：在地圖上顯示可點擊景點，hover 時顯示圖片預覽。
  */
@@ -35,10 +89,10 @@ export function PoiLayer() {
     [activePoiId, pointsOfInterest],
   );
   const [hoveredPoiId, setHoveredPoiId] = useState<string | null>(null);
-  const visiblePois =
-    poiFocusEnabled && activePoiId
-      ? pointsOfInterest.filter((poi) => poi.id === activePoiId)
-      : pointsOfInterest;
+  const visiblePois = useMemo(
+    () => getVisiblePois(pointsOfInterest, poiFocusEnabled, activePoiId),
+    [activePoiId, poiFocusEnabled, pointsOfInterest],
+  );
 
   const handleSelectPoi = (markerId: string) => {
     const shouldToggleOff = activePoiId === markerId && poiFocusEnabled;
@@ -50,10 +104,7 @@ export function PoiLayer() {
   return (
     <>
       {visiblePois.map((poi) => {
-        const { x, z } = lonLatToSceneXZ(poi.lon, poi.lat);
-        const surfaceY = heightmap
-          ? elevationToSceneY(sampleElevationMeters(heightmap, poi.lon, poi.lat))
-          : 0;
+        const { x, z, surfaceY } = getPoiMarkerPosition(poi, heightmap);
         const isActive = poiFocusEnabled && activePoiId === poi.id;
         const isHovered = hoveredPoiId === poi.id;
 
@@ -72,17 +123,7 @@ export function PoiLayer() {
               tone="poi"
               onHoverChange={setHoveredPoiId}
               onSelect={handleSelectPoi}
-              detailContent={{
-                title: poi.labelZhHant || poi.label,
-                description: poi.descriptionShort,
-                longDescription: poi.descriptionLong || poi.description,
-                imageUrl: poi.imageGallery[0]?.imageUrl ?? poi.imageUrl,
-                imageAlt: `${poi.label} photo`,
-                images: poi.imageGallery.length > 0 ? poi.imageGallery : [{ imageUrl: poi.imageUrl, alt: `${poi.label} photo` }],
-                tags: poi.tags.slice(0, 4),
-                travelInfo: poi.travel?.publicTransport,
-                cautionNotes: poi.cautionNotes.slice(0, 3),
-              }}
+              detailContent={buildPoiDetailContent(poi)}
             />
           </group>
         );

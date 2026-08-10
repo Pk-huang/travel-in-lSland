@@ -34,6 +34,17 @@ type StatusPanelProps = {
   onSelectRoad?: (payload: { segmentId: string; lon: number; lat: number }) => void;
 };
 
+type WeatherItemProps = {
+  item: NonNullable<IcelandStatusResponse["weather"]>[number];
+  index: number;
+  onSelectWeather?: (payload: { index: number; lat: number; lon: number }) => void;
+};
+
+type RoadItemProps = {
+  item: NonNullable<IcelandStatusResponse["roads"]>[number];
+  onSelectRoad?: (payload: { segmentId: string; lon: number; lat: number }) => void;
+};
+
 const ALERT_DOT: Record<AlertLevel, string> = {
   low: "bg-emerald-500",
   medium: "bg-amber-500",
@@ -45,6 +56,83 @@ const ROAD_DOT: Record<RoadStatus, string> = {
   caution: "bg-amber-500",
   closed: "bg-red-500",
 };
+
+function WeatherList({ items, onSelectWeather }: { items: NonNullable<IcelandStatusResponse["weather"]>; onSelectWeather?: StatusPanelProps["onSelectWeather"] }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">天氣（{items.length}）</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="max-h-[22rem] overflow-y-auto pr-1">
+          <ul className="divide-border divide-y">
+            {items.map((item, index) => (
+              <WeatherItem key={`${item.lat}-${item.lon}-${index}`} item={item} index={index} onSelectWeather={onSelectWeather} />
+            ))}
+          </ul>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function RoadList({ items, onSelectRoad }: { items: NonNullable<IcelandStatusResponse["roads"]>; onSelectRoad?: StatusPanelProps["onSelectRoad"] }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">路況（{items.length}）</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="max-h-[22rem] overflow-y-auto pr-1">
+          <ul className="divide-border divide-y">
+            {items.map((item) => (
+              <RoadItem key={item.segmentId} item={item} onSelectRoad={onSelectRoad} />
+            ))}
+          </ul>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function WeatherItem({ item, index, onSelectWeather }: WeatherItemProps) {
+  return (
+    <li className="py-1">
+      <button
+        type="button"
+        onClick={() => onSelectWeather?.({ index, lat: item.lat, lon: item.lon })}
+        className="hover:bg-accent/40 flex w-full items-center gap-2.5 rounded-md px-2 py-1 text-left text-sm transition"
+      >
+        <span className={`size-2 shrink-0 rounded-full ${ALERT_DOT[item.alertLevel]}`} />
+        <span className="text-muted-foreground min-w-[110px] tabular-nums">
+          {item.lat.toFixed(2)}, {item.lon.toFixed(2)}
+        </span>
+        <span className="font-semibold">{item.temperatureC.toFixed(1)}°C</span>
+        <span className="text-muted-foreground">風 {item.windSpeedMs.toFixed(1)} m/s</span>
+      </button>
+    </li>
+  );
+}
+
+function RoadItem({ item, onSelectRoad }: RoadItemProps) {
+  return (
+    <li className="py-1">
+      <button
+        type="button"
+        onClick={() => {
+          const [lon = 0, lat = 0] = item.geometry[0] ?? [0, 0];
+          onSelectRoad?.({ segmentId: item.segmentId, lon, lat });
+        }}
+        className="hover:bg-accent/40 flex w-full items-center gap-2.5 rounded-md px-2 py-1 text-left text-sm transition"
+      >
+        <span className={`size-2 shrink-0 rounded-full ${ROAD_DOT[item.status]}`} />
+        <span className="flex-1 truncate">{item.name}</span>
+        <span className="font-semibold">{item.status}</span>
+        {item.reason ? <span className="text-muted-foreground">{item.reason}</span> : null}
+      </button>
+    </li>
+  );
+}
 
 function StatusPanel({
   data,
@@ -94,68 +182,8 @@ function StatusPanel({
       </Card>
 
       <div className="grid gap-4">
-        {showWeatherList ? (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">天氣（{weather.length}）</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="max-h-[22rem] overflow-y-auto pr-1">
-                <ul className="divide-border divide-y">
-                  {weather.map((w, i) => (
-                    <li key={`${w.lat}-${w.lon}-${i}`} className="py-1">
-                      <button
-                        type="button"
-                        onClick={() => onSelectWeather?.({ index: i, lat: w.lat, lon: w.lon })}
-                        className="hover:bg-accent/40 flex w-full items-center gap-2.5 rounded-md px-2 py-1 text-left text-sm transition"
-                      >
-                        <span className={`size-2 shrink-0 rounded-full ${ALERT_DOT[w.alertLevel]}`} />
-                        <span className="text-muted-foreground min-w-[110px] tabular-nums">
-                          {w.lat.toFixed(2)}, {w.lon.toFixed(2)}
-                        </span>
-                        <span className="font-semibold">{w.temperatureC.toFixed(1)}°C</span>
-                        <span className="text-muted-foreground">
-                          風 {w.windSpeedMs.toFixed(1)} m/s
-                        </span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-        ) : null}
-
-        {showRoadList ? (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">路況（{roads.length}）</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="max-h-[22rem] overflow-y-auto pr-1">
-                <ul className="divide-border divide-y">
-                  {roads.map((r) => (
-                    <li key={r.segmentId} className="py-1">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const [lon = 0, lat = 0] = r.geometry[0] ?? [0, 0];
-                          onSelectRoad?.({ segmentId: r.segmentId, lon, lat });
-                        }}
-                        className="hover:bg-accent/40 flex w-full items-center gap-2.5 rounded-md px-2 py-1 text-left text-sm transition"
-                      >
-                        <span className={`size-2 shrink-0 rounded-full ${ROAD_DOT[r.status]}`} />
-                        <span className="flex-1 truncate">{r.name}</span>
-                        <span className="font-semibold">{r.status}</span>
-                        {r.reason && <span className="text-muted-foreground">{r.reason}</span>}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-        ) : null}
+        {showWeatherList ? <WeatherList items={weather} onSelectWeather={onSelectWeather} /> : null}
+        {showRoadList ? <RoadList items={roads} onSelectRoad={onSelectRoad} /> : null}
       </div>
     </section>
   );
@@ -168,6 +196,16 @@ function Metric({ label, value }: { label: string; value: number }) {
       <span className="text-muted-foreground text-xs">{label}</span>
     </div>
   );
+}
+
+function selectMarkerForPoi(poi: { id: string; lon: number; lat: number }, dispatch: ReturnType<typeof useMarkerInteraction>["dispatch"]) {
+  dispatch({
+    type: "select-marker",
+    kind: "poi",
+    poiId: poi.id,
+    lon: poi.lon,
+    lat: poi.lat,
+  });
 }
 
 export function WeatherDrawer() {
@@ -278,15 +316,7 @@ export function WeatherDrawer() {
                     <li key={poi.id}>
                       <button
                         type="button"
-                        onClick={() => {
-                          dispatch({
-                            type: "select-marker",
-                            kind: "poi",
-                            poiId: poi.id,
-                            lon: poi.lon,
-                            lat: poi.lat,
-                          });
-                        }}
+                        onClick={() => selectMarkerForPoi(poi, dispatch)}
                         className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-left transition hover:border-sky-300/40 hover:bg-black/30"
                       >
                         <p className="truncate text-sm font-semibold text-white">{poi.label}</p>

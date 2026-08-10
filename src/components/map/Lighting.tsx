@@ -157,6 +157,35 @@ function isRuntimeLightingClose(current: RuntimeLighting, target: RuntimeLightin
   return intensityClose && positionClose && colorClose;
 }
 
+function advanceRuntimeLighting(
+  current: RuntimeLighting,
+  target: RuntimeLighting,
+  delta: number,
+): void {
+  const factor = 1 - Math.pow(0.05, delta);
+  current.ambientIntensity +=
+    (target.ambientIntensity - current.ambientIntensity) * factor;
+  current.sunIntensity += (target.sunIntensity - current.sunIntensity) * factor;
+  current.sunPosition[0] += (target.sunPosition[0] - current.sunPosition[0]) * factor;
+  current.sunPosition[1] += (target.sunPosition[1] - current.sunPosition[1]) * factor;
+  current.sunPosition[2] += (target.sunPosition[2] - current.sunPosition[2]) * factor;
+  current.skyColor.lerp(target.skyColor, factor);
+  current.groundColor.lerp(target.groundColor, factor);
+  current.sunColor.lerp(target.sunColor, factor);
+}
+
+function shouldLogLightingJump(previous: LightingComputed | null, current: LightingComputed) {
+  if (!previous) {
+    return false;
+  }
+
+  const daylightJump = Math.abs(current.daylight - previous.daylight);
+  const sunIntensityJump = Math.abs(current.sunIntensity - previous.sunIntensity);
+  const ambientJump = Math.abs(current.ambientIntensity - previous.ambientIntensity);
+
+  return daylightJump >= 0.08 || sunIntensityJump >= 0.08 || ambientJump >= 0.06;
+}
+
 function composeLighting(
   date: Date,
   preset: LightingPreset,
@@ -377,18 +406,8 @@ export function Lighting() {
 
     const current = runtimeCurrentRef.current;
     const target = runtimeTargetRef.current;
-    const factor = 1 - Math.pow(0.05, delta);
 
-    current.ambientIntensity +=
-      (target.ambientIntensity - current.ambientIntensity) * factor;
-    current.sunIntensity += (target.sunIntensity - current.sunIntensity) * factor;
-    current.sunPosition[0] += (target.sunPosition[0] - current.sunPosition[0]) * factor;
-    current.sunPosition[1] += (target.sunPosition[1] - current.sunPosition[1]) * factor;
-    current.sunPosition[2] += (target.sunPosition[2] - current.sunPosition[2]) * factor;
-    current.skyColor.lerp(target.skyColor, factor);
-    current.groundColor.lerp(target.groundColor, factor);
-    current.sunColor.lerp(target.sunColor, factor);
-
+    advanceRuntimeLighting(current, target, delta);
     applyLightingToRefs(current, hemisphereLightRef.current, directionalLightRef.current);
 
     if (isRuntimeLightingClose(current, target)) {
@@ -412,35 +431,31 @@ export function Lighting() {
   const lastLightingRef = useRef<LightingComputed | null>(null);
   useEffect(() => {
     const previous = lastLightingRef.current;
-    if (previous) {
-      const daylightJump = Math.abs(lighting.daylight - previous.daylight);
-      const sunIntensityJump = Math.abs(lighting.sunIntensity - previous.sunIntensity);
-      const ambientJump = Math.abs(
-        lighting.ambientIntensity - previous.ambientIntensity,
-      );
+    if (shouldLogLightingJump(previous, lighting)) {
+      const daylightJump = Math.abs(lighting.daylight - previous!.daylight);
+      const sunIntensityJump = Math.abs(lighting.sunIntensity - previous!.sunIntensity);
+      const ambientJump = Math.abs(lighting.ambientIntensity - previous!.ambientIntensity);
 
-      if (daylightJump >= 0.08 || sunIntensityJump >= 0.08 || ambientJump >= 0.06) {
-        console.info("[Lighting Debug Jump]", {
-          selectedTime,
-          previous: {
-            daylight: previous.daylight,
-            sunIntensity: previous.sunIntensity,
-            ambientIntensity: previous.ambientIntensity,
-            debug: previous.debug,
-          },
-          current: {
-            daylight: lighting.daylight,
-            sunIntensity: lighting.sunIntensity,
-            ambientIntensity: lighting.ambientIntensity,
-            debug: lighting.debug,
-          },
-          delta: {
-            daylightJump,
-            sunIntensityJump,
-            ambientJump,
-          },
-        });
-      }
+      console.info("[Lighting Debug Jump]", {
+        selectedTime,
+        previous: {
+          daylight: previous!.daylight,
+          sunIntensity: previous!.sunIntensity,
+          ambientIntensity: previous!.ambientIntensity,
+          debug: previous!.debug,
+        },
+        current: {
+          daylight: lighting.daylight,
+          sunIntensity: lighting.sunIntensity,
+          ambientIntensity: lighting.ambientIntensity,
+          debug: lighting.debug,
+        },
+        delta: {
+          daylightJump,
+          sunIntensityJump,
+          ambientJump,
+        },
+      });
     }
 
     lastLightingRef.current = lighting;
