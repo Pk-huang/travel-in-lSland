@@ -1,7 +1,32 @@
 # Iceland Insight 實作進度紀錄
 
-更新日期：2026-08-07  
+更新日期：2026-08-11  
 用途：依照既有 Phase 規劃，集中記錄實作進度、決策、阻塞與下一步
+
+## 2026-08-11 測試計畫與進度文件整理
+- 狀態：完成（本地已提交，遠端 push 受認證/網路限制阻擋）
+- 目標：把測試規劃內容補齊為可執行的階段式文件，並同步更新實作進度紀錄，方便後續開始測試與驗證。
+- 本次調整：
+  - 於 [docs/testing-plan.md](docs/testing-plan.md) 補充「測試方向」、「測試階段」與「測試確認清單」內容，將測試重點整理為離線資料與圖磚渲染、核心地圖功能與演算法、狀態切換與極限測試三個方向。
+  - 於 [IMPLEMENTATION_PROGRESS_LOG.md](IMPLEMENTATION_PROGRESS_LOG.md) 增加本次整理紀錄，方便後續追蹤。
+- 驗證結果：
+  - 文件內容已完成更新
+  - 本地提交已建立（commit: 12d9f13）
+  - 遠端推送因 GitHub 連線/權限問題未完成，待後續重新確認
+
+## 2026-08-10 面板重構整理與提交推送
+- 狀態：完成（commit: 812e4ec）
+- 目標：把旅行控制面板的結構整理成更易讀、更易維護的拆分單元，並把本次變更同步推到遠端。
+- 本次調整：
+  - 將 [src/panel/workspace-panel/ControlPanel.tsx](src/panel/workspace-panel/ControlPanel.tsx) 拆分為 `DaySelector`、`TravelSummary`、`TravelMarkersList` 三個子元件。
+  - 將行程項目選取與地圖互動流程收斂到單一處理入口，降低內嵌邏輯與分支複雜度。
+  - 針對重寫後引入的型別與語法不一致問題做補正，確保元件可正常編譯。
+- 驗證結果：
+  - `get_errors`：相關檔案無錯誤
+  - `corepack pnpm lint`：通過，僅保留既有 warning（`@next/next/no-img-element`）
+  - `corepack pnpm build`：通過
+- 其他紀錄：
+  - 已完成 `git commit` 並推送到遠端分支 `main`。
 
 ## 2026-08-01 目前優先任務：架構重整
 - 目標：先把專案結構整理清楚，讓後續功能開發能建立在穩定的責任分層上，而不是在散落的邏輯中持續追加。
