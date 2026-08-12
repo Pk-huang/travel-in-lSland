@@ -1,5 +1,4 @@
-import assert from "node:assert/strict";
-import test from "node:test";
+import { describe, expect, it } from "vitest";
 
 import {
   transitionMarkerInteraction,
@@ -176,12 +175,17 @@ const cases: TransitionCase[] = [
   },
 ];
 
-test("transitionMarkerInteraction should preserve frozen phase-2 behavior", () => {
-  for (const transitionCase of cases) {
-    const next = transitionMarkerInteraction(
-      transitionCase.state,
-      transitionCase.intent,
-    );
-    assert.deepEqual(next, transitionCase.expected, transitionCase.name);
-  }
+describe("transitionMarkerInteraction", () => {
+  it("should preserve frozen phase-2 behavior", () => {
+    for (const transitionCase of cases) {
+      const next = transitionMarkerInteraction(
+        transitionCase.state,
+        transitionCase.intent,
+      );
+
+      expect(next).toEqual({
+        ...transitionCase.expected,
+      });
+    }
+  });
 });
