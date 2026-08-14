@@ -24,44 +24,52 @@ export function LeftPanel() {
       <aside
         aria-hidden={!open}
         className={cn(
-          "bg-card/80 border-border pointer-events-auto absolute top-4 bottom-4 left-4 z-20 flex w-[min(460px,calc(100vw-2rem))] flex-col rounded-xl border shadow-2xl backdrop-blur-md transition-transform duration-300 ease-out",
+          "pointer-events-auto absolute top-4 bottom-4 left-4 z-20 flex w-[min(430px,calc(100vw-2rem))] flex-col overflow-hidden bg-[#0c1724]/80 shadow-[0_18px_55px_rgba(9,15,22,0.48)] backdrop-blur-xl transition-transform duration-300 ease-out",
           open ? "translate-x-0" : "-translate-x-[calc(100%+1.5rem)]",
         )}
       >
-        {/* 標題列 */}
-        <header className="border-border flex items-center justify-between border-b px-4 py-3">
-          <div>
-            <h1 className="text-lg leading-tight font-bold">Iceland Insight</h1>
-            <p className="text-muted-foreground text-xs">左側面板</p>
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#bfe3ff]/70 to-transparent" />
+
+        <header className="flex items-center justify-between px-4 pb-4 pt-4">
+          <div className="min-w-0">
+            <div className="mb-2 flex items-center gap-2">
+              <span className="inline-flex h-2.5 w-2.5 rounded-full bg-[#d9745f] shadow-[0_0_18px_rgba(217,116,95,0.9)]" />
+              <span className="text-[10px] font-medium uppercase tracking-[0.25em] text-slate-300/80">
+                Route overview
+              </span>
+            </div>
+            <h1 className="truncate text-[1.15rem] font-semibold tracking-[-0.04em] text-slate-50">
+              Iceland Insight
+            </h1>
           </div>
+
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setOpen(false)}
             aria-label="收合面板"
+            className="h-9 w-9 rounded-full text-slate-200 hover:bg-white/5 hover:text-white"
           >
-            <ChevronLeft className="size-5" />
+            <ChevronLeft className="size-4" />
           </Button>
         </header>
 
-        {/* 可捲動內容 */}
-        <div className="min-h-0 flex-1 overflow-y-auto p-4">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
           <ControlPanel />
         </div>
       </aside>
 
-      {/* 展開按鈕：僅在收合時顯示 */}
       <Button
         variant="secondary"
         size="icon"
         onClick={() => setOpen(true)}
         aria-label="展開面板"
         className={cn(
-          "pointer-events-auto absolute top-4 left-4 z-20 shadow-lg backdrop-blur-md transition-opacity duration-200",
+          "pointer-events-auto absolute top-4 left-4 z-20 h-11 w-11 rounded-full border border-white/10 bg-[#0f1d2b]/85 text-slate-50 shadow-[0_12px_30px_rgba(0,0,0,0.28)] backdrop-blur-xl transition-all duration-200 hover:bg-[#122334]",
           open ? "pointer-events-none opacity-0" : "opacity-100",
         )}
       >
-        <PanelLeftOpen className="size-5" />
+        <PanelLeftOpen className="size-4" />
       </Button>
     </>
   );
