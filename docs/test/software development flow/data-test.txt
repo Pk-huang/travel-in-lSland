@@ -13,100 +13,169 @@ Data 規劃測試的內容
 
      資料來源：
 
-     A. 主資料源
-        - NOAA SWPC Aurora JSON
-          用途：極光預報
-          內容：JSON 格式，可直接讀取
-          優先級：高
-        - Vedur Weather API
-          用途：冰島天氣 / 測站 / 觀測資料
-          內容：OpenAPI + JSON endpoints
-          優先級：高
+ A. 主資料源
 
-     B. 備用資料源
-        - APIs.is
-          用途：公開資料彙整入口
-          優先級：中
-        - 本地 fallback JSON / fixture
-          用途：API 失敗時保底資料
-          優先級：高（保底）
-        - 若需要：Umferdin 網頁資料作為額外參考來源
-          優先級：低
+   - NOAA SWPC Aurora JSON
+     用途：極光預報
+     格式：JSON API
+     目前狀態：來源存在，尚未接入程式
+     優先級：高
 
-     C. 參考資料源
-        - Vedur 北極光頁面
-          用途：人工比對與情境驗證
-          不作正式主 API
-          優先級：低
+   - Vedur Weather API
+     用途：冰島天氣、測站、觀測資料
+     格式：JSON API
+     目前狀態：已接入程式並使用
+     優先級：高
+
+
+B. 備用資料源
+
+   - APIs.is
+     用途：公開資料彙整入口
+     格式：JSON API
+     目前狀態：來源存在，尚未接入程式
+     優先級：中
+
+   - 本地 snapshot fixture
+     用途：API 失敗時提供保底資料
+     格式：本地 JSON
+     目前狀態：已接入程式並使用
+     優先級：高（保底）
+
+   - Umferdin 網頁資料
+     用途：冰島道路資訊參考
+     格式：網站資料，尚未確認為穩定 JSON API
+     目前狀態：來源存在，尚未接入程式
+     優先級：低
+
+
+C. 參考資料源
+
+   - Vedur 北極光頁面
+     用途：人工比對與情境驗證
+     格式：HTML 網頁
+     目前狀態：僅供人工參考，未接入程式
+     不作正式 API
+     優先級：低
+
+
+D. 目前程式已使用但原清單未完整列出的資料源
+
+   - Sunrise-Sunset API
+     用途：日出、日落與日照資料
+     格式：JSON API
+     目前狀態：已接入程式並使用
+     優先級：中
 
      測試內容：
 
      1. 連線測試
         - 驗證：確認 API 是否可正常連線，並成功取得 JSON。
           執行方式：自動化腳本請求主資料源與備用資料源，檢查 HTTP 狀態與 JSON 是否可解析。
-          參與檔案：src/lib/api/vedur.ts、src/lib/http/client.ts、src/app/data/iceland-status/route.ts
-          結果：
+          測試檔案：src/lib/api/api-connect.test.tsx
+          成功條件：HTTP 200 / JSON parse 成功
+          參與檔案：src/lib/api/api-connect.test.tsx、src/lib/api/vedur.ts、src/lib/api/sun-times.ts、src/lib/http/client.ts
+          結果：失敗
+          失敗項目：連線測試
+          備註：
+          - NOAA SWPC Aurora JSON -- 失敗：測試環境連線 timeout
+          - Vedur observations -- 成功
+          - Vedur stations -- 成功
+          - APIs.is -- 失敗：測試環境連線失敗
+          - Sunrise-Sunset API -- 成功
+          - 本地 snapshot fixture -- 成功
 
         - 驗證：確認主資料源是否成功回應資料。
           執行方式：自動化腳本呼叫主資料源，檢查是否回傳成功狀態與有效資料。
+          測試檔案：src/lib/api/api-connect.test.tsx
+          成功條件：主資料源回應 HTTP 200，JSON parse 成功，且 Vedur function 回傳資料。
           參與檔案：src/lib/api/vedur.ts、src/app/data/iceland-status/route.ts
-          結果：
+          結果：失敗
+          備註：Vedur observations 與 Vedur stations 成功；NOAA SWPC Aurora JSON 因測試環境連線 timeout 失敗。
 
         - 驗證：確認備用資料源與 fallback 資料是否可用。
           執行方式：自動化腳本驗證備用資料源與 local fixture 是否能正常回應並被選用。
+          測試檔案：src/lib/api/api-connect.test.tsx
+          成功條件：備用資料源回應 HTTP 200 且 JSON parse 成功；本地 snapshot fixture 可正常讀取。
           參與檔案：src/app/data/iceland-status/route.ts、src/lib/http/circuit-breaker.ts
-          結果：
+          結果：失敗
+          備註：本地 snapshot fixture 成功；APIs.is 因測試環境連線失敗，且本次尚未驗證 fallback 是否被選用。
 
      2. 回應狀態測試
         - 驗證：確認 API 回應是否為成功狀態（200 / 正確 JSON）。
-          執行方式：自動化腳本驗證 HTTP 狀態碼、Content-Type 與 JSON parse 成功與否。
-          參與檔案：src/lib/http/client.ts、src/lib/api/vedur.ts
-          結果：
+          執行方式：使用 unit test mock fetch 回傳 HTTP 200 與有效 JSON，直接呼叫 fetchJson，驗證函式成功解析並回傳資料。
+          測試檔案：src/lib/http/client.test.ts
+          成功條件：HTTP 200 時，fetchJson 成功完成並回傳解析後的 JSON。
+          參與檔案：src/lib/http/client.ts、src/lib/http/client.test.ts
+          結果：成功
+          失敗項目：無
+          備註：測試不依賴外部網路，未額外驗證 Content-Type、schema 或 fallback。
 
         - 驗證：確認 timeout、403、500、空回應時的處理方式。
-          執行方式：自動化腳本模擬錯誤回應，驗證系統是否正確處理錯誤與 fallback。
-          參與檔案：src/lib/http/circuit-breaker.ts、src/app/data/iceland-status/route.ts
-          結果：
+          執行方式：使用 unit test mock fetch 模擬 timeout、403、500 與空回應，直接呼叫 fetchJson，驗證錯誤是否統一轉換為 UpstreamError。
+          測試檔案：src/lib/http/client.test.ts
+          成功條件：timeout 與空回應轉換為 UpstreamError；403 與 500 的 UpstreamError 保留對應 HTTP status；錯誤情境不回傳未處理例外。
+          參與檔案：src/lib/http/client.ts、src/lib/http/client.test.ts
+          結果：成功
+          失敗項目：無
+          備註：共 4 類錯誤情境測試通過；本項只驗證 HTTP client 的錯誤處理，不驗證 fallback 選用或 circuit breaker 狀態轉換。
 
      3. fallback 測試
         - 驗證：主 API 成功時使用主資料。
           執行方式：自動化腳本模擬主資料源可用，確認系統選擇主資料來源。
+          測試檔案：
+          成功條件：
+          
           參與檔案：src/app/data/iceland-status/route.ts
           結果：
 
         - 驗證：主 API 失敗時切換至備用資料。
           執行方式：自動化腳本 mock 主資料源失敗，驗證是否轉向備用資料源。
+          測試檔案：
+          成功條件：
           參與檔案：src/app/data/iceland-status/route.ts、src/lib/http/circuit-breaker.ts
           結果：
 
         - 驗證：備用資料也失敗時使用 local JSON / empty-safe fallback。
           執行方式：自動化腳本 mock 備用資料失敗，確認 fallback chain 是否進入本地資料。
+          測試檔案：
+          成功條件：
           參與檔案：src/app/data/iceland-status/route.ts
           結果：
 
         - 驗證：備用資料回傳空資料時，系統仍不崩潰並顯示明確警告。
           執行方式：自動化腳本回傳空陣列或空物件，驗證錯誤處理邏輯與 UI 狀態。
+          測試檔案：
+          成功條件：
           參與檔案：src/app/data/iceland-status/route.ts、src/schemas/domain.ts
           結果：
 
      4. 資料契約驗證
         - 驗證：必要欄位是否存在。
           執行方式：自動化腳本檢查資料 schema 的必填欄位是否全部存在。
+          測試檔案：
+          成功條件：
           參與檔案：src/schemas/domain.ts
           結果：
 
         - 驗證：欄位型別是否正確。
           執行方式：自動化腳本檢查欄位型別是否符合預期格式。
+          測試檔案：
+          成功條件：
           參與檔案：src/schemas/domain.ts、src/lib/adapters/weather.ts
           結果：
 
         - 驗證：資料是否可直接進入 render pipeline。
           執行方式：自動化腳本驗證資料結構是否符合 map / canvas 所需解構。
+          測試檔案：
+          成功條件：
           參與檔案：src/lib/adapters/weather.ts、src/lib/adapters/stations.ts、src/lib/adapters/road.ts
           結果：
 
         - 驗證：缺失欄位時是否可進行 default / fallback。
           執行方式：自動化腳本刪除欄位或設為空值，確認 fallback 邏輯是否生效。
+          測試檔案：
+          成功條件：
           參與檔案：src/app/data/iceland-status/route.ts、src/schemas/domain.ts
           結果：
 
