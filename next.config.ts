@@ -5,7 +5,13 @@ import type { NextConfig } from "next";
 const projectRoot = dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
-	allowedDevOrigins: ["127.0.0.1", "localhost"],
+	allowedDevOrigins: [
+		"127.0.0.1",
+		"localhost",
+		"0.0.0.0",
+		"::1",
+		"172.21.10.81",
+	],
 	images: {
 		remotePatterns: [
 			{

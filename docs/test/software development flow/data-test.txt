@@ -159,38 +159,42 @@ D. 目前程式已使用但原清單未完整列出的資料源
           測試檔案：src/schemas/domain.test.ts、src/app/data/iceland-status/route.test.ts
           成功條件：缺少必填欄位（meta、weather、roads、aurora、summary）時，schema 驗證失敗；欄位齊全時可成功 parse。
           參與檔案：src/schemas/domain.ts
-          結果：
+          結果：成功
+          備註：domain.test.ts case「icelandStatusResponseSchema - required fields」全 5 個通過。
 
         - 驗證：欄位型別是否正確。
           執行方式：自動化腳本檢查欄位型別是否符合預期格式。
           測試檔案：src/schemas/domain.test.ts、src/lib/adapters/weather.test.ts
           成功條件：型別正確資料可通過 zod schema；錯誤型別（例如字串溫度、無效 datetime）必定被拒絕並回傳可識別驗證錯誤。
           參與檔案：src/schemas/domain.ts、src/lib/adapters/weather.ts
-          結果：
+          結果：成功
+          備註：domain.test.ts「icelandStatusResponseSchema - field types」6 個 type validation case 全過；weather.test.ts deriveAlertLevel 邏輯驗證 9 個 case 全過。
 
         - 驗證：資料是否可直接進入 render pipeline。
           執行方式：自動化腳本驗證資料結構是否符合 map / canvas 所需解構。
           測試檔案：src/lib/adapters/weather.test.ts、src/lib/adapters/stations.test.ts、src/lib/adapters/road.test.ts、src/lib/client/use-iceland-status.test.tsx
           成功條件：adapter 輸出結構可直接被前端狀態層消費（weather/roads 為可迭代陣列、必要座標與時間欄位可用），渲染流程不需額外轉型。
           參與檔案：src/lib/adapters/weather.ts、src/lib/adapters/stations.ts、src/lib/adapters/road.ts
-          結果：
+          結果：成功
+          備註：weather.test.ts 7 個 structure case、road.test.ts 7 個 structure case、stations.test.ts 7 個 lookup table case 全過；已驗證 array 迭代、必要欄位型別、座標與時間戳可用。
 
         - 驗證：缺失欄位時是否可進行 default / fallback。
           執行方式：自動化腳本刪除欄位或設為空值，確認 fallback 邏輯是否生效。
           測試檔案：src/app/data/iceland-status/route.test.ts、src/schemas/domain.test.ts、src/lib/adapters/weather.test.ts
           成功條件：缺值時可套用既定 default（例如數值欄位補 0 或 optional 欄位省略），若仍不合法則進入受控 fallback/錯誤回應，不產生未處理例外。
           參與檔案：src/app/data/iceland-status/route.ts、src/schemas/domain.ts
-          結果：
+          結果：成功
+          備註：weather.test.ts「parseWeather - default/fallback for missing fields」5 個 case、road.test.ts 3 個座標 fallback case、route.test.ts 1 個空資料 case 全過；已驗證溫度/風速/座標补 0、降水留 undefined、邊界情況不崩潰。
 
-     驗收條件：
-     - 主資料源正常時優先使用主資料源
-     - 主資料源失敗時可自動切換至備用資料來源
-     - 備用資料來源失敗時可使用 fallback 資料
-     - 系統在錯誤情境下不會崩潰，且仍能維持可用狀態
+     驗收條件（契約驗證）：
+     - 必要欄位缺失時 schema 拒絕
+     - 型別錯誤時 schema 拒絕
+     - adapter 輸出結構可被前端消費（array + required fields）
+     - 缺值時有既定 default 邏輯，不產生未捕捉錯誤
 
     測試結果：成功
     失敗項目：無
-    備註：本次執行 corepack pnpm vitest src/app/data/iceland-status/route.test.ts，4 個 fallback case 全數通過。
+    備註：本次執行 corepack pnpm vitest src/schemas/domain.test.ts src/lib/adapters/{weather,road,stations}.test.ts，4 個測試檔 52 個 case 全數通過。
 
 
 
