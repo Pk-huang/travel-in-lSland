@@ -1,7 +1,9 @@
+import { renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import snapshot from "@/fixtures/iceland-status.normal.json";
 import { UpstreamError } from "@/src/lib/http/client";
+import { useIcelandStatus } from "@/src/lib/client/use-iceland-status";
 import { icelandStatusResponseSchema } from "@/src/schemas";
 
 vi.mock("@/src/lib/api/vedur", () => ({
@@ -39,16 +41,13 @@ vi.mock("@/src/lib/http/circuit-breaker", () => ({
 import { cache } from "@/src/lib/cache";
 import { fetchSunTimes } from "@/src/lib/api/sun-times";
 import { fetchVedurObservations } from "@/src/lib/api/vedur";
-import * as weatherAdapter from "@/src/lib/adapters/weather";
 import { vedurBreaker } from "@/src/lib/http/circuit-breaker";
 import { getStationCoords } from "@/src/lib/stations/catalog";
-import { logEvent } from "@/src/lib/observability";
 import { GET } from "./route";
 
 const mockFetchVedurObservations = vi.mocked(fetchVedurObservations);
 const mockFetchSunTimes = vi.mocked(fetchSunTimes);
 const mockGetStationCoords = vi.mocked(getStationCoords);
-const mockLogEvent = vi.mocked(logEvent);
 
 const mockedBreaker = vedurBreaker as {
   canRequest: ReturnType<typeof vi.fn>;
@@ -81,8 +80,22 @@ function createSunTimes(date: string) {
   };
 }
 
+type Deferred<T> = {
+  promise: Promise<T>;
+  resolve: (value: T) => void;
+};
+
+function createDeferred<T>(): Deferred<T> {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((res) => {
+    resolve = res;
+  });
+  return { promise, resolve };
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.unstubAllGlobals();
 
   vi.spyOn(cache, "get").mockResolvedValue(null);
   vi.spyOn(cache, "set").mockResolvedValue();
@@ -112,30 +125,18 @@ beforeEach(() => {
   mockFetchSunTimes.mockImplementation(async ({ date }) => createSunTimes(date));
 });
 
-describe("GET /data/iceland-status fallback skeleton", () => {
-  it("資料可流到轉換層（Smoke）", async () => {
-    const parseWeatherSpy = vi.spyOn(weatherAdapter, "parseWeather");
-
-    const response = await GET(createRequest());
-    const body = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(parseWeatherSpy).toHaveBeenCalled();
-    expect(() => icelandStatusResponseSchema.parse(body)).not.toThrow();
-  });
-
-  it("主 API 成功時使用主資料", async () => {
+describe("JSON priority and pre-render loading integration", () => {
+  it("主次來源同時可用時採用主 JSON", async () => {
     const response = await GET(createRequest());
     const body = await response.json();
 
     expect(response.status).toBe(200);
     expect(body.meta.fallback).toBe(false);
     expect(body.meta.cache).toBe("miss");
-    expect(body.weather.length).toBeGreaterThan(0);
     expect(body.summary).not.toEqual(snapshot.summary);
   });
 
-  it("主 API 失敗時切換至 fallback 路徑", async () => {
+  it("主來源失敗時切換到 fallback JSON", async () => {
     mockFetchVedurObservations.mockRejectedValueOnce(
       new UpstreamError("Vedur unavailable", 503),
     );
@@ -145,41 +146,94 @@ describe("GET /data/iceland-status fallback skeleton", () => {
 
     expect(response.status).toBe(200);
     expect(body.meta.fallback).toBe(true);
-    expect(body.meta.region).toBe("all");
     expect(body.summary).toEqual(snapshot.summary);
-  });
-
-  it("上游不可用時使用 local snapshot fallback", async () => {
-    mockedBreaker.canRequest.mockReturnValueOnce(false);
-    mockedBreaker.getState.mockReturnValueOnce("open");
-
-    const response = await GET(createRequest());
-    const body = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(body.meta.fallback).toBe(true);
-    expect(body.meta.region).toBe("all");
     expect(() => icelandStatusResponseSchema.parse(body)).not.toThrow();
   });
 
-  it("空資料或邊界資料時不崩潰，並回傳可處理結果", async () => {
-    mockFetchVedurObservations.mockResolvedValueOnce([]);
-    mockGetStationCoords.mockResolvedValueOnce({});
-    mockFetchSunTimes.mockRejectedValueOnce(new Error("sun API down"));
-    mockFetchSunTimes.mockRejectedValueOnce(new Error("sun API down"));
-    mockFetchSunTimes.mockRejectedValueOnce(new Error("sun API down"));
+  it("render-ready 前不輸出可渲染資料", async () => {
+    const payload = {
+      meta: {
+        region: "all",
+        generatedAt: "2026-08-12T00:00:00.000Z",
+        cache: "hit",
+        fallback: false,
+      },
+      weather: [],
+      roads: [],
+      aurora: [],
+      summary: {
+        riskScore: 0,
+        highRiskSegments: 0,
+      },
+    };
 
-    const response = await GET(createRequest());
-    const body = await response.json();
+    const deferred = createDeferred<{ ok: boolean; json: () => Promise<typeof payload> }>();
+    vi.stubGlobal("fetch", vi.fn().mockImplementation(() => deferred.promise));
 
-    expect(response.status).toBe(200);
-    expect(body.meta.fallback).toBe(false);
-    expect(body.weather).toEqual([]);
-    expect(body.roads).toEqual([]);
-    expect(mockLogEvent).toHaveBeenCalledWith(
-      "warn",
-      "sun-times fetch failed",
-      expect.objectContaining({ fallback: "null" }),
-    );
+    const { result } = renderHook(() => useIcelandStatus("all"));
+
+    expect(result.current.loading).toBe(true);
+    expect(result.current.data).toBeNull();
+    expect(result.current.error).toBeNull();
+
+    deferred.resolve({
+      ok: true,
+      json: async () => payload,
+    });
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+
+    expect(result.current.data).toEqual(payload);
+    expect(result.current.error).toBeNull();
+  });
+
+  it("連續 20 次執行來源優先與 ready 時序皆一致", async () => {
+    const payload = {
+      meta: {
+        region: "all",
+        generatedAt: "2026-08-12T00:00:00.000Z",
+        cache: "hit",
+        fallback: false,
+      },
+      weather: [],
+      roads: [],
+      aurora: [],
+      summary: {
+        riskScore: 0,
+        highRiskSegments: 0,
+      },
+    };
+
+    for (let index = 0; index < 20; index += 1) {
+      const routeResponse = await GET(createRequest());
+      const routeBody = await routeResponse.json();
+
+      expect(routeResponse.status).toBe(200);
+      expect(routeBody.meta.fallback).toBe(false);
+
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue({
+          ok: true,
+          json: async () => payload,
+        }),
+      );
+
+      const { result, unmount } = renderHook(() => useIcelandStatus("all"));
+
+      expect(result.current.loading).toBe(true);
+      expect(result.current.data).toBeNull();
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.data).toEqual(payload);
+      expect(result.current.error).toBeNull();
+      unmount();
+      vi.unstubAllGlobals();
+    }
   });
 });
