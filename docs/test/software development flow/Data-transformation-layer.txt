@@ -74,7 +74,7 @@ transform function → mesh / geometry → scene setup → renderer → canvas
        - 邊界檢查：冰島 bbox 四角、中心點座標在預期範圍內
        - 海岸線裁切：elevation < 0 → y = -0.3（SEA_FLOOR_UNIT）正確
        - 反向轉換：sceneXZToLonLat 正確復原原始 lon/lat
-       - 通過率：___ / ___ cases
+       - 通過率：23 / 23 cases ✓
 
        【驗證條件】
        - Canvas 與其他層使用同一套轉換結果（單一真相源）
@@ -110,7 +110,7 @@ transform function → mesh / geometry → scene setup → renderer → canvas
        - 雪覆蓋：高度 > 1180m + classSnowMask 影響白色比例（0 ~ 0.6）
        - 邊界值：elevation = 0m、最高點、負值的顏色合理
        - 顏色平順：相鄰頂點顏色差異不出現硬切
-       - 通過率：___ / ___ cases
+       - 通過率：34 / 34 cases ✓
 
        【驗證條件】
        - 顏色值落在有效範圍 [0, 1]³（無溢位）
@@ -146,7 +146,7 @@ transform function → mesh / geometry → scene setup → renderer → canvas
        - 邊界對齊：地形 bbox 與冰島範圍對齊（中心 = 世界原點）
        - Material 正確：逐頂點顏色已生效（vertexColors = true）
        - 法線計算：geometry.computeVertexNormals() 執行正確
-       - 通過率：___ / ___ cases
+       - 通過率：22 / 22 cases ✓
 
        【驗證條件】
        - 集成測試：涉及座標轉換、顏色映射、geometry attribute 綁定
