@@ -1,7 +1,73 @@
 # Iceland Insight 實作進度紀錄
 
-更新日期：2026-08-11  
+更新日期：2026-08-27  
 用途：依照既有 Phase 規劃，集中記錄實作進度、決策、阻塞與下一步
+
+## 2026-08-27 資料轉換層測試實作 - 3 層架構完成
+- 狀態：完成（commit: 2f64e0a）
+- 目標：實現原始資料轉換為可渲染內容的完整測試套件，涵蓋座標轉換、顏色映射、網格生成三層。
+- 本次實作：
+
+### 層級 1：CRS 座標轉換（Unit Test）
+- 檔案：[src/lib/map/coords.test.ts](src/lib/map/coords.test.ts)
+- 測試數：23 cases
+- 覆蓋內容：
+  * `lonLatToSceneXZ()`: bbox 邊角映射、中心對齐、邊界檢查
+  * `sceneXZToLonLat()`: round-trip 反向轉換一致性
+  * `elevationToSceneY()`: 海拔轉高度、負值夾平到 SEA_FLOOR_UNIT(-0.3)
+  * `computeKmPerUnit()`: 水平尺度係數（≈13.2 km/unit）
+  * `sampleElevationMeters()`: heightmap 取樣、邊界 clamp 處理
+- 驗證結果：✓ 23/23 pass（0ms）
+
+### 層級 2：顏色映射轉換（Unit Test）
+- 檔案：[src/components/map/Terrain.test.ts](src/components/map/Terrain.test.ts)
+- 導出函式：`worldCoverBaseColor()` (from Terrain.tsx)
+- 測試數：34 cases
+- 覆蓋內容：
+  * 海水區域：深水→淺水漸層、海岸線混色
+  * Landcover class：10/20/30/40/50/60/70/80/90/100 各類色彩
+  * 斜率影響：14~130 m/cell 平滑過渡（從植被→裸岩）
+  * 高度影響：0~2000m 海拔分區、雪線邏輯
+  * 雪覆蓋：classSnowMask 與斜率互動、邊界羽化
+  * RGB 有效性：所有輸出落在 [0, 1]³
+  * 矩陣測試：7 classes × 5 elevations × 4 slopes = 140 組合
+- 驗證結果：✓ 34/34 pass（10ms）
+
+### 層級 3：Canvas 內容轉換（Integration Test）
+- 檔案：[src/components/map/__tests__/terrain-geometry.test.ts](src/components/map/__tests__/terrain-geometry.test.ts)
+- 導出函式：`createTerrainGeometry()` (from Terrain.tsx)
+- 測試數：22 cases
+- 資料來源：
+  * `/public/dem/iceland-mapzen-256.json` (256×256 DEM)
+  * `/public/landcover/iceland-worldcover-2021-256.json` (landcover)
+- 覆蓋內容：
+  * (3a) 頂點位置：grid² 數量、PLANE_WIDTH 尺度、elevationToSceneY 對齐
+  * (3a) 海拔裁切：elevation<0 → SEA_FLOOR_UNIT(-0.3)
+  * (3b) 顏色屬性：Float32BufferAttribute、itemSize=3、RGB ∈ [0,1]
+  * (3b) 色彩驗證：深海藍色、高海拔顏色有效
+  * (3c) 材質配置：vertexColors 材質可綁定、法向量計算完成
+  * (3c) 整合驗證：Mesh 邊界框、所有必要 attributes、JSON 資料一致性
+- 驗證結果：✓ 22/22 pass（2.64s）
+
+### 整體驗證
+- **全測試套件**：✓ 3 files / 79 tests passed
+- **ESLint**：✓ 所有測試檔通過
+- **TypeScript**：✓ 無型別錯誤
+- **Production Build**：✓ `pnpm build` 成功（Next.js）
+- **Git**：✓ 提交並推送到 main
+
+### 設計決策
+- **單層責任**：CRS/Color/Geometry 三層各自獨立，無交叉驗證
+- **數據來源優先級**：mock（unit） > 實際 JSON（integration）
+- **導出策略**：暴露 `worldCoverBaseColor` 和 `createTerrainGeometry` 供測試
+  
+### 合規檢查
+- ✓ SKILL.md testing-workflow：unit vs integration 明確分層
+- ✓ 直接導入函式（非複製邏輯）
+- ✓ 單一目的性（各層無重複驗證）
+- ✓ 本地資料驅動（無外部 API 依賴）
+
+---
 
 ## 2026-08-11 測試計畫與進度文件整理
 - 狀態：完成（本地已提交，遠端 push 受認證/網路限制阻擋）
