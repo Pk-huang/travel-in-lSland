@@ -164,8 +164,10 @@ function applyWorldCoverClassColor(classId: number | undefined, targetColor: Col
 /**
  * L0 底色骨架：以 WorldCover 思維做分類混色（海域/植被/裸地/雪），
  * 先用可重現規則建立可視語意，後續再替換成真實 landcover raster。
+ * 
+ * 導出供測試使用（Terrain.test.ts）。
  */
-function worldCoverBaseColor(
+export function worldCoverBaseColor(
   meters: number,
   slopeMetersPerCell: number,
   noise: number,
@@ -215,7 +217,7 @@ function worldCoverBaseColor(
   return targetColor;
 }
 
-function createTerrainGeometry({
+export function createTerrainGeometry({
   baseHeightmap,
   landcover,
   terrainDetailLevel,

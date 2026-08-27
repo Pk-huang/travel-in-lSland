@@ -154,34 +154,7 @@ transform function → mesh / geometry → scene setup → renderer → canvas
 
     4. 解析度與 LOD 參數轉換
 
-       【驗證項目】不同解析度 heightmap 轉換是否維持座標與色彩一致性
-
-       【測試檔】lod-transform.test.ts
-       【實作檔】coords.ts、Terrain.tsx
-
-       【渲染用途】確保 LOD 切換時視覺連貫
-
-       【測試資料】
-       - 多解析度 DEM：/public/dem/iceland-mapzen-128/256/512/768/1080.json
-       - 多解析度 landcover：/public/landcover/iceland-worldcover-2021-256/512/768/1080.json
-       - 同一測試點集跨所有解析度
-
-       【執行內容】
-       - 測試多組 heightmap：128 × 128、256 × 256、512 × 512、768 × 768
-       - 選取相同測試點（經緯度、高度）
-       - 在不同解析度下執行座標與顏色轉換
-       - 對比結果是否一致
-
-       【測試結果】
-       - 座標一致性：同一經緯度在不同 grid 下 lonLatToSceneXZ 結果相同（誤差 < 0.001 units）
-       - 高度一致性：同一座標的 elevationToSceneY 結果相同（因為用同一 function）
-       - 顏色一致性：同一高度區間在不同 grid 下映射相同色帶
-       - bbox 對齊：ICELAND_BBOX 與 PLANE_WIDTH 固定，不因 grid 變化
-       - 通過率：___ / ___ cases
-
-       【驗證條件】
-       - 邏輯層驗證：不涉及渲染效能、FPS、記憶體
-       - 確認 LOD 切換時無座標跳躍或色彩閃爍      
+       功能已不在計畫中 
 
 
 
