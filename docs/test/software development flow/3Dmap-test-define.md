@@ -29,6 +29,8 @@ data source → 資料驗證 / 正規化 → 轉換 function → mesh / geometry
 
 ### Data
 
+對應流程 data source → validate / normalize → transform function
+
 1. Source / API / JSON
 
    工作：提供原始資料，讓 3D canvas 可以產生繪製地圖。
@@ -121,6 +123,12 @@ data source → 資料驗證 / 正規化 → 轉換 function → mesh / geometry
   - 已覆蓋：timeout / 403 / 500 / 空回應錯誤轉換、主失敗切 fallback、備援失敗切 local snapshot、空資料不崩潰。
 
 ### Data transformation layer
+
+對應流程 transform function → mesh / geometry → scene setup → renderer → canvas →
+
+本階段補測範圍（僅保留第 2、3 項）：
+- 錯誤分類與可觀測性
+- CRS/座標軸錯置檢查
 
 1. Transform / data conversion
 
@@ -305,3 +313,7 @@ data source → 資料驗證 / 正規化 → 轉換 function → mesh / geometry
   測試內容：檢查 FPS、畫面更新穩定性、記憶體使用量、渲染負擔與拖曳/縮放時的流暢度。
 
   驗證條件：在目標環境中可維持穩定渲染，且 FPS 不低於預定目標，必要時能進行降級處理。
+
+- 解析度切換壓力測試
+
+- 地形高度、顏色與解析度切換

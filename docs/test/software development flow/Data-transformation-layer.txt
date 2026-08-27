@@ -1,0 +1,262 @@
+### Data transformation layer
+
+transform function → mesh / geometry → scene setup → renderer → canvas 
+
+本階段補測範圍（僅保留第 2、3 項）：
+- 錯誤分類與可觀測性
+- CRS/座標軸錯置檢查
+- 不納入：解析度切換壓力測試（改由 ### map : canvas 負責）
+
+1. Transform / data conversion
+
+   工作：將原始資料整理成可供地圖渲染的資料契約，並在異常時提供安全的 fallback。
+
+   內容：schema / data contract、欄位驗證、資料正規化、轉換 function、錯誤處理與備用資料策略。
+
+   功能與測試內容：
+
+   - Data contract / schema 定義
+
+      **重複測試註記：此項驗證已於 data-test 主紀錄完成；本段保留轉換層責任定義。
+      參照：Validation / schema / fallback > JSON 資料格式是否完整（必要欄位、型別驗證）。
+
+   - 必要欄位與型別驗證
+
+      **重複測試註記：與 Data contract / schema 定義之實測證據重疊，已統一收斂於 data-test 主紀錄。
+      參照：Validation / schema / fallback > JSON 資料格式是否完整。
+
+   - 地理座標與數值範圍驗證
+
+      **重複測試註記：此項已於 data-test 的地理範圍與邊界缺口規劃中記錄，避免在本段重複維護。
+      參照：Validation / schema / fallback > 地理資料與數值範圍驗證。
+
+   - 原始資料轉成 render-ready data
+
+     功能目的：驗證高程資料能否轉換為 Mesh 可直接使用的座標與顏色資料。
+
+     測試內容：檢查座標轉換、顏色映射、幾何組合等轉換函式的邏輯正確性。
+              此層不重複 data-test 的 schema / 欄位驗證，只驗證轉換邏輯。
+
+     驗證條件：轉換結果可直接進入 PlaneGeometry 與 Mesh 渲染，無需額外修正。
+
+     測試資料來源：優先使用本地靜態檔案（不打 API）
+     - 高程資料：/public/dem/iceland-mapzen-*.json（128/256/512/768/1080 grid）
+     - 地被資料：/public/landcover/iceland-worldcover-2021-*.json
+     - POI 資料：/public/poi/iceland-pois.json
+     - 備用資料：/fixtures/iceland-status.normal.json 等
+
+     測試架構：分為座標轉換（CRS）、顏色映射、Mesh 組合、解析度一致性四層。
+
+     測試內容：
+
+    1. Coordinate Reference System 座標轉換
+
+       【驗證項目】經緯度 & 高度 → 場景座標的轉換是否正確
+
+       【測試檔】coords.test.ts
+       【實作檔】coords.ts
+
+       【渲染用途】Canvas 與所有點位層（POI、測站、道路等）共用的座標映射系統
+
+       【測試資料】
+       - 來源：/public/dem/iceland-mapzen-256.json（512×512 grid elevations 陣列）
+       - 提取測試點：bbox 四角、中心點、極值點
+
+       【執行內容】
+       - 水平座標轉換：lonLatToSceneXZ(lon, lat) → { x, z }
+       - 垂直座標轉換：elevationToSceneY(elevation) → y
+       - 輸入：mock 高程資料（lon, lat, elevation）
+       - 輸出：三維場景座標 { x, y, z }
+
+       【測試結果】
+       - 水平座標對齊：lon/lat → x/z 映射正確
+       - 垂直座標對齊：elevation → y 應用垂直誇張（×25）正確
+       - 邊界檢查：冰島 bbox 四角、中心點座標在預期範圍內
+       - 海岸線裁切：elevation < 0 → y = -0.3（SEA_FLOOR_UNIT）正確
+       - 反向轉換：sceneXZToLonLat 正確復原原始 lon/lat
+       - 通過率：___ / ___ cases
+
+       【驗證條件】
+       - Canvas 與其他層使用同一套轉換結果（單一真相源）
+       - 座標在場景邊界內（x ∈ [-20, 20]、y ∈ [-0.3, 10+]、z ∈ [-depth/2, depth/2]）
+
+    2. 顏色映射轉換公式
+
+       【驗證項目】elevation + landcover + slope → RGB 顏色是否正確
+
+       【測試檔】terrain-color.test.ts
+       【實作檔】Terrain.tsx (worldCoverBaseColor 函式)
+
+       【渲染用途】地形逐頂點上色
+
+       【測試資料】
+       - 高程資料：/public/dem/iceland-mapzen-256.json（elevations 陣列）
+       - 地被資料：/public/landcover/iceland-worldcover-2021-256.json（classes 陣列）
+       - 提取測試點：各 landcover class、不同高度帶、坡度區間
+
+       【執行內容】
+       - 呼叫 worldCoverBaseColor(elevation, slope, landcover, classSnowMask, noise)
+       - 輸入：elevation（公尺）、坡度、landcover class、雪覆蓋遮罩、噪聲
+       - 輸出：RGB 顏色值 [0, 1]³
+
+       【測試結果】
+       - elevation 區間映射：
+         • 深水（< -220m）→ 深藍
+         • 淺水（-220 ~ 0m）→ 藍綠漸層
+         • 海岸（0 ~ 60m）→ 褐綠混合
+         • 高度區間 → 不同色系
+       - landcover 影響：不同 class ID 對應不同基礎色
+       - 坡度影響：坡度 > 14m/cell 開始偏向裸岩色；坡度 > 130m/cell 高度偏離
+       - 雪覆蓋：高度 > 1180m + classSnowMask 影響白色比例（0 ~ 0.6）
+       - 邊界值：elevation = 0m、最高點、負值的顏色合理
+       - 顏色平順：相鄰頂點顏色差異不出現硬切
+       - 通過率：___ / ___ cases
+
+       【驗證條件】
+       - 顏色值落在有效範圍 [0, 1]³（無溢位）
+       - 多參數混合時色彩結果符合設計預期
+
+    3. Canvas 內容轉換
+
+       【驗證項目】PlaneGeometry + heightmap + 色彩是否正確組合成可渲染 Mesh
+
+       【測試檔】terrain-geometry.test.ts
+       【實作檔】Terrain.tsx (createTerrainGeometry 函式)
+
+       【渲染用途】地形 Mesh 在場景中的完整視覺
+
+       【測試資料】
+       - 高程資料：/public/dem/iceland-mapzen-256.json
+       - 地被資料：/public/landcover/iceland-worldcover-2021-256.json
+       - 完整 geometry 組合：256×256 網格的完整轉換驗證
+
+       【執行內容】
+       - 建立 PlaneGeometry（segments = grid-1）
+       - 逐頂點：
+         • 呼叫 elevationToSceneY(elevation) 設定 position.z（高度）
+         • 呼叫 worldCoverBaseColor(...) 計算顏色
+         • 存入 colors 陣列
+       - 綁定 color attribute 到 geometry
+       - 套用 meshStandardMaterial vertexColors
+
+       【測試結果】
+       - 頂點位置對應：geometry.position[i].z = elevationToSceneY(elevations[i])
+       - 頂點顏色對應：geometry.color[i] = worldCoverBaseColor(elevations[i], ...)
+       - 高度起伏：地形起伏與 elevations 陣列內容一致（無反轉、偏移）
+       - 邊界對齊：地形 bbox 與冰島範圍對齊（中心 = 世界原點）
+       - Material 正確：逐頂點顏色已生效（vertexColors = true）
+       - 法線計算：geometry.computeVertexNormals() 執行正確
+       - 通過率：___ / ___ cases
+
+       【驗證條件】
+       - 集成測試：涉及座標轉換、顏色映射、geometry attribute 綁定
+       - 經驗證的 Mesh 可直接加入場景並渲染
+
+    4. 解析度與 LOD 參數轉換
+
+       【驗證項目】不同解析度 heightmap 轉換是否維持座標與色彩一致性
+
+       【測試檔】lod-transform.test.ts
+       【實作檔】coords.ts、Terrain.tsx
+
+       【渲染用途】確保 LOD 切換時視覺連貫
+
+       【測試資料】
+       - 多解析度 DEM：/public/dem/iceland-mapzen-128/256/512/768/1080.json
+       - 多解析度 landcover：/public/landcover/iceland-worldcover-2021-256/512/768/1080.json
+       - 同一測試點集跨所有解析度
+
+       【執行內容】
+       - 測試多組 heightmap：128 × 128、256 × 256、512 × 512、768 × 768
+       - 選取相同測試點（經緯度、高度）
+       - 在不同解析度下執行座標與顏色轉換
+       - 對比結果是否一致
+
+       【測試結果】
+       - 座標一致性：同一經緯度在不同 grid 下 lonLatToSceneXZ 結果相同（誤差 < 0.001 units）
+       - 高度一致性：同一座標的 elevationToSceneY 結果相同（因為用同一 function）
+       - 顏色一致性：同一高度區間在不同 grid 下映射相同色帶
+       - bbox 對齊：ICELAND_BBOX 與 PLANE_WIDTH 固定，不因 grid 變化
+       - 通過率：___ / ___ cases
+
+       【驗證條件】
+       - 邏輯層驗證：不涉及渲染效能、FPS、記憶體
+       - 確認 LOD 切換時無座標跳躍或色彩閃爍      
+
+
+
+
+   - Error handling / fallback
+
+      **重複測試註記：fallback 鏈與異常回應已在 data-test 驗證並記錄結果；本段僅保留轉換層需求。
+      參照：Validation / schema / fallback > 異常資料處理。
+
+   - 地形高度、顏色與解析度差異轉換
+
+    測驗重複 - 原始資料轉成 render-ready data
+
+   - API / JSON / source priority 與載入順序
+
+      **重複測試註記：來源優先順序與載入時序已在 data-test 完成整合測試；本段不重寫測試結果。
+      參照：Source / API / JSON > 設定優先順序與載入順序。
+
+2. Render preparation / compatibility
+
+   工作：將已轉換完成的資料整理成渲染器與互動系統可直接使用的準備層。
+
+   內容：渲染相關設定、解析度切換、畫布與相機參數、quality mode、interaction spec、光影與場景相容性。
+
+   功能與測試內容：
+
+   - 渲染座標與地形顏色設定
+
+     功能目的：確認轉換後資料在渲染前已正確對應到三維空間座標與視覺顏色。
+
+     測試內容：驗證座標系統、地形高度映射、顏色資料與 mesh geometry 是否對齊。
+
+     驗證條件：地圖在三維空間中的位置與色彩符合設計，且不出現偏移、反轉或顏色錯配。
+
+   - Resolution / quality modes
+
+      **重複測試註記：與下方「解析度切換」測試目的高度重疊，採同一組解析度切換證據。
+      參照：Render preparation / compatibility > 解析度切換。
+
+   - Camera / interaction spec
+
+     功能目的：確認相機設定與互動規格符合使用者操作需求與場景配置。
+
+     測試內容：驗證相機初始姿態、縮放範圍、旋轉限制、拖曳與視角切換設定是否符合設計。
+
+     驗證條件：使用者可以正常操作相機，且視角、限制與交互行為穩定、可預測。
+
+   - 畫布大小、viewport、DPR 設定
+
+     功能目的：確認渲染區域與解析度設定適合不同螢幕與裝置，避免變形或低清晰度。
+
+     測試內容：檢查 viewport、canvas 尺寸、DPR、響應式重算是否正確執行。
+
+     驗證條件：畫布在不同大小與裝置下均保持正確比例、清晰度與可視範圍。
+
+   - 解析度切換
+
+     功能目的：確認在不同解析度下，地圖仍可穩定重新計算與重新渲染。
+
+     測試內容：驗證解析度變更時是否重新配置 geometry、texture、camera、renderer 設定。
+
+     驗證條件：切換解析度後畫面不失真、不崩潰，且維持可交互狀態。
+
+   - 光影、時間與場景參數
+
+     功能目的：確認光源、陰影與時間參數能正確影響地圖視覺效果，且在場景中保持一致。
+
+     測試內容：檢查 light、shadow、time of day / environment 設定是否正確套用到場景。
+
+     驗證條件：各參數變更後與預期一致，且不破壞地形顯示或互動性能。
+
+   - 渲染器相容性與效能準備
+
+     功能目的：確認 render pipeline 與環境設定能符合 browser / GPU / device 相容性要求。
+
+     測試內容：驗證 renderer 設定、device pixel ratio、fallback、性能優化與場景初始化是否建構正確。
+
+     驗證條件：系統能在目標環境中正常初始化渲染，並維持穩定的效能與可用性。
