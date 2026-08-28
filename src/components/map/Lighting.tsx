@@ -42,7 +42,7 @@ function clamp(value: number, min: number, max: number): number {
 const VISUAL_LONG_DAY_THRESHOLD_SECONDS = 18 * 60 * 60;
 const VISUAL_LONG_DAY_MIN_DAYLIGHT = 0.8;
 
-function hexToRgb(hex: string): [number, number, number] {
+export function hexToRgb(hex: string): [number, number, number] {
   const normalized = hex.replace("#", "");
   if (normalized.length !== 6) {
     return [255, 255, 255];
@@ -56,7 +56,7 @@ function hexToRgb(hex: string): [number, number, number] {
   return [(value >> 16) & 255, (value >> 8) & 255, value & 255];
 }
 
-function rgbToHex(r: number, g: number, b: number): string {
+export function rgbToHex(r: number, g: number, b: number): string {
   const toHex = (v: number) => {
     const safe = Math.round(clamp01(v / 255) * 255);
     return safe.toString(16).padStart(2, "0");
@@ -64,7 +64,7 @@ function rgbToHex(r: number, g: number, b: number): string {
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
-function mixHexColor(night: string, day: string, t: number): string {
+export function mixHexColor(night: string, day: string, t: number): string {
   const ratio = clamp01(t);
   const [nr, ng, nb] = hexToRgb(night);
   const [dr, dg, db] = hexToRgb(day);

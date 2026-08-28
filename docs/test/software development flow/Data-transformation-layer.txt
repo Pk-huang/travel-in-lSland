@@ -308,6 +308,16 @@ transform function → mesh / geometry → scene setup → renderer → canvas
         - 陰影精度與效能平衡
         - 預設光照下地形細節可讀
 
+        【測試檔】lighting-material.test.ts
+        【測試結果】
+        - 色彩轉換函式檢驗：hexToRgb、rgbToHex、往返轉換、邊界值處理（6 tests）
+        - 日光與強度計算檢驗：日光曲線、環境光強度、主光強度、daylight clamp（4 tests）
+        - 太陽位置軌跡檢驗：軌道半徑、高度變化、角度連續性、圓周覆蓋（5 tests）
+        - 色彩計算與混合檢驗：日夜色混合、hex 格式有效性、預設色接近度（3 tests）
+        - 三預設差異驗證：光照強度差異、高對比設定、參數完整性、色彩不同（4 tests）
+        - 邊界與特殊情況檢驗：無效日期 fallback、hour 欄位計算、結果穩定性（4 tests）
+        - 通過率：26 / 26 cases ✓
+
 
     - Material & Geometry 預準備驗證
 
