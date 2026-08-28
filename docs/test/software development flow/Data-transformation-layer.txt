@@ -269,11 +269,22 @@ transform function → mesh / geometry → scene setup → renderer → canvas
         - Device pixel ratio 正確應用
         - Viewport 寬高與 canvas 同步
         - 窗口 resize / rotate 時重新計算
-        - 不同螢幕密度下清晰度
+        - 不同螢幕密度下清晰度:先不用測到mobile，僅測桌面與筆電
 
         驗證條件：
         - 無拉伸、無模糊、可視範圍正確
         - 重算後無偏移
+
+        【測試檔】canvas-viewport.test.ts
+        【測試結果】
+        - Canvas Container 尺寸設定檢驗：絕對定位、全螢幕覆蓋、背景漸層、oklch 色值（5 tests）
+        - Canvas DPR 設定檢驗：[1,2] 配置、最小/最大值、自動選擇、清晰度提升（5 tests）
+        - Canvas 與 Container 同步檢驗：填滿容器、無邊距、無拉伸模糊、縱橫比保持（4 tests）
+        - Viewport 一致性檢查：FOV 兼容、寬高比適應、無 letterbox、完整覆蓋（4 tests）
+        - 桌面與筆電屏幕密度檢查：標準 DPI、High DPI、中間密度、效能平衡（5 tests）
+        - Canvas & Viewport 完整性檢查：初始化完整、多寬高比支援、內容無偏移、保持比例（4 tests）
+        - 邊界情況與穩定性檢查：超寬屏 21:9、方形屏 1:1、極端寬高比（3 tests）
+        - 通過率：29 / 29 cases ✓
 
 
 
