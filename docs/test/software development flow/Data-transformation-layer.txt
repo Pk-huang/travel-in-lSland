@@ -238,8 +238,8 @@ transform function → mesh / geometry → scene setup → renderer → canvas
 
         測試內容：
         - Scene background / clear color 設定正確
-        - Fog 參數（若使用）符合設計（color、near、far）
-        - 場景邊界 / clipping plane 設定合理
+        - Fog 參數（若使用）符合設計（color、near、far）: 尚無設定 之後再考慮擴充
+        - 場景邊界 / clipping plane 設定合理 : 尚無設定 之後再考慮擴充
         - 環境光（ambient light）預設值
         - Render target 初值設定
 
@@ -248,7 +248,19 @@ transform function → mesh / geometry → scene setup → renderer → canvas
         - 背景、霧等特效符合預期
         - 場景邊界防止物件超出視範
 
-        - Canvas 與 Viewport 設定
+        【測試檔】scene-initialization.test.ts
+        【測試結果】
+        - Canvas Camera 設定檢驗：FOV 50°、位置 [12,36,12]、邊界檢查、範圍合理（5 tests）
+        - Device Pixel Ratio 檢驗：DPR [1,2]、最小/最大值、螢幕密度適應（4 tests）
+        - 光源預設配置檢驗：默認 realistic、參數完整、環境光強度（4 tests）
+        - 環境光強度驗證：基礎強度 0.22、範圍 [0,1]、日光增強、總強度合理（4 tests）
+        - 主光源強度驗證：太陽光基礎、日光增強、軌道半徑、軌道高度（4 tests）
+        - 光源顏色驗證：天空/地面/太陽 hex 值有效、日夜顏色不同（5 tests）
+        - 所有預設一致性檢查：完整參數、強度範圍、預設可切換（3 tests）
+        - Scene 初始化完整性檢查：相機設定、光源預設、多預設支援、DPR 自適應（4 tests）
+        - 通過率：33 / 33 cases ✓
+
+    - Canvas 與 Viewport 設定
 
         功能目的：確認渲染區域與解析度設定適合不同螢幕與裝置。
 
@@ -262,6 +274,10 @@ transform function → mesh / geometry → scene setup → renderer → canvas
         驗證條件：
         - 無拉伸、無模糊、可視範圍正確
         - 重算後無偏移
+
+
+
+
 
    - 光影、時間與場景參數
 
