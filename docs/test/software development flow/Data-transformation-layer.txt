@@ -157,8 +157,6 @@ transform function → mesh / geometry → scene setup → renderer → canvas
        功能已不在計畫中 
 
 
-
-
    - Error handling / fallback
 
       **重複測試註記：fallback 鏈與異常回應已在 data-test 驗證並記錄結果；本段僅保留轉換層需求。
@@ -173,6 +171,13 @@ transform function → mesh / geometry → scene setup → renderer → canvas
       **重複測試註記：來源優先順序與載入時序已在 data-test 完成整合測試；本段不重寫測試結果。
       參照：Source / API / JSON > 設定優先順序與載入順序。
 
+
+
+
+
+
+
+
 2. Render preparation / compatibility
 
    工作：將已轉換完成的資料整理成渲染器與互動系統可直接使用的準備層。
@@ -181,55 +186,218 @@ transform function → mesh / geometry → scene setup → renderer → canvas
 
    功能與測試內容：
 
-   - 渲染座標與地形顏色設定
 
-     功能目的：確認轉換後資料在渲染前已正確對應到三維空間座標與視覺顏色。
+  - Camera 初始化
 
-     測試內容：驗證座標系統、地形高度映射、顏色資料與 mesh geometry 是否對齊。
+        功能目的：確認相機的基礎設定與視錐正確。
 
-     驗證條件：地圖在三維空間中的位置與色彩符合設計，且不出現偏移、反轉或顏色錯配。
+        測試內容：
+        - 相機位置、方向、目標點設定正確
+        - FOV 值合理（通常 50~75°）
+        - 視錐（near plane、far plane）覆蓋地形範圍
+        - 縱橫比（aspect ratio）與 canvas 一致
 
-   - Resolution / quality modes
+        驗證條件：
+        - 相機視野能完整覆蓋地形
+        - 視錐邊界設定合理
 
-      **重複測試註記：與下方「解析度切換」測試目的高度重疊，採同一組解析度切換證據。
-      參照：Render preparation / compatibility > 解析度切換。
+        【測試檔】camera-rig.test.ts
+        【測試結果】
+        - 地形邊界常數檢驗：bbox 有效性、平面寬度、平面深度、垂直誇張（4 tests）
+        - 相機位置對應檢驗：完整視野、高度縮放、目標點於原點、預設距離（5 tests）
+        - 視距限制檢驗：MIN > 地形半徑、MAX > 預設、MIN < MAX、範圍合理（4 tests）
+        - 俯仰角限制檢驗：防止鑽地、水平視角、角度範圍覆蓋、MIN < MAX（4 tests）
+        - 視錐覆蓋檢驗：覆蓋海床、覆蓋最高峰（2 tests）
+        - POI 焦點檢驗：參數合理、視距 < MAX（2 tests）
+        - 座標系統檢驗：中心於原點、統一座標系（2 tests）
+        - 驗證總結：常數定義完整、相機視野完全覆蓋地形（3 tests）
+        - 通過率：24 / 24 cases ✓
 
-   - Camera / interaction spec
+        - Camera 互動約束（移至 map : canvas）
 
-     功能目的：確認相機設定與互動規格符合使用者操作需求與場景配置。
+        功能目的：確認使用者操作範圍的限制。
 
-     測試內容：驗證相機初始姿態、縮放範圍、旋轉限制、拖曳與視角切換設定是否符合設計。
+        測試內容：
+        - 旋轉範圍限制（例如俯仰角 -80° ~ 80°）
+        - 縮放倍數範圍（例如 1× ~ 5×）
+        - 拖曳邊界（防止相機飛出地形外）
+        - 視角切換行為（orthographic vs perspective）
 
-     驗證條件：使用者可以正常操作相機，且視角、限制與交互行為穩定、可預測。
+        驗證條件：
+        - 互動限制防止視角超出預期
 
-   - 畫布大小、viewport、DPR 設定
+
+
+   - 「渲染基礎初始化（Scene + Canvas）」
 
      功能目的：確認渲染區域與解析度設定適合不同螢幕與裝置，避免變形或低清晰度。
 
-     測試內容：檢查 viewport、canvas 尺寸、DPR、響應式重算是否正確執行。
+    - Scene 層級初始化
 
-     驗證條件：畫布在不同大小與裝置下均保持正確比例、清晰度與可視範圍。
+        功能目的：確認場景容器的基礎視覺設定與初始狀態正確 ex . 背景色、霧、邊界、環境光。
 
-   - 解析度切換
+        測試內容：
+        - Scene background / clear color 設定正確
+        - Fog 參數（若使用）符合設計（color、near、far）
+        - 場景邊界 / clipping plane 設定合理
+        - 環境光（ambient light）預設值
+        - Render target 初值設定
 
-     功能目的：確認在不同解析度下，地圖仍可穩定重新計算與重新渲染。
+        驗證條件：
+        - Scene 建立後視覺參數完整
+        - 背景、霧等特效符合預期
+        - 場景邊界防止物件超出視範
 
-     測試內容：驗證解析度變更時是否重新配置 geometry、texture、camera、renderer 設定。
+        - Canvas 與 Viewport 設定
 
-     驗證條件：切換解析度後畫面不失真、不崩潰，且維持可交互狀態。
+        功能目的：確認渲染區域與解析度設定適合不同螢幕與裝置。
+
+        測試內容：
+        - Canvas CSS size vs WebGL drawing buffer 同步
+        - Device pixel ratio 正確應用
+        - Viewport 寬高與 canvas 同步
+        - 窗口 resize / rotate 時重新計算
+        - 不同螢幕密度下清晰度
+
+        驗證條件：
+        - 無拉伸、無模糊、可視範圍正確
+        - 重算後無偏移
 
    - 光影、時間與場景參數
 
-     功能目的：確認光源、陰影與時間參數能正確影響地圖視覺效果，且在場景中保持一致。
+    - 光影與場景參數
 
-     測試內容：檢查 light、shadow、time of day / environment 設定是否正確套用到場景。
+        功能目的：確認光源與陰影的預設設定正確。
 
-     驗證條件：各參數變更後與預期一致，且不破壞地形顯示或互動性能。
+        測試內容：
+        - 主光源方向、顏色、強度設定
+        - 環境光（ambient light）強度
+        - 陰影參數（shadow map resolution、near/far）
+        - 光源與地形交互的視覺效果
+        - （可選）時間參數架構，若支援動態光照
 
-   - 渲染器相容性與效能準備
+        驗證條件：
+        - 光影效果符合視覺設計
+        - 陰影精度與效能平衡
+        - 預設光照下地形細節可讀
 
-     功能目的：確認 render pipeline 與環境設定能符合 browser / GPU / device 相容性要求。
 
-     測試內容：驗證 renderer 設定、device pixel ratio、fallback、性能優化與場景初始化是否建構正確。
+    - Material & Geometry 預準備驗證
 
-     驗證條件：系統能在目標環境中正常初始化渲染，並維持穩定的效能與可用性。
+        功能目的：確認地形 Mesh 的 Material 與 Geometry 綁定正確，使地圖產生正確的材質,光影效果...等
+
+        測試內容：
+            1. Material 類型檢查
+            ✓ 是否使用 MeshStandardMaterial？
+            ✓ 其他材質類型是否有明確理由？
+
+            2. Material 屬性驗證
+            ✓ side 設定（FrontSide / BackSide / DoubleSide）
+            ✓ vertexColors 已啟用（true）
+            ✓ colorSpace 正確（通常 SRGBColorSpace）
+            ✓ 基礎屬性合理（roughness、metalness 初值）
+
+            3. 法線計算與驗證
+            ✓ computeVertexNormals() 已執行
+            ✓ 法線數據存在且範圍正確 [-1, 1]
+            ✓ 法線方向與幾何體一致
+
+            4. Geometry 與 Material 綁定
+            ✓ Material 正確套用到 Mesh
+            ✓ 顏色 attribute 被著色器正確讀取
+            ✓ Material 屬性變更後自動反映（needsUpdate）
+
+            5. 光影交互驗證
+            ✓ 有光源時，地形光照反應正確
+            ✓ 無光源時，地形仍可見（環境光）
+            ✓ 高光、陰影位置符合預期
+
+        驗證條件：
+            ✓ Material 綁定後視覺無異常
+            ✓ 顏色、光影、法線都符合預期
+            ✓ 幾何體與材質無衝突或相容性問題
+            ✓ 著色器正確解析所有 attributes
+
+
+   - 品質模式與解析度預設
+
+        功能目的：切換不同品質模式的配置。
+
+        測試內容：
+        - 品質模式定義（low / medium / high）
+        - 各模式對應的解析度、特性禁用清單
+        - 預設品質的完整配置（geometry grid size、shader complexity、shadow resolution）
+
+        驗證條件：
+        - 品質模式定義清晰
+        - 預設品質配置正確
+
+      
+
+    - 性能預算驗證（交付前檢查）
+
+        功能目的：能否根據裝置的不同性能，現址輸出的上下限
+
+        測試內容：
+        - 頂點數是否超過目標 fps 對應的預算
+        - Draw call 數計算與評估
+        - 紋理記憶體估算
+        - 預估 60fps 下的硬體需求
+        - 不同品質預設的效能差異
+
+        驗證條件：
+        - 配置符合目標設備能力
+        - 超預算時觸發降級方案
+        - 各品質模式下效能可預測 
+
+
+
+    - Renderer 初始化與環境檢測
+
+        功能目的：確認裝置的環境的功能
+
+        測試內容：
+        - Canvas 支援 WebGL 檢查
+        - WebGL 版本偵測（1.0 vs 2.0）
+        - 環境特性偵測（支援的擴展、著色器精度）
+        - 初始化失敗時的 fallback 策略
+
+        驗證條件：
+        - Renderer 成功建立或正確 fallback
+        - 環境特性用於下游品質決策
+
+        - Renderer 基礎設定
+
+        功能目的：確認 Renderer 的核心參數正確。
+
+        測試內容：
+        - Antialias 設定
+        - Precision（低精度 vs 高精度）
+        - Pixel ratio 正確應用
+        - Tone mapping、exposure 默認值
+
+        驗證條件：
+        - Renderer 設定與 Canvas 配置同步
+        - 視覺效果無異常
+
+        - 性能預算驗證 已在上方「性能預算驗證（交付前檢查）」中描述，避免重複。
+
+
+
+   - 初始化失敗與降級機制
+
+        功能目的：確保系統在異常環境下能安全降級而非崩潰。
+
+        測試內容：
+        - Canvas 不支援 WebGL → fallback 策略
+        - Material 載入失敗 → 預設顏色渲染
+        - 記憶體不足 → 自動降解析度
+        - 相機設定衝突 → 使用保守值
+        - 錯誤訊息與診斷
+
+        驗證條件：
+        - 系統不因單點失敗而完全崩潰
+        - 降級後仍可操作與顯示
+        - 錯誤訊息明確易排查
+
+     備註：先不執行 展示目前只會在可使用裝置上進行，若遇到不支援 WebGL 的裝置，會直接顯示錯誤訊息，未來可考慮提供 fallback。
