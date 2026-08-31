@@ -290,7 +290,7 @@ transform function → mesh / geometry → scene setup → renderer → canvas
 
 
 
-   - 光影、時間與場景參數
+  
 
     - 光影與場景參數
 
@@ -356,18 +356,29 @@ transform function → mesh / geometry → scene setup → renderer → canvas
             ✓ 著色器正確解析所有 attributes
 
 
-   - 品質模式與解析度預設
+   - 解析度設定切換
 
-        功能目的：切換不同品質模式的配置。
+        功能目的：驗證解析度切換機制正確運行。
 
         測試內容：
-        - 品質模式定義（low / medium / high）
-        - 各模式對應的解析度、特性禁用清單
-        - 預設品質的完整配置（geometry grid size、shader complexity、shadow resolution）
+        - TERRAIN_DETAIL_LEVEL_OPTIONS 有效性（包含 256、512、1080）
+        - getDemUrlByLevel() 正確映射各解析度到對應 DEM 檔
+        - createTerrainGeometry(grid, level) 產出的頂點數與 level² 成正比
+        - 各解析度下 geometry 可正確載入（無異常）
 
         驗證條件：
-        - 品質模式定義清晰
-        - 預設品質配置正確
+        - 每個解析度的 DEM 檔路徑存在
+        - geometry 頂點數 = grid 行數 × grid 列數
+        - 無 TypeScript 或執行時錯誤
+
+        【測試檔】terrain-detail-level.test.ts
+        【測試結果】
+        - 解析度常數定義檢驗：OPTIONS 有效、DEFAULT 512、按升序排列（6 tests）
+        - DEM 映射檢驗：256/512/1080 對應正確路徑、格式符合 (3 tests）
+        - 幾何頂點對應檢驗：256→65536、512→262144、1080→1166400、皆與 grid² 相符 (3 tests）
+        - 無異常載入檢驗：三等級皆成功、color attribute 綁定、法線已計算 (5 tests）
+        - 配置一致性檢驗：DEM/Landcover 檔完整、grid 一致、版本對齊 (3 tests）
+        - 通過率：20 / 20 cases ✓
 
       
 
