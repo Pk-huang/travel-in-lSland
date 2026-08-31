@@ -92,6 +92,48 @@
 
 ## 6. 測試階段
 
+### Phase 2-2：渲染初始化完整驗證（2026-08-31 完成）
+
+#### 完整測試覆蓋統計
+- **總計**：179 個測試全過
+- **涵蓋期間**：2026-08-25 ~ 2026-08-31
+- **涵蓋範圍**：渲染初始化層級完整驗收
+
+#### 分層測試明細
+
+**層級 1：基礎設定（相機、光影、Canvas）**
+| 子階段 | 檔案 | 測試數 | 重點驗證 | Commit |
+|--------|------|--------|---------|--------|
+| 2-2a | camera-rig.test.ts | 24 | 相機初始化、FOV 50°、位置、視距限制、視錐覆蓋 | 8c032d5 |
+| 2-2b | scene-initialization.test.ts | 33 | 場景初始化、光源強度、色彩配置、預設、DPR 自適應 | d5bdeaf |
+| 2-2c | canvas-viewport.test.ts | 29 | Canvas 尺寸、DPR 設定、Viewport 同步、屏幕適配 | ff61e86 |
+| 2-2d | lighting-material.test.ts | 26 | 光影參數、色彩、日光曲線、三種光照預設 | ad5db6a |
+
+**層級 2：資源與效能（解析度、頂點、記憶體）**
+| 子階段 | 檔案 | 測試數 | 重點驗證 | Commit |
+|--------|------|--------|---------|--------|
+| 2-2e | terrain-detail-level.test.ts | 20 | 256/512/1080 解析度、DEM 文件、頂點計算 | 0046c79 |
+| 2-2f | terrain-renderer-system.test.ts | 29 | WebGL 檢測、Renderer 設定、效能預算、記憶體相容性 | 64cef13 |
+
+**層級 3：材質與集成（Material、Geometry、法線）**
+| 子階段 | 檔案 | 測試數 | 重點驗證 | Commit |
+|--------|------|--------|---------|--------|
+| 2-2g | terrain-material-geometry.test.ts | 18 | Material 配置、法線計算、Geometry 綁定、光影交互 | 215a488 |
+
+#### 驗證結果
+- ✅ **全測試套件**：179 tests all passing
+- ✅ **效能預算**：256→2-3MB、512→9MB、1080→40MB GPU 記憶體
+- ✅ **Draw call**：< 10（Terrain + Sea level 各 1 call）
+- ✅ **編譯與部署**：ESLint + TypeScript + Production Build 全過
+- ✅ **健康檢查**：curl home:200 OK
+
+#### 下一步（Phase 2-2h 選配）
+- 初始化失敗與降級機制（WebGL 不可用時）
+- 目前策略：系統不支援 WebGL 時顯示錯誤訊息
+- 暫不實作，留作未來擴充
+
+---
+
 ### Phase 1：地圖互動測試
 
 這一階段以「地圖是否能正常提供核心使用體驗」為核心，重點測試使用者打開地圖後最常見的互動流程。
