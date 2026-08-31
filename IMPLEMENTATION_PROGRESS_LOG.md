@@ -1,7 +1,76 @@
 # Iceland Insight 實作進度紀錄
 
-更新日期：2026-08-27  
+更新日期：2026-08-31  
 用途：依照既有 Phase 規劃，集中記錄實作進度、決策、阻塞與下一步
+
+---
+
+## 2026-08-31 Phase 2-2 Rendering Initialization Testing - 完全完成
+- 狀態：完成（commit: e27275d）
+- 目標：完成 Phase 2-2 涵蓋所有渲染初始化層級的 7 個測試子階段，共 179 個測試，並將文檔從純文本轉換為 Markdown 格式。
+- 本次實作：
+
+### Phase 2-2 完整測試套件（7 個子階段）
+
+| 階段 | 檔案 | 測試數 | 重點驗證 | Commit |
+|------|------|--------|---------|--------|
+| **2-2a** | `camera-rig.test.ts` | 24 tests | 相機初始化、FOV 50°、位置 [12,36,12]、視距限制、俯仰角限制、視錐覆蓋 | 8c032d5 |
+| **2-2b** | `scene-initialization.test.ts` | 33 tests | 場景初始化、環境光/主光源強度、色彩配置、多種光照預設、DPR [1,2] 自適應 | d5bdeaf |
+| **2-2c** | `canvas-viewport.test.ts` | 29 tests | Canvas 尺寸、DPR 設定、Viewport 同步、桌面與高密度屏幕適配、邊界情況 | ff61e86 |
+| **2-2d** | `lighting-material.test.ts` | 26 tests | 光影參數、色彩轉換、日光曲線、太陽軌跡、三種光照預設（realistic/warm/cold）| ad5db6a |
+| **2-2e** | `terrain-detail-level.test.ts` | 20 tests | 解析度選項（256/512/1080）、DEM 文件映射、頂點數計算（65K/262K/1.16M）、無異常載入 | 0046c79 |
+| **2-2f** | `terrain-renderer-system.test.ts` | 29 tests | WebGL 環境檢測、Renderer 設定、性能預算（2-3MB/9MB/40MB）、記憶體與設備相容性 | 64cef13 |
+| **2-2g** | `terrain-material-geometry.test.ts` | 18 tests | Material 類型、法線計算、Geometry & Material 綁定、光影交互、整合驗證 | 215a488 |
+| **合計** | — | **179 tests** | 完整渲染初始化層級驗證 | **e27275d** |
+
+### 重點驗證項目
+
+**層級 1：基礎設定（2-2a ~ 2-2d）**
+- ✓ 相機視錐覆蓋地形邊界
+- ✓ 環境光 0.22 + 主光源 2.0 基礎強度
+- ✓ Canvas/Viewport 與 DPR 同步適應
+- ✓ 光照預設一致性（三種預設光源參數完整）
+
+**層級 2：資源與效能（2-2e ~ 2-2f）**
+- ✓ 256/512/1080 三種解析度對應 DEM 文件與頂點數
+- ✓ 性能預算：256→2-3MB、512→9MB、1080→40MB GPU 記憶體
+- ✓ Draw call < 10（Terrain + Sea level 各 1 call）
+- ✓ WebGL 2.0 優先、高精度著色器支援
+
+**層級 3：材質與集成（2-2g）**
+- ✓ MeshStandardMaterial + vertexColors + FrontSide 綁定
+- ✓ 法線數量與頂點匹配、範圍 [-1, 1]
+- ✓ 顏色 attribute 與位置 attribute 正確綁定
+- ✓ 環境光與定向光交互正常、無全黑區域
+
+### 文檔轉換
+
+- **來源**：[docs/test/software development flow/Data-transformation-layer.txt](docs/test/software development flow/Data-transformation-layer.txt) (540 行純文本)
+- **產出**：[docs/test/software development flow/Data-transformation-layer.md](docs/test/software development flow/Data-transformation-layer.md) (490 行 Markdown)
+- **改進**：
+  - 表格格式化（test 統計與 commit 履歷）
+  - 代碼區塊與標題層次結構
+  - 粗體與列表視覺化
+  - GitHub 原生預覽支援
+
+### 整體驗證結果
+
+- ✅ **全測試套件**：179 tests all passing
+- ✅ **ESLint**：所有測試檔無 error
+- ✅ **TypeScript**：型別檢查無誤
+- ✅ **性能**：單檔測試運行時間 0.6s ~ 2.6s
+- ✅ **記憶體**：構件加載與釋放正常
+- ✅ **Production Build**：`pnpm build` 成功
+- ✅ **部署驗收**：curl health check `200 OK`
+
+### 下一步
+
+- **Phase 2-2h**（暫不執行）：初始化失敗與降級機制（WebGL 不可用、Material 加載失敗、記憶體不足）
+  - 目前策略：系統不支援 WebGL 時顯示錯誤訊息，未來可考慮提供 fallback
+- **Phase 2-3**：互動測試層級（待規劃）
+  - 預期範圍：POI 點位互動、相機動畫、場景切換、時間軸控制
+
+---
 
 ## 2026-08-27 資料轉換層測試實作 - 3 層架構完成
 - 狀態：完成（commit: 2f64e0a）
