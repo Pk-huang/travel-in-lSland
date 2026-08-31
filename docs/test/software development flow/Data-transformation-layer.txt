@@ -400,35 +400,57 @@ transform function → mesh / geometry → scene setup → renderer → canvas
 
 
 
-    - Renderer 初始化與環境檢測
+    - Render 初始化與環境檢測
 
-        功能目的：確認裝置的環境的功能
+        功能目的：確認 WebGL 環境與 Renderer 的初始化狀態，並驗證性能預算合理。
 
         測試內容：
-        - Canvas 支援 WebGL 檢查
-        - WebGL 版本偵測（1.0 vs 2.0）
-        - 環境特性偵測（支援的擴展、著色器精度）
-        - 初始化失敗時的 fallback 策略
+        1. WebGL 環境偵測
+           ✓ Canvas WebGL context 可用性檢查
+           ✓ WebGL 版本優先順序（2.0 > 1.0）
+           ✓ 著色器精度支援（highp / mediump / lowp）
+           ✓ 擴展列舉與偵測
+
+        2. Canvas 與 Renderer 設定
+           ✓ Camera FOV 50°、position [12, 36, 12]
+           ✓ Device Pixel Ratio [1, 2]
+           ✓ Canvas 定位與全螢幕覆蓋
+           ✓ 背景漸層設定
+
+        3. Renderer 核心設定
+           ✓ vertexColors 已啟用
+           ✓ ACESFilmic tone mapping 正確
+
+        4. 頂點數性能預算
+           ✓ 256 level: 65,536 頂點 → 2-3 MB 記憶體
+           ✓ 512 level: 262,144 頂點 → 9 MB 記憶體
+           ✓ 1080 level: 1,166,400 頂點 → 40 MB 記憶體
+
+        5. Draw call 評估
+           ✓ Terrain: 1 draw call
+           ✓ Sea level: 1 draw call
+           ✓ Total: < 10 draw calls
+
+        6. 記憶體與設備相容性
+           ✓ 記憶體計算：vertex 數 × bytes/vertex = total MB
+           ✓ 60fps 需求估算
+           ✓ 設備功能降級（若需要則 256 + DPR 1）
 
         驗證條件：
-        - Renderer 成功建立或正確 fallback
         - 環境特性用於下游品質決策
-
-        - Renderer 基礎設定
-
-        功能目的：確認 Renderer 的核心參數正確。
-
-        測試內容：
-        - Antialias 設定
-        - Precision（低精度 vs 高精度）
-        - Pixel ratio 正確應用
-        - Tone mapping、exposure 默認值
-
-        驗證條件：
         - Renderer 設定與 Canvas 配置同步
-        - 視覺效果無異常
+        - 性能預算在可預測範圍內
 
-        - 性能預算驗證 已在上方「性能預算驗證（交付前檢查）」中描述，避免重複。
+        【測試檔】terrain-renderer-system.test.ts
+        【測試結果】
+        - WebGL 環境檢測：5 tests (context 優先序、精度支援、擴展列舉、context loss 復原)
+        - Canvas 配置：5 tests (FOV、位置、DPR、定位、背景漸層)
+        - Renderer 設定：2 tests (vertexColors、tone mapping)
+        - 頂點數預算：6 tests (256/512/1080 各解析度的記憶體計算驗證)
+        - Draw call 評估：3 tests (terrain/sea-level 的 draw call 總數)
+        - 記憶體與設備：5 tests (記憶體計算、60fps 需求、設備能力判定、降級策略)
+        - 解析度一致性：3 tests (DEM/Landcover 檔配對、解析度縮放、效能相關性)
+        - 通過率：29 / 29 cases ✓
 
 
 
