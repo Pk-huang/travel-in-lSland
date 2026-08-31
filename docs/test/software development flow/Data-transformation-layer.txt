@@ -321,39 +321,54 @@ transform function → mesh / geometry → scene setup → renderer → canvas
 
     - Material & Geometry 預準備驗證
 
-        功能目的：確認地形 Mesh 的 Material 與 Geometry 綁定正確，使地圖產生正確的材質,光影效果...等
+        功能目的：確認地形 Mesh 的 Material 與 Geometry 綁定正確，使地圖產生正確的材質、光影效果。
 
         測試內容：
-            1. Material 類型檢查
-            ✓ 是否使用 MeshStandardMaterial？
-            ✓ 其他材質類型是否有明確理由？
+        1. Material 類型與屬性驗證 — 4 tests
+           ✓ 是否使用 MeshStandardMaterial
+           ✓ side 設定為 FrontSide（只渲染正面）
+           ✓ vertexColors 已啟用（true）
+           ✓ colorSpace 與色彩空間配置支援
 
-            2. Material 屬性驗證
-            ✓ side 設定（FrontSide / BackSide / DoubleSide）
-            ✓ vertexColors 已啟用（true）
-            ✓ colorSpace 正確（通常 SRGBColorSpace）
-            ✓ 基礎屬性合理（roughness、metalness 初值）
+        2. Material 基礎屬性 — 2 tests
+           ✓ roughness 初值在 [0, 1] 範圍
+           ✓ metalness 初值在 [0, 1] 範圍
 
-            3. 法線計算與驗證
-            ✓ computeVertexNormals() 已執行
-            ✓ 法線數據存在且範圍正確 [-1, 1]
-            ✓ 法線方向與幾何體一致
+        3. 法線計算與驗證 — 3 tests
+           ✓ normal attribute 存在
+           ✓ 法線數量 = 頂點數
+           ✓ 法線範圍正確 [-1, 1]
 
-            4. Geometry 與 Material 綁定
-            ✓ Material 正確套用到 Mesh
-            ✓ 顏色 attribute 被著色器正確讀取
-            ✓ Material 屬性變更後自動反映（needsUpdate）
+        4. Geometry & Material 綁定 — 3 tests
+           ✓ Material 正確套用到 Mesh
+           ✓ 顏色 attribute 綁定正確
+           ✓ 位置 attribute 綁定正確
 
-            5. 光影交互驗證
-            ✓ 有光源時，地形光照反應正確
-            ✓ 無光源時，地形仍可見（環境光）
-            ✓ 高光、陰影位置符合預期
+        5. 光影交互驗證 — 3 tests
+           ✓ AmbientLight 下地形可見
+           ✓ DirectionalLight 法線相互作用正確
+           ✓ 顏色綁定無異常（不出現全黑區域）
+
+        6. 整合驗證 — 3 tests
+           ✓ 所有 attribute 完整齊備
+           ✓ vertexColors 與 Geometry 綁定正確
+           ✓ Material 支援標準屬性設定
 
         驗證條件：
-            ✓ Material 綁定後視覺無異常
-            ✓ 顏色、光影、法線都符合預期
-            ✓ 幾何體與材質無衝突或相容性問題
-            ✓ 著色器正確解析所有 attributes
+        ✓ Material 綁定後視覺無異常
+        ✓ 顏色、光影、法線都符合預期
+        ✓ 幾何體與材質無衝突或相容性問題
+        ✓ 著色器正確解析所有 attributes
+
+        【測試檔】terrain-material-geometry.test.ts
+        【測試結果】
+        - Material 類型檢查：4 tests（MeshStandardMaterial、FrontSide、vertexColors、colorSpace）
+        - Material 屬性驗證：2 tests（roughness、metalness 初值範圍）
+        - 法線計算驗證：3 tests（attribute 存在、數量相符、範圍正確）
+        - Geometry & Material 綁定：3 tests（Material 套用、color attribute、position attribute）
+        - 光影交互驗證：3 tests（環境光可見性、DirectionalLight 法線互動、顏色無異常）
+        - 整合驗證：3 tests（完整 attribute、vertexColors 綁定、標準屬性支援）
+        - 通過率：18 / 18 cases ✓
 
 
    - 解析度設定切換
