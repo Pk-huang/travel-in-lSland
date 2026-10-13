@@ -3,10 +3,13 @@
 import { useEffect, useMemo } from "react";
 import { ExternalLink, MapPinned } from "lucide-react";
 
-import { useWorkspaceTravelPlans } from "@/src/components/providers/WorkspaceProvider";
+import {
+  useWorkspaceData,
+  useWorkspaceTravelPlans,
+} from "@/src/components/providers/WorkspaceProvider";
 import { useMarkerInteraction } from "@/src/lib/map/marker-interaction";
 import { useWorkspaceStore } from "@/src/lib/store/workspace";
-import { buildTravelMapMarkers } from "@/src/lib/travel-plans/travel-plan-map-utils";
+import { DateWeatherSection } from "./trip-planning/DateWeatherSection";
 
 type TravelPlanDay = {
   dayId: string;
@@ -27,54 +30,12 @@ type TravelPlanDay = {
   }>;
 };
 
-type TravelDayOption = {
-  dayId: string;
-  dateDisplay: { month: string; day: number; weekday: string };
-};
-
 type TravelItemSelection = {
   lat?: number | null;
   lon?: number | null;
   itemId: string;
   dayId: string;
 };
-
-function DaySelector({
-  travelDays,
-  selectedTravelDayId,
-  onSelectDay,
-}: {
-  travelDays: TravelDayOption[];
-  selectedTravelDayId: string | null;
-  onSelectDay: (dayId: string) => void;
-}) {
-  return (
-    <section className="space-y-3 rounded-[18px] bg-white/[0.02] p-3 text-slate-200">
-      <p className="text-[10px] leading-5 tracking-[0.18em] text-slate-300/70 uppercase">
-        日程選擇
-      </p>
-      <div className="flex flex-wrap gap-2">
-        {travelDays.map((day) => {
-          const isSelected = day.dayId === selectedTravelDayId;
-          return (
-            <button
-              key={day.dayId}
-              type="button"
-              onClick={() => onSelectDay(day.dayId)}
-              className={
-                isSelected
-                  ? "rounded-full bg-[#d9745f]/16 px-3 py-1.5 text-xs font-medium text-[#ffd4ca] ring-1 ring-[#d9745f]/40"
-                  : "rounded-full bg-slate-900/35 px-3 py-1.5 text-xs font-medium text-slate-200/80 transition hover:bg-slate-800/60 hover:text-white"
-              }
-            >
-              {day.dateDisplay.month}/{day.dateDisplay.day} {day.dateDisplay.weekday}
-            </button>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
 
 function TravelSummary({
   selectedDay,
@@ -160,32 +121,11 @@ function TravelSummary({
   );
 }
 
-function TravelMarkersList({ travelMarkers }: { travelMarkers: ReturnType<typeof buildTravelMapMarkers> }) {
-  return (
-    <div className="rounded-[18px] bg-white/[0.02] p-3">
-      <p className="mb-2 text-[10px] uppercase tracking-[0.22em] text-slate-300/70">Map points</p>
-      <ul className="space-y-2">
-        {travelMarkers.map((marker) => (
-          <li key={marker.markerId} className="text-xs text-slate-200/75">
-            <div className="flex items-center justify-between gap-2">
-              <span>
-                {String(marker.sequence).padStart(2, "0")} · {marker.name}
-              </span>
-              <span className="rounded-full bg-slate-900/35 px-2 py-0.5 text-[9px] uppercase tracking-[0.14em] text-slate-300/70">
-                {marker.hasLocation ? "map" : "info"}
-              </span>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 export function ControlPanel() {
   const { dispatch } = useMarkerInteraction();
-  const selectedTravelDayId = useWorkspaceStore((s) => s.selectedTravelDayId);
-  const setSelectedTravelDayId = useWorkspaceStore((s) => s.setSelectedTravelDayId);
+  const selectedTravelDayId = useWorkspaceStore((state) => state.selectedTravelDayId);
+  const setSelectedTravelDayId = useWorkspaceStore((state) => state.setSelectedTravelDayId);
+  const { data: weather } = useWorkspaceData();
   const { data: travelPlans } = useWorkspaceTravelPlans();
 
   const travelDays = useMemo(() => travelPlans.plans[0]?.days ?? [], [travelPlans]);
@@ -193,13 +133,6 @@ export function ControlPanel() {
     () => travelDays.find((day) => day.dayId === selectedTravelDayId) ?? null,
     [selectedTravelDayId, travelDays],
   );
-  const travelMarkers = useMemo(() => {
-    if (!selectedDay) {
-      return [];
-    }
-
-    return buildTravelMapMarkers(selectedDay);
-  }, [selectedDay]);
 
   useEffect(() => {
     if (travelDays.length === 0) {
@@ -211,10 +144,6 @@ export function ControlPanel() {
       setSelectedTravelDayId(travelDays[0]?.dayId ?? null);
     }
   }, [selectedTravelDayId, setSelectedTravelDayId, travelDays]);
-
-  const handleSelectDay = (dayId: string) => {
-    setSelectedTravelDayId(dayId);
-  };
 
   const handleSelectTravelItem = (item: TravelItemSelection) => {
     if (item.lat == null || item.lon == null) {
@@ -232,16 +161,16 @@ export function ControlPanel() {
 
   return (
     <div className="space-y-4">
-      <DaySelector
+      <DateWeatherSection
         travelDays={travelDays}
         selectedTravelDayId={selectedTravelDayId}
-        onSelectDay={handleSelectDay}
+        onSelectDay={setSelectedTravelDayId}
+        weather={weather}
       />
 
       {selectedDay ? (
         <section className="space-y-3">
           <TravelSummary selectedDay={selectedDay} onSelectTravelItem={handleSelectTravelItem} />
-          <TravelMarkersList travelMarkers={travelMarkers} />
         </section>
       ) : (
         <section className="rounded-[18px] bg-white/[0.02] p-4 text-slate-300/75">
