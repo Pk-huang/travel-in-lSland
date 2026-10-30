@@ -21,7 +21,7 @@
           "timelineSections": [
             {
               "sectionId": "morning",
-              "label": "早上",
+              "label": "Morning",
               "items": [
                 {
                   "itemId": "d1-m-01",
@@ -99,7 +99,7 @@
             },
             {
               "sectionId": "afternoon",
-              "label": "下午",
+              "label": "Midday",
               "items": [
                 {
                   "itemId": "d1-a-01",
@@ -122,7 +122,7 @@
             },
             {
               "sectionId": "evening",
-              "label": "晚上",
+              "label": "Evening",
               "items": [
                 {
                   "itemId": "d1-e-01",
