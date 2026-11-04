@@ -53,7 +53,9 @@ export function MapCanvas() {
         <SeaLevel />
         {selectedDay ? <TravelStopLayer day={selectedDay} /> : null}
         {shouldShowPoiPins ? <PoiLayer /> : null}
-        {data ? <StationLayer stations={data.weather} isWeatherMode={isWeatherMode} /> : null}
+        {isWeatherMode && data ? (
+          <StationLayer stations={data.weather} isWeatherMode={isWeatherMode} />
+        ) : null}
         {shouldShowRoads && data ? <RoadLayer roads={data.roads} /> : null}
         <CameraRig />
       </Canvas>
