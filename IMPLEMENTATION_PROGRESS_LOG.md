@@ -1,7 +1,22 @@
 # Iceland Insight 實作進度紀錄
 
-更新日期：2026-08-31  
+更新日期：2026-10-14  
 用途：依照既有 Phase 規劃，集中記錄實作進度、決策、阻塞與下一步
+
+---
+
+## 2026-10-14 左側行程面板 UI 整理與區塊拆分
+- 狀態：完成（本機 commit: 893ba46，尚未推送）
+- 目標：讓左欄以行程日期導覽和當日內容為主，減少重複資訊並建立後續 UI 重構邊界。
+- 本次調整：
+	- 移除重複的 `Map points` 清單，保留行程項目中的地圖定位標示與點擊聚焦行為。
+	- 將日期按鈕改為固定週曆格，並與區域天氣觀測摘要整合；外層保持透明。
+	- 天氣摘要精簡為區域測站平均溫度與更新時間；無天氣狀態來源時使用中性雲朵 SVG，不推測晴雨雪。
+	- 將日期／天氣區塊拆至 `src/panel/workspace-panel/trip-planning/DateWeatherSection.tsx`；`ControlPanel` 保留資料協調與行程內容。
+- 驗證結果：
+	- 相關檔案診斷無新增型別或語法錯誤；首頁 HTTP `200`，瀏覽器畫面已確認。
+	- `corepack pnpm lint` 仍被既有錯誤阻擋：`src/lib/travel-plans/build-travel-map-markers.test.ts` 的 `no-explicit-any`。
+	- 本機 commit 已建立；推送工具呼叫遭略過，尚未推送至遠端。
 
 ---
 

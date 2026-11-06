@@ -17,6 +17,7 @@ export type InfoModeOption = {
 export type InfoModeState = {
   activeMode: InfoMode | null;
   isOpen: boolean;
+  setOpen: (isOpen: boolean) => void;
   options: readonly InfoModeOption[];
   setMode: (mode: InfoMode) => void;
   toggleMode: (mode: InfoMode) => void;
@@ -32,11 +33,14 @@ const INFO_MODE_OPTIONS: readonly InfoModeOption[] = [
 export function useInfoModeState(): InfoModeState {
   const activeMode = useWorkspaceStore((s) => s.activeInfoPanelSection);
   const setActiveMode = useWorkspaceStore((s) => s.setActiveInfoPanelSection);
+  const isOpen = useWorkspaceStore((s) => s.isMapInfoOpen);
+  const setOpen = useWorkspaceStore((s) => s.setMapInfoOpen);
 
   return useMemo(
     () => ({
       activeMode,
-      isOpen: activeMode !== null,
+      isOpen,
+      setOpen,
       options: INFO_MODE_OPTIONS,
       setMode: (mode: InfoMode) => setActiveMode(mode),
       toggleMode: (mode: InfoMode) => {
@@ -44,6 +48,6 @@ export function useInfoModeState(): InfoModeState {
       },
       closeMode: () => setActiveMode(null),
     }),
-    [activeMode, setActiveMode],
+    [activeMode, setActiveMode, isOpen, setOpen],
   );
 }

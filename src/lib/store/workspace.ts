@@ -56,6 +56,7 @@ export type WorkspaceState = {
   selectedTravelDayId: string | null;
   /** 左側資訊面板目前展開的區塊。 */
   activeInfoPanelSection: InfoPanelSection;
+  isMapInfoOpen: boolean;
   /** 右上/右下工具抽屜目前開啟的模式。 */
   activeUtilityPanel: UtilityPanel;
   /** 工具抽屜目前顯示的分頁。 */
@@ -79,6 +80,7 @@ export type WorkspaceState = {
   setActiveUtilityTab: (tab: UtilityPanelTab) => void;
   clearPoiFocus: () => void;
   setActiveInfoPanelSection: (section: InfoPanelSection) => void;
+  setMapInfoOpen: (isOpen: boolean) => void;
 };
 
 export const useWorkspaceStore = create<WorkspaceState>((set) => ({
@@ -95,7 +97,8 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   poiFocusEnabled: false,
   mapFocusTarget: null,
   selectedTravelDayId: null,
-  activeInfoPanelSection: "weather",
+  activeInfoPanelSection: null,
+  isMapInfoOpen: false,
   activeUtilityPanel: null,
   activeUtilityTab: "display",
 
@@ -118,4 +121,5 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   clearPoiFocus: () =>
     set({ activePoiId: null, poiFocusEnabled: false, activeTravelItemId: null, mapFocusTarget: null }),
   setActiveInfoPanelSection: (activeInfoPanelSection) => set({ activeInfoPanelSection }),
+  setMapInfoOpen: (isMapInfoOpen) => set({ isMapInfoOpen }),
 }));

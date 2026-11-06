@@ -7,6 +7,34 @@ describe("workspace marker state consistency", () => {
     useWorkspaceStore.setState({ ...useWorkspaceStore.getInitialState() });
   });
 
+  it("starts with the map info panel collapsed", () => {
+    expect(useWorkspaceStore.getState().activeInfoPanelSection).toBeNull();
+    expect(useWorkspaceStore.getState().isMapInfoOpen).toBe(false);
+  });
+
+  it("changes map modes without opening the info panel", () => {
+    for (const mode of ["weather", "poi", "road"] as const) {
+      useWorkspaceStore.getState().setActiveInfoPanelSection(mode);
+      expect(useWorkspaceStore.getState().activeInfoPanelSection).toBe(mode);
+      expect(useWorkspaceStore.getState().isMapInfoOpen).toBe(false);
+    }
+  });
+
+  it("preserves mode and marker selection when the info panel closes", () => {
+    const state = useWorkspaceStore.getState();
+    state.setActiveInfoPanelSection("weather");
+    state.selectStation("station-a");
+    state.setMapInfoOpen(true);
+    expect(useWorkspaceStore.getState().isMapInfoOpen).toBe(true);
+
+    state.setActiveInfoPanelSection("road");
+    expect(useWorkspaceStore.getState().isMapInfoOpen).toBe(true);
+    state.setMapInfoOpen(false);
+    expect(useWorkspaceStore.getState().activeInfoPanelSection).toBe("road");
+    expect(useWorkspaceStore.getState().selectedStationId).toBe("station-a");
+    expect(useWorkspaceStore.getState().isMapInfoOpen).toBe(false);
+  });
+
   it("clears stale marker state when a new marker is selected", () => {
     const state = useWorkspaceStore.getState();
 

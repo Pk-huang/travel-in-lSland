@@ -1,7 +1,5 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
-
 import {
   useWorkspaceData,
   useWorkspacePois,
@@ -9,12 +7,6 @@ import {
 import { useInfoModeState } from "@/src/app-shell/hooks/useInfoModeState";
 import { Badge } from "@/src/components/ui/badge";
 import { Button } from "@/src/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/src/components/ui/card";
 import { useMarkerInteraction } from "@/src/lib/map/marker-interaction";
 import { cn } from "@/src/lib/utils";
 import type {
@@ -59,39 +51,31 @@ const ROAD_DOT: Record<RoadStatus, string> = {
 
 function WeatherList({ items, onSelectWeather }: { items: NonNullable<IcelandStatusResponse["weather"]>; onSelectWeather?: StatusPanelProps["onSelectWeather"] }) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">天氣（{items.length}）</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <section className="border-t border-white/10 pt-4">
+      <h3 className="mb-3 text-base font-semibold">天氣（{items.length}）</h3>
         <div className="max-h-[22rem] overflow-y-auto pr-1">
-          <ul className="divide-border divide-y">
+          <ul className="divide-y divide-white/10">
             {items.map((item, index) => (
               <WeatherItem key={`${item.lat}-${item.lon}-${index}`} item={item} index={index} onSelectWeather={onSelectWeather} />
             ))}
           </ul>
         </div>
-      </CardContent>
-    </Card>
+    </section>
   );
 }
 
 function RoadList({ items, onSelectRoad }: { items: NonNullable<IcelandStatusResponse["roads"]>; onSelectRoad?: StatusPanelProps["onSelectRoad"] }) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">路況（{items.length}）</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <section className="border-t border-white/10 pt-4">
+      <h3 className="mb-3 text-base font-semibold">路況（{items.length}）</h3>
         <div className="max-h-[22rem] overflow-y-auto pr-1">
-          <ul className="divide-border divide-y">
+          <ul className="divide-y divide-white/10">
             {items.map((item) => (
               <RoadItem key={item.segmentId} item={item} onSelectRoad={onSelectRoad} />
             ))}
           </ul>
         </div>
-      </CardContent>
-    </Card>
+    </section>
   );
 }
 
@@ -150,14 +134,12 @@ function StatusPanel({
 
   if (error) {
     return (
-      <Card className="border-destructive/60">
-        <CardContent className="space-y-3 pt-6">
+      <section className="space-y-3 border-b border-destructive/60 pb-4">
           <p className="text-destructive text-sm">資料載入失敗：{error}</p>
           <Button variant="outline" size="sm" onClick={onRetry}>
             重試
           </Button>
-        </CardContent>
-      </Card>
+      </section>
     );
   }
 
@@ -169,8 +151,7 @@ function StatusPanel({
 
   return (
     <section className="space-y-4">
-      <Card>
-        <CardContent className="flex flex-wrap items-center gap-6 pt-6">
+      <div className="flex flex-wrap items-center gap-6 py-2">
           <Metric label="風險分數" value={summary.riskScore} />
           <Metric label="高風險路段" value={summary.highRiskSegments} />
           <Metric label="天氣測站" value={weather.length} />
@@ -178,8 +159,7 @@ function StatusPanel({
             <Badge variant="secondary">cache: {meta.cache}</Badge>
             {meta.fallback && <Badge variant="destructive">備援資料</Badge>}
           </div>
-        </CardContent>
-      </Card>
+      </div>
 
       <div className="grid gap-4">
         {showWeatherList ? <WeatherList items={weather} onSelectWeather={onSelectWeather} /> : null}
@@ -209,60 +189,31 @@ function selectMarkerForPoi(poi: { id: string; lon: number; lat: number }, dispa
 }
 
 export function WeatherDrawer() {
-  const { activeMode, isOpen, options, setMode } = useInfoModeState();
+  const { activeMode, isOpen, options } = useInfoModeState();
   const { dispatch } = useMarkerInteraction();
   const { data, loading, error, refetch } = useWorkspaceData();
   const { points: pointsOfInterest } = useWorkspacePois();
   const activeSection = activeMode ?? "weather";
-  const weatherModeOption = options.find((option) => option.id === "weather");
-  const WeatherModeIcon = weatherModeOption?.Icon;
+  const activeModeOption = options.find((option) => option.id === activeSection);
 
   return (
-    <>
-      <aside
-        aria-hidden={!isOpen}
-        className={cn(
-          "bg-card/85 border-border pointer-events-auto absolute top-16 right-4 z-20 flex max-h-[calc(100dvh-5rem)] w-[min(340px,calc(100vw-2rem))] flex-col overflow-hidden rounded-xl border shadow-2xl backdrop-blur-md transition-transform duration-300 ease-out",
-          isOpen ? "translate-x-0" : "translate-x-[calc(100%+1.5rem)]",
-        )}
-      >
-        <header className="border-border flex items-center justify-between border-b px-4 py-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => dispatch({ type: "clear-interaction", source: "panel-close" })}
-            aria-label="收合右側面板"
-          >
-            <ChevronRight className="size-5" />
-          </Button>
-          <div>
-            <h2 className="text-base leading-tight font-bold">天氣 / 路況 / 景點</h2>
-            <p className="text-muted-foreground text-xs">同區切換清單，點擊項目後同步地圖</p>
+    <aside
+      aria-hidden={!isOpen}
+      className={cn(
+        "bg-[#0c1724]/95 border-white/15 pointer-events-auto absolute right-0 bottom-full z-20 mb-0 flex max-h-[calc(100dvh-8rem)] w-full flex-col overflow-hidden rounded-t-2xl rounded-b-none border border-b-0 shadow-2xl backdrop-blur-md transition-[opacity,transform] duration-300 ease-out",
+        isOpen ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-4 opacity-0",
+      )}
+    >
+        <header className="flex items-center gap-3 border-b border-white/10 px-4 py-3">
+          <div className="min-w-0">
+            <h2 className="text-base leading-tight font-bold">地圖資訊</h2>
+            <p className="text-muted-foreground text-xs">
+              {activeModeOption?.label} · 點擊項目後同步地圖
+            </p>
           </div>
         </header>
 
         <div className="min-h-0 flex-1 overflow-y-auto p-4">
-          <div className="mb-3 grid grid-cols-3 gap-2">
-            {options.map(({ id, label, Icon }) => (
-              <Button
-                key={id}
-                type="button"
-                variant={activeSection === id ? "default" : "outline"}
-                size="sm"
-                onClick={() => {
-                  if (activeSection !== id) {
-                    dispatch({ type: "clear-interaction", source: "mode-switch" });
-                  }
-                  setMode(id);
-                }}
-                className="justify-center gap-1"
-              >
-                <Icon className="size-4" />
-                {label}
-              </Button>
-            ))}
-          </div>
-
           {activeSection === "weather" ? (
             <StatusPanel
               data={data}
@@ -305,19 +256,19 @@ export function WeatherDrawer() {
 
           {activeSection === "poi" ? (
             <section className="space-y-3">
-              <div className="rounded-xl border border-white/10 bg-black/15 p-3">
+              <div className="border-b border-white/10 pb-3">
                 <p className="text-sm font-semibold text-white">景點（{pointsOfInterest.length}）</p>
                 <p className="text-xs text-white/60">點擊景點後，地圖會切到景點模式並聚焦</p>
               </div>
 
               <div className="max-h-[30rem] overflow-y-auto pr-1">
-                <ul className="space-y-2">
+                <ul className="divide-y divide-white/10">
                   {pointsOfInterest.map((poi) => (
                     <li key={poi.id}>
                       <button
                         type="button"
                         onClick={() => selectMarkerForPoi(poi, dispatch)}
-                        className="w-full rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-left transition hover:border-sky-300/40 hover:bg-black/30"
+                        className="w-full px-2 py-3 text-left transition hover:bg-white/5"
                       >
                         <p className="truncate text-sm font-semibold text-white">{poi.label}</p>
                         <p className="truncate text-xs text-white/60">{poi.descriptionShort}</p>
@@ -330,19 +281,5 @@ export function WeatherDrawer() {
           ) : null}
         </div>
       </aside>
-
-      <Button
-        variant="secondary"
-        size="icon"
-        onClick={() => setMode("weather")}
-        aria-label="展開天氣面板"
-        className={cn(
-          "pointer-events-auto absolute top-16 right-4 z-20 shadow-lg backdrop-blur-md transition-opacity duration-200",
-          isOpen ? "pointer-events-none opacity-0" : "opacity-100",
-        )}
-      >
-        {WeatherModeIcon ? <WeatherModeIcon className="size-5" /> : null}
-      </Button>
-    </>
   );
 }

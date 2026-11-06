@@ -17,12 +17,11 @@ export function PanelModule() {
 
           {/* 右側功能區塊：放置抽屜、模式切換、時間軸與其他功能內容 */}
           <div className="pointer-events-none relative flex-1">
-            <div className="pointer-events-none absolute top-16 right-4">
-              <WeatherDrawer />
-            </div>
-
-            <div className="pointer-events-none absolute right-4 bottom-4">
-              <InfoModeDock />
+            <div className="pointer-events-none absolute right-4 bottom-4 z-30 w-[min(340px,calc(100vw-2rem))]">
+              <div className="pointer-events-none relative w-full">
+                <WeatherDrawer />
+                <InfoModeDock />
+              </div>
             </div>
 
             <SceneControlPanel />

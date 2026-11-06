@@ -123,24 +123,24 @@ function TravelSummary({
     <section className="space-y-4 rounded-[20px] from-[#122334]  py-5 via-[#0e1a2a] to-[#0a1320] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
       <div>
         <div className="">
-          <div className="bg-amber-400 px-2 py-2 w-full">
-            <p className="flex items-center gap-1.5 text-lg uppercase  text-slate-950 font-semibold">
-              <NotebookText aria-hidden="true" className="size-5" />
+          <div className=" py-2 w-full border-amber-400 border-b">
+            <p className="flex items-center gap-1.5 text-lg uppercase  text-amber-400 font-semibold">
+              <NotebookText aria-hidden="true" className="size-5 text-amber-400" />
               Day focus
             </p>
           </div>
           <div className="mt-5">
-            <p className=" mt-2 text-lg font-semibold tracking-[-0.04em] text-white">{selectedDay.title}</p>
+            <p className="px-2 mt-2 text-lg font-semibold tracking-[-0.04em] text-white">{selectedDay.title}</p>
           </div>
 
         </div>
 
 
-        <p className="mt-4 text-sm text-slate-300/80">{selectedDay.driveText}</p>
+        <p className="px-2 mt-4 text-sm text-slate-300/80">{selectedDay.driveText}</p>
 
         {selectedDay.mapRouteUrl ? (
           <a
-            className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-[#bfe3ff] underline-offset-4 hover:underline"
+            className="px-2 mt-3 inline-flex items-center gap-1 text-xs font-medium text-[#bfe3ff] underline-offset-4 hover:underline"
             href={selectedDay.mapRouteUrl}
             target="_blank"
             rel="noreferrer"
@@ -175,13 +175,13 @@ function TravelSummary({
                 <>
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex min-w-0 items-center gap-2">
-                      <span title={typePresentation.label} className="shrink-0">
+                      {/* <span title={typePresentation.label} className="shrink-0">
                         <TypeIcon aria-hidden="true" className={`size-4 ${typePresentation.color}`} />
-                      </span>
+                      </span> */}
                       <p className="min-w-0 text-sm font-medium text-white">{item.name}</p>
                     </div>
                     {hasLocation ? (
-                      <MapPinned aria-hidden="true" className="size-4 shrink-0 text-sky-200" />
+                      <MapPinned aria-hidden="true" className="size-4 shrink-0 text-sky-200/75" />
                     ) : null}
                   </div>
                   {item.description ? (

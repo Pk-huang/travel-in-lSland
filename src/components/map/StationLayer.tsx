@@ -1,7 +1,7 @@
 "use client";
 
 import { Html } from "@react-three/drei";
-import { Activity } from "lucide-react";
+import { Activity, CloudSun } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { cn } from "@/src/lib/utils";
@@ -94,7 +94,11 @@ export function StationLayer({
       {visibleStations.map(({ markerId, x, y, z, station }) => {
         const isHovered = hoveredStationKey === markerId;
         const isSelected = selectedStationId === markerId;
-        const markerToneClass = getWeatherIconClass(station.alertLevel, isSelected || isHovered);
+        const WeatherMarkerIcon = isWeatherMode ? CloudSun : Activity;
+        const markerToneClass = getWeatherIconClass(
+          station.alertLevel,
+          isSelected || isHovered || isWeatherMode,
+        );
 
         return (
           <Html key={markerId} position={[x, y, z]} distanceFactor={38}>
@@ -119,7 +123,7 @@ export function StationLayer({
                 aria-label={`天氣站 ${markerId}`}
                 title={`${station.temperatureC.toFixed(1)}°C / 風 ${station.windSpeedMs.toFixed(1)} m/s`}
               >
-                <Activity className="size-4" />
+                <WeatherMarkerIcon className="size-4" />
               </button>
 
               {isWeatherMode && (isSelected || isHovered) ? (
